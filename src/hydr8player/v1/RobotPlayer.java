@@ -260,7 +260,12 @@ public strictfp class RobotPlayer {
     static WellInfo foundWell = null;
     static void runCarrierGatherResources(RobotController rc) throws GameActionException {
         switch(carrierGatherResourcesState) {
-            case SEARCHING_FOR_WELL: runCarrierSearchForWell(rc); break;
+            case SEARCHING_FOR_WELL:
+                runCarrierSearchForWell(rc);
+                if(foundWell != null){
+                    carrierGatherResourcesState = CarrierGatherResourcesState.RETRIEVING_RESOURCE;
+                }
+                break;
             case RETRIEVING_RESOURCE:
                 rc.setIndicatorString("Should I retrieve resources from a found well?");
                 if(foundWell != null){
@@ -279,7 +284,6 @@ public strictfp class RobotPlayer {
             if(wells.length > 0) {
                 rc.setIndicatorString("I found a well.");
                 foundWell = wells[0];
-                carrierGatherResourcesState = CarrierGatherResourcesState.RETRIEVING_RESOURCE;
             }
         } else {
             rc.setIndicatorString("I already know where a well is.");
