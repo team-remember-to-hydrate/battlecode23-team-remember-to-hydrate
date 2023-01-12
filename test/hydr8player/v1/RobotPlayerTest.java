@@ -32,4 +32,20 @@ public class RobotPlayerTest {
         // then
         assertEquals(state.getCurrentState(), CarrierGatherResourcesState.State.RETRIEVING_RESOURCE);
     }
+
+    @Test
+    public void testCarrierContinuesSearchingWhenWellIsNotFound() throws GameActionException {
+        // given
+        RobotController mockedRc = mock(RobotController.class);
+        CarrierGatherResourcesState state = new CarrierGatherResourcesState();
+        state.setCurrentState(CarrierGatherResourcesState.State.SEARCHING_FOR_WELL);
+        state.setFoundWell(null);
+
+        // when
+        runCarrierGatherResources(mockedRc, state);
+
+        // then
+        assertEquals(state.getCurrentState(), CarrierGatherResourcesState.State.SEARCHING_FOR_WELL);
+    }
+
 }
