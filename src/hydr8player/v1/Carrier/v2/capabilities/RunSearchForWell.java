@@ -11,16 +11,16 @@ import hydr8player.v1.Carrier.v2.CarrierState;
  */
 public class RunSearchForWell {
     public void run(RobotController rc, CarrierState state) throws GameActionException {
-        rc.setIndicatorString("Should I search for a well?");
-        if(state.getFoundWell() != null){
-            rc.setIndicatorString("Searching for a well.");
+        rc.setIndicatorString("Capability: RunSearchForWell");
+        if(state.getFoundWell() != null) {
+            rc.setIndicatorString("RunSearchForWell > No well found yet.");
             WellInfo[] wells = rc.senseNearbyWells();
             if(wells != null && wells.length > 0) {
-                rc.setIndicatorString("I found a well.");
+                rc.setIndicatorString("RunSearchForWell > I found a well.");
                 state.setFoundWell(wells[0]);
             }
         } else {
-            rc.setIndicatorString("I already know where a well is.");
+            rc.setIndicatorString("RunSearchForWell > I already know where a well is.");
         }
     }
 }

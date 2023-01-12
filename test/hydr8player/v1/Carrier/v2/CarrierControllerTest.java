@@ -1,15 +1,15 @@
 package hydr8player.v1.Carrier.v2;
 
+import hydr8player.v1.Carrier.v2.capabilities.RunRetrieveResources;
+import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
-import org.junit.Test;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.WellInfo;
 
 import hydr8player.v1.Carrier.v2.capabilities.RunSearchForWell;
-import org.junit.jupiter.api.BeforeEach;
 
 /**
  * author: hydr8
@@ -28,32 +28,22 @@ import org.junit.jupiter.api.BeforeEach;
  *   [ ] hydr8 is currently implementing
  */
 
+/**
+ * These tests ensure Carrier state transitions occur only when expected
+ * These tests do NOT verify what capabilities run
+ */
+
 public class CarrierControllerTest {
-    RobotController mockedRc = null;
-    @BeforeEach
-    void init() {
-        mockedRc = mock(RobotController.class);
-    }
-
-    @Test
-    public void testCarrierShouldRunSearchForWellCapability() throws GameActionException {
-        // setup
-        RunSearchForWell mockedRunSearchForWell = mock(RunSearchForWell.class);
-        CarrierController cc = new CarrierController(mockedRunSearchForWell);
-
-        // given
-        CarrierState state = new CarrierState();
-        // when
-        cc.run(mockedRc, state);
-        // then
-        verify(mockedRunSearchForWell).run(mockedRc, state); // side effect
-    }
-
+    /**
+     * CarrierController SEARCHING_FOR_WELL
+     */
     @Test
     public void testCarrierBeginsRetrievingResourcesWhenWellIsFound() throws GameActionException {
         // setup
+        RobotController mockedRc = mock(RobotController.class);
         RunSearchForWell mockedRunSearchForWell = mock(RunSearchForWell.class);
-        CarrierController cc = new CarrierController(mockedRunSearchForWell);
+        RunRetrieveResources mockedRunRetrieveResources = mock(RunRetrieveResources.class);
+        CarrierController cc = new CarrierController(mockedRunSearchForWell, mockedRunRetrieveResources);
 
         //given
         CarrierState state = new CarrierState(CarrierState.State.SEARCHING_FOR_WELL);
@@ -67,15 +57,28 @@ public class CarrierControllerTest {
     @Test
     public void testCarrierContinuesSearchingWhenWellIsNotFound() throws GameActionException {
         // setup
+        RobotController mockedRc = mock(RobotController.class);
         RunSearchForWell mockedRunSearchForWell = mock(RunSearchForWell.class);
+        RunRetrieveResources mockedRunRetrieveResources = mock(RunRetrieveResources.class);
+        CarrierController cc = new CarrierController(mockedRunSearchForWell, mockedRunRetrieveResources);
 
         // given
         CarrierState state = new CarrierState(CarrierState.State.SEARCHING_FOR_WELL);
         state.setFoundWell(null);
-        CarrierController cc = new CarrierController(mockedRunSearchForWell);
+
         // when
         cc.run(mockedRc, state);
         // then
         assertEquals(state.getCurrentState(), CarrierState.State.SEARCHING_FOR_WELL);
     }
+
+    /**
+     * CarrierController RETRIEVING_RESOURCE
+     */
+
+    /**
+     * CarrierController RETURNING_TO_HQ
+     */
+
+    // TODO: 1/12/2023
 }

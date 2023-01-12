@@ -12,7 +12,7 @@ import hydr8player.v1.Carrier.v2.CarrierState;
 public class RunRetrieveResources {
     // PRECONDITION: Found well. if well is not found, carrier should never be in this state
     // PRECONDITION: Transitioned from SEARCHING_FOR_WELL state
-    public static void run(RobotController rc, CarrierState state) throws GameActionException {
+    public void run(RobotController rc, CarrierState state) throws GameActionException {
         rc.setIndicatorString("Do I have capacity to retrieve resources from a found well?");
         int totalCarrying = rc.getResourceAmount(ResourceType.ADAMANTIUM) +
                 rc.getResourceAmount(ResourceType.MANA) +

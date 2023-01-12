@@ -3,6 +3,7 @@ package hydr8player.v1;
 import battlecode.common.*;
 import hydr8player.v1.Carrier.v2.CarrierController;
 import hydr8player.v1.Carrier.v2.CarrierState;
+import hydr8player.v1.Carrier.v2.capabilities.RunRetrieveResources;
 import hydr8player.v1.Carrier.v2.capabilities.RunSearchForWell;
 
 import java.util.Arrays;
@@ -45,7 +46,8 @@ public strictfp class RobotPlayer {
     };
 
     static final RunSearchForWell runSearchForWell = new RunSearchForWell();
-    static final CarrierController carrierController = new CarrierController(runSearchForWell);
+    static final RunRetrieveResources runRetrieveResources = new RunRetrieveResources();
+    static final CarrierController carrierController = new CarrierController(runSearchForWell, runRetrieveResources);
     static final CarrierState carrierState = new CarrierState();
 
     /**
