@@ -194,9 +194,11 @@ public strictfp class RobotPlayer {
     }
 
     static final CarrierState carrierState = CarrierState.GATHER_RESOURCES;
+    static final CarrierGatherResourcesState carrierGatherResourcesState = new CarrierGatherResourcesState();
+
     static void runCarrier(RobotController rc) throws GameActionException {
         switch(carrierState) {
-            case GATHER_RESOURCES: runCarrierGatherResources(rc); break;
+            case GATHER_RESOURCES: runCarrierGatherResources(rc, carrierGatherResourcesState); break;
         }
 
         /*
@@ -251,31 +253,25 @@ public strictfp class RobotPlayer {
         }*/
     }
 
-    enum CarrierGatherResourcesState {
-        SEARCHING_FOR_WELL,
-        RETRIEVING_RESOURCE,
-        RETURNING_TO_HQ
-    }
-    static CarrierGatherResourcesState carrierGatherResourcesState = CarrierGatherResourcesState.SEARCHING_FOR_WELL;
-    static WellInfo foundWell = null;
-    static void runCarrierGatherResources(RobotController rc) throws GameActionException {
-        switch(carrierGatherResourcesState) {
+    static void runCarrierGatherResources(RobotController rc, CarrierGatherResourcesState state) throws GameActionException {
+        switch(state.getCurrentState()) {
             case SEARCHING_FOR_WELL:
-                runCarrierSearchForWell(rc);
-                if(foundWell != null){
-                    carrierGatherResourcesState = CarrierGatherResourcesState.RETRIEVING_RESOURCE;
+                // runCarrierSearchForWell(rc);
+                if(state.getFoundWell() != null){
+                    state.setCurrentState(CarrierGatherResourcesState.State.RETRIEVING_RESOURCE);
                 }
                 break;
-            case RETRIEVING_RESOURCE:
+            /*case RETRIEVING_RESOURCE:
                 rc.setIndicatorString("Should I retrieve resources from a found well?");
                 if(foundWell != null){
                     runCarrierRetrieveResource(rc);
                     carrierGatherResourcesState = CarrierGatherResourcesState.RETURNING_TO_HQ;
                 }
-                break;
+                break;*/
         }
     }
 
+    /*
     static void runCarrierSearchForWell(RobotController rc) throws GameActionException {
         rc.setIndicatorString("Should I search for a well?");
         if(foundWell != null){
@@ -307,7 +303,7 @@ public strictfp class RobotPlayer {
         }
         // POSTCONDITION: carrier cannot hold more resources
         // POSTCONDITION: carrierGatherResourcesState is RETURNING_TO_HQ
-    }
+    }*/
 
     /**
      * Run a single turn for a Launcher.
