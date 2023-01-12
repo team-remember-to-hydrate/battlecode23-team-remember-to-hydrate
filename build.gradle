@@ -170,8 +170,9 @@ dependencies {
 
   // The Battlecode engine.
   implementation group: 'org.battlecode', name: 'battlecode23', version: versions.battlecode
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 
-  // The Battlecode client.
+    // The Battlecode client.
   client group: 'org.battlecode', name: clientName, version: versions.battlecode
 
   // Scala

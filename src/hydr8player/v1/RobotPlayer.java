@@ -1,11 +1,9 @@
-package hydr8player.v1.Carrier.v2;
-/**
- * author: hydr8
- * Strategies:
- * - Carrier I
- */
+package hydr8player.v1;
 
 import battlecode.common.*;
+import hydr8player.v1.Carrier.v2.CarrierController;
+import hydr8player.v1.Carrier.v2.CarrierState;
+import hydr8player.v1.Carrier.v2.capabilities.RunSearchForWell;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -46,6 +44,10 @@ public strictfp class RobotPlayer {
             Direction.NORTHWEST,
     };
 
+    static final RunSearchForWell runSearchForWell = new RunSearchForWell();
+    static final CarrierController carrierController = new CarrierController(runSearchForWell);
+    static final CarrierState carrierState = new CarrierState();
+
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * It is like the main function for your robot. If this method returns, the robot dies!
@@ -77,12 +79,12 @@ public strictfp class RobotPlayer {
                 // use different strategies on different robots. If you wish, you are free to rewrite
                 // this into a different control structure!
                 switch (rc.getType()) {
-                    case HEADQUARTERS:     runHeadquarters(rc);  break;
-                    case CARRIER:      runCarrier(rc);   break;
-                    case LAUNCHER: runLauncher(rc); break;
-                    case BOOSTER: // Examplefuncsplayer doesn't use any of these robot types below.
-                    case DESTABILIZER: // You might want to give them a try!
-                    case AMPLIFIER:       break;
+                    case HEADQUARTERS:  runHeadquarters(rc); break;
+                    case CARRIER:       carrierController.run(rc, carrierState); break;
+                    case LAUNCHER:      runLauncher(rc); break;
+                    case BOOSTER:       // Examplefuncsplayer doesn't use any of these robot types below.
+                    case DESTABILIZER:  // You might want to give them a try!
+                    case AMPLIFIER:     break;
                 }
 
             } catch (GameActionException e) {
@@ -184,126 +186,6 @@ public strictfp class RobotPlayer {
             }
         }
     }
-
-    /**
-     * Run a single turn for a Carrier.
-     * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
-     */
-    enum CarrierState {
-        GATHER_RESOURCES
-    }
-
-    static final CarrierState carrierState = CarrierState.GATHER_RESOURCES;
-    static final CarrierGatherResourcesState carrierGatherResourcesState = new CarrierGatherResourcesState();
-
-    static void runCarrier(RobotController rc) throws GameActionException {
-        switch(carrierState) {
-            case GATHER_RESOURCES: runCarrierGatherResources(rc, carrierGatherResourcesState); break;
-        }
-
-        /*
-        rc.setIndicatorString("Searching for Ad or Mn");
-        WellInfo[] wells = rc.senseNearbyWells();
-        Direction dir = null;
-        if (!rc.getLocation().equals(wells)) {
-            dir = rc.getLocation().directionTo(wells[0].getMapLocation());
-        }
-
-        if (rc.getAnchor() != null) {
-            // If I have an anchor singularly focus on getting it to the first island I see
-            Set<MapLocation> islandLocs = senseIslandLocations(rc);
-            if (islandLocs.size() > 0) {
-                MapLocation islandLocation = islandLocs.iterator().next();
-                moveStraightTowards(rc, islandLocation);
-                placeAnchor(rc);
-            }
-        }
-
-        // Try to gather from squares around us.
-        MapLocation me = rc.getLocation();
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                MapLocation wellLocation = new MapLocation(me.x + dx, me.y + dy);
-                collect(rc, wellLocation);
-            }
-        }
-
-        // Occasionally try out the carriers attack
-        if (rng.nextInt(20) == 1) {
-            RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-            if (enemyRobots.length > 0) {
-                if (rc.canAttack(enemyRobots[0].location)) {
-                    rc.attack(enemyRobots[0].location);
-                }
-            }
-        }
-
-        // If we can see a well, move towards it
-        WellInfo[] wells = rc.senseNearbyWells();
-        if (wells.length > 1 && rng.nextInt(3) == 1) {
-            WellInfo well_one = wells[1];
-            Direction dir = me.directionTo(well_one.getMapLocation());
-            if (rc.canMove(dir))
-                rc.move(dir);
-        }
-        // Also try to move randomly.
-        Direction dir = directions[rng.nextInt(directions.length)];
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-        }*/
-    }
-
-    static void runCarrierGatherResources(RobotController rc, CarrierGatherResourcesState state) throws GameActionException {
-        switch(state.getCurrentState()) {
-            case SEARCHING_FOR_WELL:
-                // runCarrierSearchForWell(rc);
-                if(state.getFoundWell() != null){
-                    state.setCurrentState(CarrierGatherResourcesState.State.RETRIEVING_RESOURCE);
-                }
-                break;
-            /*case RETRIEVING_RESOURCE:
-                rc.setIndicatorString("Should I retrieve resources from a found well?");
-                if(foundWell != null){
-                    runCarrierRetrieveResource(rc);
-                    carrierGatherResourcesState = CarrierGatherResourcesState.RETURNING_TO_HQ;
-                }
-                break;*/
-        }
-    }
-
-    /*
-    static void runCarrierSearchForWell(RobotController rc) throws GameActionException {
-        rc.setIndicatorString("Should I search for a well?");
-        if(foundWell != null){
-            rc.setIndicatorString("Searching for a well.");
-            WellInfo[] wells = rc.senseNearbyWells();
-            if(wells.length > 0) {
-                rc.setIndicatorString("I found a well.");
-                foundWell = wells[0];
-            }
-        } else {
-            rc.setIndicatorString("I already know where a well is.");
-        }
-    }
-
-    static void runCarrierRetrieveResource(RobotController rc) throws GameActionException {
-        // PRECONDITION: Found well. if well is not found, carrier should never be in this state
-        // PRECONDITION: Transitioned from SEARCHING_FOR_WELL state
-        rc.setIndicatorString("Do I have capacity to retrieve resources from a found well?");
-        // STANDARD PATH: try to retrieve resources
-        int totalCarrying = rc.getResourceAmount(ResourceType.ADAMANTIUM) +
-                rc.getResourceAmount(ResourceType.MANA) +
-                rc.getResourceAmount(ResourceType.ELIXIR);
-        if(totalCarrying <= 40 && rc.getAnchor() == null) {
-            rc.setIndicatorString("Retrieving resources");
-            MapLocation foundWellLocation = foundWell.getMapLocation();
-            if (rc.canCollectResource(foundWellLocation, -1)) {
-                rc.collectResource(foundWellLocation, -1);
-            }
-        }
-        // POSTCONDITION: carrier cannot hold more resources
-        // POSTCONDITION: carrierGatherResourcesState is RETURNING_TO_HQ
-    }*/
 
     /**
      * Run a single turn for a Launcher.
