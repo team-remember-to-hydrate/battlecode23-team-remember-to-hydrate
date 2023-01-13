@@ -189,11 +189,44 @@ public strictfp class omega_scrimbot_1 {
         return null; // TODO
     }
 
+    // Scan for HQ
+    static MapLocation scanHQ(RobotController rc) throws GameActionException {
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for (RobotInfo robot : robots) {
+            if (robot.getTeam() == rc.getTeam() && robot.getType() == RobotType.HEADQUARTERS){
+                return robot.getLocation();
+            }
+        }
+        return null;
+    }
+
     /**
      * Run a single turn for a Carrier.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
      */
     static void runCarrier(RobotController rc) throws GameActionException {
+        /**
+         * First turn initialization
+         */
+        if (turnCount == 1){
+            MapLocation myHqLoc = scanHQ(rc);
+        }
+
+        // Start turn by updating my inventory status
+        int myAdamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
+        int myMana = rc.getResourceAmount(ResourceType.MANA);
+        int myElixer = rc.getResourceAmount(ResourceType.ELIXIR);
+        int total_resources = myElixer + myAdamantium + myMana;
+        boolean carryingMaxAmt = total_resources == 40;
+
+        //
+
+        // If I am close to a HQ, I should try to deliver resources or grab an anchor.
+        if (total_resources > 0) {
+
+        }
+
+
         if (rc.getAnchor() != null) {
             // If I have an anchor singularly focus on getting it to the first island I see
             int[] islands = rc.senseNearbyIslands();
@@ -217,22 +250,25 @@ public strictfp class omega_scrimbot_1 {
                 }
             }
         }
-        // Try to gather from squares around us.
-        MapLocation me = rc.getLocation();
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                MapLocation wellLocation = new MapLocation(me.x + dx, me.y + dy);
-                if (rc.canCollectResource(wellLocation, -1)) {
-                    if (rng.nextBoolean()) {
-                        rc.collectResource(wellLocation, -1);
-                        rc.setIndicatorString("Collecting, now have, AD:" + 
-                            rc.getResourceAmount(ResourceType.ADAMANTIUM) + 
-                            " MN: " + rc.getResourceAmount(ResourceType.MANA) + 
-                            " EX: " + rc.getResourceAmount(ResourceType.ELIXIR));
+        // Try to gather from squares around us. Only if we can carry more.
+        if (!carryingMaxAmt){
+            MapLocation me = rc.getLocation();
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    MapLocation wellLocation = new MapLocation(me.x + dx, me.y + dy);
+                    if (rc.canCollectResource(wellLocation, -1)) {
+                        if (rng.nextBoolean()) {
+                            rc.collectResource(wellLocation, -1);
+                            rc.setIndicatorString("Collecting, now have, AD:" +
+                                    rc.getResourceAmount(ResourceType.ADAMANTIUM) +
+                                    " MN: " + rc.getResourceAmount(ResourceType.MANA) +
+                                    " EX: " + rc.getResourceAmount(ResourceType.ELIXIR));
+                        }
                     }
                 }
             }
         }
+
         // Occasionally try out the carriers attack
         if (rng.nextInt(20) == 1) {
             RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
@@ -243,18 +279,21 @@ public strictfp class omega_scrimbot_1 {
             }
         }
         
-        // If we can see a well, move towards it
-        WellInfo[] wells = rc.senseNearbyWells();
-        if (wells.length > 1 && rng.nextInt(3) == 1) {
-            WellInfo well_one = wells[1];
-            Direction dir = me.directionTo(well_one.getMapLocation());
-            if (rc.canMove(dir)) 
+        // If we can see a well, and can carry more resources, move towards it
+        if (!carryingMaxAmt && (rc.getAnchor() == null)){
+            WellInfo[] wells = rc.senseNearbyWells();
+            if (wells.length > 1 && rng.nextInt(3) == 1) {
+                WellInfo well_one = wells[1];
+                MapLocation me = rc.getLocation();
+                Direction dir = me.directionTo(well_one.getMapLocation());
+                if (rc.canMove(dir))
+                    rc.move(dir);
+            }
+            // Also try to move randomly.
+            Direction dir = directions[rng.nextInt(directions.length)];
+            if (rc.canMove(dir)) {
                 rc.move(dir);
-        }
-        // Also try to move randomly.
-        Direction dir = directions[rng.nextInt(directions.length)];
-        if (rc.canMove(dir)) {
-            rc.move(dir);
+            }
         }
     }
 
@@ -268,8 +307,8 @@ public strictfp class omega_scrimbot_1 {
         Team opponent = rc.getTeam().opponent();
         RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
         if (enemies.length >= 0) {
-            // MapLocation toAttack = enemies[0].location;
-            MapLocation toAttack = rc.getLocation().add(Direction.EAST);
+            MapLocation toAttack = enemies[0].location;
+            //MapLocation toAttack = rc.getLocation().add(Direction.EAST);
 
             if (rc.canAttack(toAttack)) {
                 rc.setIndicatorString("Attacking");        
