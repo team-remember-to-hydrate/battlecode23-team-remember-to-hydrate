@@ -29,8 +29,9 @@ import hydr8player.v1.Carrier.v2.capabilities.RunSearchForWell;
  */
 
 /**
- * These tests ensure Carrier state transitions occur only when expected
+ * CarrierControllerTest verifies Carrier state transitions occur only when expected
  * These tests do NOT verify what capabilities run
+ * These tests do NOT stub rc, they only assert state transitions given state + strategy
  */
 
 public class CarrierControllerTest {
@@ -45,13 +46,13 @@ public class CarrierControllerTest {
         RunRetrieveResources mockedRunRetrieveResources = mock(RunRetrieveResources.class);
         CarrierController cc = new CarrierController(mockedRunSearchForWell, mockedRunRetrieveResources);
 
-        //given
+        // given
         CarrierState state = new CarrierState(CarrierState.State.SEARCHING_FOR_WELL);
         state.setFoundWell(mock(WellInfo.class));
         // when
         cc.run(mockedRc, state);
         // then
-        assertEquals(state.getCurrentState(), CarrierState.State.RETRIEVING_RESOURCE);
+        assertEquals(state.getCurrentState(), CarrierState.State.RETRIEVING_RESOURCES);
     }
 
     @Test
@@ -65,20 +66,69 @@ public class CarrierControllerTest {
         // given
         CarrierState state = new CarrierState(CarrierState.State.SEARCHING_FOR_WELL);
         state.setFoundWell(null);
-
         // when
         cc.run(mockedRc, state);
         // then
-        assertEquals(state.getCurrentState(), CarrierState.State.SEARCHING_FOR_WELL);
+        assertEquals(CarrierState.State.SEARCHING_FOR_WELL, state.getCurrentState());
     }
 
     /**
      * CarrierController RETRIEVING_RESOURCE
      */
+    @Test
+    public void testCarrierBeginsDeliveringToHqWhenItIsAtCarryingCapacity() throws GameActionException {
+        // setup
+        RobotController mockedRc = mock(RobotController.class);
+        RunSearchForWell mockedRunSearchForWell = mock(RunSearchForWell.class);
+        RunRetrieveResources mockedRunRetrieveResources = mock(RunRetrieveResources.class);
+        CarrierController cc = new CarrierController(mockedRunSearchForWell, mockedRunRetrieveResources);
+
+        // given
+        CarrierState state = new CarrierState(CarrierState.State.RETRIEVING_RESOURCES);
+        state.setFoundWell(mock(WellInfo.class));
+        state.setIsAtHoldingCapacity(true);
+        // when
+        cc.run(mockedRc, state);
+        // then
+        assertEquals(CarrierState.State.DELIVERING_TO_HQ, state.getCurrentState());
+    }
+
+    @Test
+    public void testCarrierContinuesRetrievingResourcesWhenItIsNotAtCarryingCapacity() throws GameActionException {
+        // setup
+        RobotController mockedRc = mock(RobotController.class);
+        RunSearchForWell mockedRunSearchForWell = mock(RunSearchForWell.class);
+        RunRetrieveResources mockedRunRetrieveResources = mock(RunRetrieveResources.class);
+        CarrierController cc = new CarrierController(mockedRunSearchForWell, mockedRunRetrieveResources);
+
+        // given
+        CarrierState state = new CarrierState(CarrierState.State.RETRIEVING_RESOURCES);
+        state.setFoundWell(mock(WellInfo.class));
+        state.setIsAtHoldingCapacity(false);
+        // when
+        cc.run(mockedRc, state);
+        // then
+        assertEquals(CarrierState.State.RETRIEVING_RESOURCES, state.getCurrentState());
+    }
 
     /**
-     * CarrierController RETURNING_TO_HQ
+     * CarrierController DELIVERING_TO_HQ
      */
+    @Test
+    public void testCarrierBeginsRetrievingResourcesWhenItHasCarryingCapacityAndFoundWell() throws GameActionException {
+        // setup
+        RobotController mockedRc = mock(RobotController.class);
+        RunSearchForWell mockedRunSearchForWell = mock(RunSearchForWell.class);
+        RunRetrieveResources mockedRunRetrieveResources = mock(RunRetrieveResources.class);
+        CarrierController cc = new CarrierController(mockedRunSearchForWell, mockedRunRetrieveResources);
 
-    // TODO: 1/12/2023
+        // given
+        CarrierState state = new CarrierState(CarrierState.State.RETRIEVING_RESOURCES);
+        state.setFoundWell(mock(WellInfo.class));
+        state.setIsAtHoldingCapacity(false);
+        // when
+        cc.run(mockedRc, state);
+        // then
+        assertEquals(CarrierState.State.RETRIEVING_RESOURCES, state.getCurrentState());
+    }
 }

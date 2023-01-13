@@ -6,11 +6,13 @@ import battlecode.common.WellInfo;
  */
 public class CarrierState {
     private State currentState = State.SEARCHING_FOR_WELL;
+
     public CarrierState(){}
     public CarrierState(State currentState){
         this.currentState = currentState;
     }
     private WellInfo foundWell = null;
+    private boolean isAtHoldingCapacity = false;
 
     public WellInfo getFoundWell() {
         return this.foundWell;
@@ -19,6 +21,9 @@ public class CarrierState {
     public void setFoundWell(WellInfo wellInfo) {
         this.foundWell = wellInfo;
     }
+
+    public boolean getIsAtHoldingCapacity() { return this.isAtHoldingCapacity; }
+    public void setIsAtHoldingCapacity(boolean value) { this.isAtHoldingCapacity = value; }
 
     public State getCurrentState() {
         return this.currentState;
@@ -29,7 +34,7 @@ public class CarrierState {
     }
     public enum State {
         SEARCHING_FOR_WELL,
-        RETRIEVING_RESOURCE,
-        RETURNING_TO_HQ
+        RETRIEVING_RESOURCES,
+        DELIVERING_TO_HQ
     }
 }

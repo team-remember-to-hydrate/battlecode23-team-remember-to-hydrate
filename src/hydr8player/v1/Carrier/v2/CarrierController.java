@@ -1,6 +1,7 @@
 package hydr8player.v1.Carrier.v2;
 
 import battlecode.common.GameActionException;
+import battlecode.common.GameActionExceptionType;
 import battlecode.common.RobotController;
 
 import hydr8player.v1.Carrier.v2.capabilities.RunRetrieveResources;
@@ -9,14 +10,14 @@ import hydr8player.v1.Carrier.v2.capabilities.RunSearchForWell;
 /**
  * CarrierController runs a carrier strategy with carrier state
  * side effects: runSearchForWell, setCurrentState
+ * ResourceControllers such as this should never call setters other than setCurrentState
  */
 
 public class CarrierController {
     private RunSearchForWell runSearchForWell = null;
     private RunRetrieveResources runRetrieveResources = null;
 
-    public CarrierController(
-            RunSearchForWell runSearchForWell,
+    public CarrierController(RunSearchForWell runSearchForWell,
             RunRetrieveResources runRetrieveResources
     ){
         this.runSearchForWell = runSearchForWell;
@@ -30,18 +31,22 @@ public class CarrierController {
                 this.runSearchForWell.run(rc, state);
                 if(state.getFoundWell() != null) {
                     rc.setIndicatorString("State Transition: to RETRIEVING_RESOURCE");
-                    state.setCurrentState(CarrierState.State.RETRIEVING_RESOURCE);
+                    state.setCurrentState(CarrierState.State.RETRIEVING_RESOURCES);
                 }
                 break;
-            case RETRIEVING_RESOURCE:
+            case RETRIEVING_RESOURCES:
                 rc.setIndicatorString("State: RETRIEVING_RESOURCE");
                 if(state.getFoundWell() == null) {
-                    // throw Error, CarrierController made a mistake and entered this state without a found well
-                    // TODO: 1/12/2023 how to handle ResourceStateController errors like this?
+                    throw new GameActionException(GameActionExceptionType.INTERNAL_ERROR,
+                            "Error in CarrierController. " +
+                                    "Carrier should not be retrieving a resource without a known well.");
                 }
                 else {
                     this.runRetrieveResources.run(rc, state);
-                    state.setCurrentState(CarrierState.State.RETURNING_TO_HQ);
+                    if(state.getIsAtHoldingCapacity()) {
+                        rc.setIndicatorString("State Transition: to DELIVERING_TO_HQ");
+                        state.setCurrentState(CarrierState.State.DELIVERING_TO_HQ);
+                    }
                 }
                 break;
         }

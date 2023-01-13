@@ -49,7 +49,7 @@ public class CarrierControllerSideEffectsTest {
 
         // given
         WellInfo mockedFoundWell = mock(WellInfo.class);
-        CarrierState state = new CarrierState(CarrierState.State.RETRIEVING_RESOURCE);
+        CarrierState state = new CarrierState(CarrierState.State.RETRIEVING_RESOURCES);
         state.setFoundWell(mockedFoundWell);
 
         // when
@@ -61,8 +61,12 @@ public class CarrierControllerSideEffectsTest {
     }
 
     /**
-     * CarrierController RETURNING_TO_HQ
+     * CarrierController DELIVERING_TO_HQ
      */
+    @Test
+    public void testCarrierRunDeliverToHqCapability() {
+
+    }
 
     // TODO: 1/12/2023
 }

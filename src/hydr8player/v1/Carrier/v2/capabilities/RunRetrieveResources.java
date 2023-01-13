@@ -8,6 +8,7 @@ import hydr8player.v1.Carrier.v2.CarrierState;
 
 /**
  * RunRetrieveResources tries to retrieve resources from a well
+ * side effects: maybe collectResource
  */
 public class RunRetrieveResources {
     // PRECONDITION: Found well. if well is not found, carrier should never be in this state
