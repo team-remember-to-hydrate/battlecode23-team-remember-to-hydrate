@@ -206,6 +206,7 @@ public strictfp class RobotPlayer {
             Direction dir = me.directionTo(birth_location);
             rc.setIndicatorString("returning to " + birth_location );
             if (rc.canMove(dir))
+
                 rc.move(dir);
         }
 
