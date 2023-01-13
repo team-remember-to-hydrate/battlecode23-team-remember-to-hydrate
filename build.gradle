@@ -170,13 +170,18 @@ dependencies {
 
   // The Battlecode engine.
   implementation group: 'org.battlecode', name: 'battlecode23', version: versions.battlecode
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 
-  // The Battlecode client.
+    // The Battlecode client.
   client group: 'org.battlecode', name: clientName, version: versions.battlecode
 
   // Scala
   implementation group: 'org.scala-lang', name: 'scala-library', version: '2.11.7'
   testImplementation group: 'org.scalatest', name: 'scalatest_2.11', version: '3.0.0'
+
+  // hydr8 added this manually
+  testImplementation "org.mockito:mockito-core:3.+"
+
 }
 
 
