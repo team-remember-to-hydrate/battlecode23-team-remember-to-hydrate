@@ -208,9 +208,11 @@ public strictfp class omega_scrimbot_1 {
         /**
          * First turn initialization
          */
+        MapLocation mySpawnHQ = null;
         if (turnCount == 1){
-            MapLocation myHqLoc = scanHQ(rc);
+            mySpawnHQ = scanHQ(rc);
         }
+
 
         // Start turn by updating my inventory status
         int myAdamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
@@ -219,11 +221,13 @@ public strictfp class omega_scrimbot_1 {
         int total_resources = myElixer + myAdamantium + myMana;
         boolean carryingMaxAmt = total_resources == 40;
 
-        //
+        // Update my location
+        MapLocation myLocation = rc.getLocation();
 
         // If I am close to a HQ, I should try to deliver resources or grab an anchor.
-        if (total_resources > 0) {
-
+        // TODO Implement more than just anchor (out of time now)
+        if (rc.canTakeAnchor(mySpawnHQ, Anchor.STANDARD)) {
+            rc.takeAnchor(mySpawnHQ, Anchor.STANDARD);
         }
 
 
