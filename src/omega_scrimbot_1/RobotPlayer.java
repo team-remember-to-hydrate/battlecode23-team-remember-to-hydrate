@@ -12,7 +12,7 @@ import java.util.Set;
  * The run() method inside this class is like your main function: this is what we'll call once your robot
  * is created!
  */
-public strictfp class omega_scrimbot_1 {
+public strictfp class RobotPlayer {
 
     /**
      * We will use this variable to count the number of turns this robot has been alive.
