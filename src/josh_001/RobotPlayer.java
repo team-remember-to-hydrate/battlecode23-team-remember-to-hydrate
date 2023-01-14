@@ -3,9 +3,7 @@ package josh_001;
 import battlecode.common.*;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -80,7 +78,7 @@ public strictfp class RobotPlayer {
                 switch (rc.getType()) {
                     case HEADQUARTERS:     runHeadquarters(rc);  break;
                     case CARRIER:      runCarrier(rc);   break;
-                    case LAUNCHER: runLauncher(rc); break;
+                    case LAUNCHER: Launcher.runLauncher(rc); break;
                     case BOOSTER: // Examplefuncsplayer doesn't use any of these robot types below.
                     case DESTABILIZER: // You might want to give them a try!
                     case AMPLIFIER:       break;
@@ -214,40 +212,46 @@ public strictfp class RobotPlayer {
         WellInfo[] wells = rc.senseNearbyWells();
         if (wells.length > 1 && rng.nextInt(3) == 1) {
             WellInfo well_one = wells[1];
-            Direction dir = me.directionTo(well_one.getMapLocation());
-            if (rc.canMove(dir)) 
+            Direction dir = movable_direction(rc, me.directionTo(well_one.getMapLocation()));
+            if (rc.canMove(dir))
                 rc.move(dir);
         }
         // Also try to move randomly.
-        Direction dir = directions[rng.nextInt(directions.length)];
+/*        Direction dir = directions[rng.nextInt(directions.length)];
         if (rc.canMove(dir)) {
             rc.move(dir);
-        }
+        }*/
     }
 
-    /**
-     * Run a single turn for a Launcher.
-     * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
-     */
-    static void runLauncher(RobotController rc) throws GameActionException {
-        // Try to attack someone
-        int radius = rc.getType().actionRadiusSquared;
-        Team opponent = rc.getTeam().opponent();
-        RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
-        if (enemies.length >= 0) {
-            // MapLocation toAttack = enemies[0].location;
-            MapLocation toAttack = rc.getLocation().add(Direction.EAST);
 
-            if (rc.canAttack(toAttack)) {
-                rc.setIndicatorString("Attacking");        
-                rc.attack(toAttack);
-            }
-        }
 
-        // Also try to move randomly.
-        Direction dir = directions[rng.nextInt(directions.length)];
-        if (rc.canMove(dir)) {
-            rc.move(dir);
+    // find closest movable direction
+    static Direction movable_direction(RobotController rc, Direction desired_dir){
+        if(rc.canMove(desired_dir)) return desired_dir;
+        for (int rotation_offset = 0; rotation_offset <= 4; rotation_offset++){  // 4 is 1/2 of the 8 possible directions
+            Direction left_dir = Direction.values()[desired_dir.ordinal() + ((4 - rotation_offset) % 8)];
+            Direction right_dir = Direction.values()[desired_dir.ordinal() + ((8 - rotation_offset) % 8)];
+            if (rc.canMove(left_dir)) return left_dir;
+            if (rc.canMove(right_dir)) return right_dir;
         }
+        return Direction.CENTER;
     }
+
+    // methods to retrieve packed information
+    static MapLocation unpackMapLocation(int target) {
+        int target_x = target >>> 10;
+        int target_y = (target & 0x03f0) >>> 4;
+        return new MapLocation(target_x,target_y);
+    }
+
+    static int unpackExtra(int target) {
+        return target & 0x000f;
+    }
+
+    static int packMapLocationExtra(MapLocation here, int extra) {
+        int x = here.x;
+        int y = here.y;
+        return (x << 10) + (y << 4) + extra;
+    }
+
 }
