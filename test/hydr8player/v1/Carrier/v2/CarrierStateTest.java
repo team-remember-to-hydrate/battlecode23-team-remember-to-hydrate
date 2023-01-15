@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import battlecode.common.GameActionException;
-import hydr8player.v1.Carrier.v2.capabilities.RunSearchForWell;
 import org.junit.Test;
 
 public class CarrierStateTest {
@@ -13,6 +12,6 @@ public class CarrierStateTest {
     public void testCarrierShouldRunSearchForWellCapability() throws GameActionException {
         CarrierState state = new CarrierState();
         assertEquals(state.getCurrentState(), CarrierState.State.SEARCHING_FOR_WELL);
-        assertEquals(state.getFoundWell(), null);
+        assertEquals(state.getWell(), null);
     }
 }

@@ -1,10 +1,10 @@
 package hydr8player.v1.Carrier.v2;
 
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.WellInfo;
-import hydr8player.v1.Carrier.v2.capabilities.RunRetrieveResources;
-import hydr8player.v1.Carrier.v2.capabilities.RunSearchForWell;
+import hydr8player.v1.Carrier.v2.capabilities.*;
 import org.junit.Test;
 
 import static org.mockito.Mockito.*;
@@ -19,20 +19,34 @@ public class CarrierControllerSideEffectsTest {
      * CarrierController SEARCHING_FOR_WELL
      */
     @Test
-    public void testCarrierRunSearchForWellCapability() throws GameActionException {
+    public void testCarrierRunFindWellCapability() throws GameActionException {
         // setup
         RobotController mockedRc = mock(RobotController.class);
-        RunSearchForWell mockedRunSearchForWell = mock(RunSearchForWell.class);
+        RunFindWell mockedRunFindWell = mock(RunFindWell.class);
         RunRetrieveResources mockedRunRetrieveResources = mock(RunRetrieveResources.class);
-        CarrierController cc = new CarrierController(mockedRunSearchForWell, mockedRunRetrieveResources);
+        RunDeliverToHq mockedRunDeliverToHq = mock(RunDeliverToHq.class);
+        RunPathingToWell mockedRunPathingToWell = mock(RunPathingToWell.class);
+        RunPathingToHq mockedRunPathingToHq = mock(RunPathingToHq.class);
+
+        CarrierController cc = new CarrierController(
+                mockedRunFindWell,
+                mockedRunRetrieveResources,
+                mockedRunDeliverToHq,
+                mockedRunPathingToWell,
+                mockedRunPathingToHq
+        );
 
         // given
         CarrierState state = new CarrierState(CarrierState.State.SEARCHING_FOR_WELL);
+        when(mockedRc.getLocation()).thenReturn(new MapLocation(0, 0)); // mock to avoid null pointer
+        when(mockedRc.isActionReady()).thenReturn(true); // mock to avoid null pointer
+
         // when
         cc.run(mockedRc, state);
 
         // then ensure only correct capability runs
-        verify(mockedRunSearchForWell).run(mockedRc, state); // side effect
+        verify(mockedRunPathingToWell).run(mockedRc, state); // side effect
+        verify(mockedRunFindWell).run(mockedRc, state); // side effect
         verify(mockedRunRetrieveResources, never()).run(mockedRc, state); // side effect
     }
 
@@ -43,30 +57,70 @@ public class CarrierControllerSideEffectsTest {
     public void testCarrierRunRetrieveResourcesCapability() throws GameActionException {
         // setup
         RobotController mockedRc = mock(RobotController.class);
-        RunSearchForWell mockedRunSearchForWell = mock(RunSearchForWell.class);
+        RunFindWell mockedRunFindWell = mock(RunFindWell.class);
         RunRetrieveResources mockedRunRetrieveResources = mock(RunRetrieveResources.class);
-        CarrierController cc = new CarrierController(mockedRunSearchForWell, mockedRunRetrieveResources);
+        RunDeliverToHq mockedRunDeliverToHq = mock(RunDeliverToHq.class);
+        RunPathingToWell mockedRunPathingToWell = mock(RunPathingToWell.class);
+        RunPathingToHq mockedRunPathingToHq = mock(RunPathingToHq.class);
+
+        CarrierController cc = new CarrierController(
+                mockedRunFindWell,
+                mockedRunRetrieveResources,
+                mockedRunDeliverToHq,
+                mockedRunPathingToWell,
+                mockedRunPathingToHq
+        );
 
         // given
         WellInfo mockedFoundWell = mock(WellInfo.class);
         CarrierState state = new CarrierState(CarrierState.State.RETRIEVING_RESOURCES);
-        state.setFoundWell(mockedFoundWell);
+        when(mockedRc.getLocation()).thenReturn(new MapLocation(0, 0)); // mock to avoid null pointer
+        when(mockedRc.isActionReady()).thenReturn(true); // mock to avoid null pointer
+
+        state.setWell(mockedFoundWell);
 
         // when
         cc.run(mockedRc, state);
 
         // then ensure only correct capability runs
-        verify(mockedRunSearchForWell, never()).run(mockedRc, state);
+        verify(mockedRunPathingToWell).run(mockedRc, state);
         verify(mockedRunRetrieveResources).run(mockedRc, state);
+        verify(mockedRunPathingToHq, never()).run(mockedRc, state);
+        verify(mockedRunFindWell, never()).run(mockedRc, state);
     }
 
     /**
      * CarrierController DELIVERING_TO_HQ
      */
     @Test
-    public void testCarrierRunDeliverToHqCapability() {
+    public void testCarrierRunDeliverToHqCapability() throws GameActionException {
+        RobotController mockedRc = mock(RobotController.class);
+        RunFindWell mockedRunFindWell = mock(RunFindWell.class);
+        RunRetrieveResources mockedRunRetrieveResources = mock(RunRetrieveResources.class);
+        RunDeliverToHq mockedRunDeliverToHq = mock(RunDeliverToHq.class);
+        RunPathingToWell mockedRunPathingToWell = mock(RunPathingToWell.class);
+        RunPathingToHq mockedRunPathingToHq = mock(RunPathingToHq.class);
+        CarrierController cc = new CarrierController(
+                mockedRunFindWell,
+                mockedRunRetrieveResources,
+                mockedRunDeliverToHq,
+                mockedRunPathingToWell,
+                mockedRunPathingToHq
+        );
 
+        // given
+        CarrierState state = new CarrierState(CarrierState.State.DELIVERING_TO_HQ);
+        state.setHqLoc(new MapLocation(0,0));
+        state.setWell(mock(WellInfo.class));
+
+        // when
+        cc.run(mockedRc, state);
+
+        // then ensure only correct capability runs
+        verify(mockedRunPathingToWell, never()).run(mockedRc, state);
+        verify(mockedRunRetrieveResources, never()).run(mockedRc, state);
+        verify(mockedRunFindWell, never()).run(mockedRc, state);
+        verify(mockedRunPathingToHq).run(mockedRc, state);
+        verify(mockedRunDeliverToHq).run(mockedRc, state);
     }
-
-    // TODO: 1/12/2023
 }
