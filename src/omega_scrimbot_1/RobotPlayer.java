@@ -21,6 +21,8 @@ public strictfp class RobotPlayer {
      */
     static int turnCount = 0;
 
+    static Direction lastMoved = Direction.NORTH;
+
     /**
      * A random number generator.
      * We will use this RNG to make some random moves. The Random class is provided by the java.util.Random
