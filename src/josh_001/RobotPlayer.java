@@ -143,4 +143,20 @@ public strictfp class RobotPlayer {
         return (x << 10) + (y << 4) + extra;
     }
 
+    static int get_HQ_array_index(RobotController rc) throws GameActionException {
+        RobotInfo[] bots = rc.senseNearbyRobots();
+        for(RobotInfo bot : bots){
+            if(bot.getType() == RobotType.HEADQUARTERS){
+                for(int i=0; i<4; i++){
+                    int array_i = rc.readSharedArray(i);
+                    MapLocation array_loc = unpackMapLocation(array_i);
+                    if(bot.getLocation().equals(array_loc)){
+                        return i;
+                    }
+                }
+            }
+        }
+        return 99;
+    }
+
 }
