@@ -52,24 +52,22 @@ public class Pathfinding_V01 {
             return startDirection;
         }
         else {
-            Direction[] directions = getClockwiseMoveDirectionsN0();
-            int attempts = 1;
-            int incrementVal = 1;
-
-            if (!rotateClockwise){
-                incrementVal = -1;
+            Direction proposedDir = startDirection;
+            if (rotateClockwise){
+                proposedDir = proposedDir.rotateRight();
             }
-
-            int curOffset = incrementVal;
-            while (attempts < directions.length){
-                Direction proposedDir = directions[(startDirection.ordinal() + curOffset + directions.length)
-                        % directions.length];
+            else{
+                proposedDir = proposedDir.rotateLeft();
+            }
+            while (proposedDir != startDirection){
                 if (rc.canMove(proposedDir)){
                     return proposedDir;
                 }
-                else {
-                    curOffset += incrementVal;
-                    attempts++;
+                else if (rotateClockwise){
+                    proposedDir = proposedDir.rotateRight();
+                }
+                else{
+                    proposedDir = proposedDir.rotateLeft();
                 }
             }
             return Direction.CENTER;
