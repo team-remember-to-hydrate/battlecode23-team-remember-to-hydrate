@@ -137,6 +137,10 @@ public strictfp class RobotPlayer {
         return target & 0x000f;
     }
 
+    static ResourceType unpackResource(int target){
+        return ResourceType.values()[unpackExtra(target)];
+    }
+
     static int packMapLocationExtra(MapLocation here, int extra) {
         int x = here.x;
         int y = here.y;

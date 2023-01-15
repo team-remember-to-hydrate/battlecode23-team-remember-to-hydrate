@@ -8,12 +8,16 @@ public class Headquarters {
         INITIAL,
         SCOUT,
         RESOURCE};
+    static WellInfo[] wells;
+    static states current_state;
     /**
      * Run a single turn for a Headquarters.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
      */
     static void runHeadquarters(RobotController rc) throws GameActionException {
+
         // first round save our location to the array in the first available spot. 0-3
+        // also track visible wells since HQ don't move
         if(rc.getRoundNum() == 1) {
             // use first available shared array slot
             for (int i = 0; i < 4; i++) {
@@ -26,14 +30,16 @@ public class Headquarters {
                     break;
                 }
             }
-            // sense visible wells mark them on array
-            WellInfo[] wells = rc.senseNearbyWells();
+
+            // sense visible wells mark them on array, change state to RESOURCE
+            wells = rc.senseNearbyWells();
             if(wells.length > 0){
+                current_state = states.RESOURCE;
                 for(WellInfo well : wells){
                     for(int i = 4; i < 12; i++){
                         int array_int = rc.readSharedArray(i);
                         if(array_int == 0){
-                            rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), 0)); // we should add the resource type here
+                            rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), well.getResourceType().ordinal()));
                             break;
                         }
                     }
@@ -49,7 +55,7 @@ public class Headquarters {
                 for(int i = 4; i < 12; i++){
                     int this_well = rc.readSharedArray(i);
                     if(this_well != 0){
-                        System.out.println("Well at " + RobotPlayer.unpackMapLocation(this_well));
+                        System.out.println("Well at " + RobotPlayer.unpackMapLocation(this_well) + " of type " + RobotPlayer.unpackResource(this_well));
                     }
                 }
             }
