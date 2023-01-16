@@ -31,7 +31,7 @@ public class CarrierTest {
     }
 
     static void noMore(){
-        //verifyNoMoreInteractions(mockCarrier);
+        verifyNoMoreInteractions(mockCarrier);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class CarrierTest {
         when(rc.getLocation()).thenReturn(new MapLocation(2, 2)); // not adjacent
         cc.run(rc, mockCarrier);
 
-        op().moveWithBugNav(rc, mockCarrier.getWellLoc());
+        op().moveWithBugNav(rc, mockCarrier.wellLoc);
         noMore();
     }
 
@@ -70,10 +70,10 @@ public class CarrierTest {
         when(rc.canCollectResource(any(), anyInt())).thenReturn(true);
         cc.run(rc, mockCarrier);
 
-        op().collectResources(rc, mockCarrier.getWellLoc());
+        op().collectResources(rc, mockCarrier.wellLoc);
         noMore();
     }
-/*
+
     @Test
     public void ShouldTravelToHqWhenResourceCapacityIsFull() throws GameActionException {
         setup();
@@ -84,8 +84,7 @@ public class CarrierTest {
         cc.run(rc, mockCarrier);
 
         op().moveWithBugNav(rc, mockCarrier.hqLoc);
+        op().tryTransferAllResources(rc, mockCarrier.hqLoc);
         noMore();
     }
-*/
-
 }
