@@ -5,12 +5,8 @@ import battlecode.common.*;
 public class CarrierController {
     public void run(RobotController rc, Carrier c) throws GameActionException {
         if(c.hqLoc == null) {
-            RobotInfo[] bots = rc.senseNearbyRobots(2);
-            for (RobotInfo bot : bots) {
-                if (bot.getType() == RobotType.HEADQUARTERS) {
-                    c.hqLoc = bot.getLocation();
-                }
-            }
+            rc.setIndicatorString("searching for hq");
+            c.searchForHq(rc);
         }
         else if(c.wellLoc == null){ // game mechanic: robot also spawns within sight of a well
             rc.setIndicatorString("searching for a well");

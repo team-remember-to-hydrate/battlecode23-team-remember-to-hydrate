@@ -106,4 +106,13 @@ public class Carrier {
             rc.takeAnchor(loc, Anchor.STANDARD);
         }
     }
+
+    public void searchForHq(RobotController rc) throws GameActionException {
+        RobotInfo[] bots = rc.senseNearbyRobots(2);
+        for (RobotInfo bot : bots) {
+            if (bot.getType() == RobotType.HEADQUARTERS) {
+                this.hqLoc = bot.getLocation();
+            }
+        }
+    }
 }

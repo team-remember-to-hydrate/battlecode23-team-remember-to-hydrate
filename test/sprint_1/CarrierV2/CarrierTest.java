@@ -1,6 +1,5 @@
 package sprint_1.CarrierV2;
 
-import battlecode.common.Anchor;
 import battlecode.common.MapLocation;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
@@ -44,6 +43,16 @@ public class CarrierTest {
 
         op().searchForWell(rc);
         op().moveRandom(rc);
+        noMore();
+    }
+
+    @Test
+    public void ShouldSearchForHqByDefault() throws GameActionException {
+        setup();
+
+        cc.run(rc, mockCarrier);
+
+        op().searchForHq(rc);
         noMore();
     }
 
@@ -95,8 +104,8 @@ public class CarrierTest {
 
         mockCarrier.amountResourcesHeld = 0;
         mockCarrier.hqLoc = new MapLocation(0,0);
-        mockCarrier.wellLoc = new MapLocation(1, 1);
-        when(rc.getLocation()).thenReturn(new MapLocation(2, 2));
+        mockCarrier.wellLoc = new MapLocation(3, 3);
+        when(rc.getLocation()).thenReturn(new MapLocation(1, 1));
         when(rc.canTakeAnchor(any(), any())).thenReturn(true);
 
         cc.run(rc, mockCarrier);
