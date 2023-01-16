@@ -1,4 +1,4 @@
-package hydr8player.v1.Carrier.v2;
+package sprint_1.CarrierV2;
 
 import battlecode.common.MapLocation;
 import org.junit.Test;
