@@ -68,7 +68,7 @@ public class Carrier {
         int totalCarrying = rc.getResourceAmount(ResourceType.ADAMANTIUM) +
                 rc.getResourceAmount(ResourceType.MANA) +
                 rc.getResourceAmount(ResourceType.ELIXIR);
-        if(totalCarrying <= 40 && rc.getAnchor() == null) {
+        if(totalCarrying < MAX_RESOURCE_CAPACITY && rc.getAnchor() == null) {
             rc.setIndicatorString("Retrieving resources");
             if (rc.canCollectResource(wellLoc, -1)) {
                 rc.collectResource(wellLoc, -1);
