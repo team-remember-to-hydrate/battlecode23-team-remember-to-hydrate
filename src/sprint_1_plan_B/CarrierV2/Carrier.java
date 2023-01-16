@@ -1,4 +1,4 @@
-package sprint_1.CarrierV2;
+package sprint_1_plan_B.CarrierV2;
 
 import battlecode.common.*;
 

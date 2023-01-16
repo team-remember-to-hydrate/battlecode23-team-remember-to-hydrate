@@ -9,62 +9,36 @@ import java.util.Set;
 public class CarrierController {
     public void run(RobotController rc, Carrier c) throws GameActionException {
         if(c.hqLoc == null) {
-            RobotInfo[] bots = rc.senseNearbyRobots(2);
-            for (RobotInfo bot : bots) {
-                if (bot.getType() == RobotType.HEADQUARTERS) {
-                    c.hqLoc = bot.getLocation();
-                }
-            }
+            rc.setIndicatorString("searching for hq");
+            c.searchForHq(rc);
         }
-        // If I am close to a HQ, I should try to grab an anchor.
-        else if (rc.canTakeAnchor(c.hqLoc, Anchor.ACCELERATING)) {
-            rc.takeAnchor(c.hqLoc, Anchor.ACCELERATING);
+        else if(rc.canTakeAnchor(c.hqLoc, Anchor.ACCELERATING) || rc.canTakeAnchor(c.hqLoc, Anchor.STANDARD)) {
+            rc.setIndicatorString("picking up anchor from hq");
+            c.tryPickUpAnchor(rc, c.hqLoc);
         }
-        else if (rc.canTakeAnchor(c.hqLoc, Anchor.STANDARD)) {
-            rc.takeAnchor(c.hqLoc, Anchor.STANDARD);
+        else if(c.hasAnchor){
+            rc.setIndicatorString("delivering anchor");
+            c.deliverAnchor(rc);
         }
-        else if (rc.getAnchor() != null) {
-            // If I have an anchor singularly focus on getting it to the first island I see
-            int[] islands = rc.senseNearbyIslands();
-            Set<MapLocation> islandLocs = new HashSet<>();
-            for (int id : islands) {
-                MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
-                islandLocs.addAll(Arrays.asList(thisIslandLocs));
-            }
-            if (islandLocs.size() > 0) {
-                MapLocation islandLocation = islandLocs.iterator().next();
-                rc.setIndicatorString("Moving my anchor towards " + islandLocation);
-                while (!rc.getLocation().equals(islandLocation)) {
-                    Direction dir = rc.getLocation().directionTo(islandLocation);
-                    if (rc.canMove(dir)) {
-                        rc.move(dir);
-                    }
-                }
-                if (rc.canPlaceAnchor()) {
-                    rc.setIndicatorString("Huzzah, placed anchor!");
-                    rc.placeAnchor();
-                }
-            }
-        }
-        else if(c.getWellLoc() == null){
+        else if(c.wellLoc == null){ // game mechanic: robot also spawns within sight of a well
             rc.setIndicatorString("searching for a well");
             c.searchForWell(rc);
             c.moveRandom(rc);
         }
         else if(c.amountResourcesHeld < Carrier.MAX_RESOURCE_CAPACITY){
-            if(rc.getLocation().distanceSquaredTo(c.getWellLoc()) <= 2){
+            if(rc.getLocation().distanceSquaredTo(c.wellLoc) <= 2){
                 rc.setIndicatorString("collecting resources");
-                c.collectResources(rc, c.getWellLoc());
+                c.tryCollectResources(rc, c.wellLoc);
             }
             else {
                 rc.setIndicatorString("moving to well");
-                c.moveWithBugNav(rc, c.getWellLoc());
+                c.moveWithBugNav(rc, c.wellLoc);
             }
         }
         else if(c.amountResourcesHeld == Carrier.MAX_RESOURCE_CAPACITY && c.hqLoc != null){
-            rc.setIndicatorString("carrying resources back to hq");
-            c.moveWithBugNav(rc, c.hqLoc);
-            c.tryTransferAllResources(rc, c.hqLoc);
+                rc.setIndicatorString("carrying resources back to hq");
+                c.moveWithBugNav(rc, c.hqLoc);
+                c.tryTransferAllResources(rc, c.hqLoc);
         }
         else {
             rc.setIndicatorString("INTERNAL ERROR");
