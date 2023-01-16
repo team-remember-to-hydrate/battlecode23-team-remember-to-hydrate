@@ -14,7 +14,7 @@ public class Carrier {
             Direction.WEST,
             Direction.NORTHWEST
     };
-    public static final int MAX_RESOURCE_CAPACITY = 40;
+    public static final int MAX_RESOURCE_CAPACITY = GameConstants.CARRIER_CAPACITY;
     MapLocation wellLoc;
     public MapLocation getWellLoc() { return this.wellLoc; }
     public int amountResourcesHeld = 0;
