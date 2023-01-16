@@ -1,4 +1,4 @@
-package josh_001;
+package josh_002;
 
 import battlecode.common.*;
 import java.util.Random;
