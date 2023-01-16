@@ -1,5 +1,6 @@
 ## IntelliJ
-.idea
+.idea/*
+.idea/vcs.xml
 
 ###### BATTLECODE ######
 
@@ -7,7 +8,7 @@
 /client
 
 ###### GRADLE ######
-
+build.gradle
 .gradle
 **/build/
 !src/**/build/
