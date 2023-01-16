@@ -12,19 +12,19 @@ public class CarrierController {
                 }
             }
         }
-        else if(c.getWellLoc() == null){
+        else if(c.wellLoc == null){
             rc.setIndicatorString("searching for a well");
             c.searchForWell(rc);
             c.moveRandom(rc);
         }
         else if(c.amountResourcesHeld < Carrier.MAX_RESOURCE_CAPACITY){
-            if(rc.getLocation().distanceSquaredTo(c.getWellLoc()) <= 2){
+            if(rc.getLocation().distanceSquaredTo(c.wellLoc) <= 2){
                 rc.setIndicatorString("collecting resources");
-                c.collectResources(rc, c.getWellLoc());
+                c.collectResources(rc, c.wellLoc);
             }
             else {
                 rc.setIndicatorString("moving to well");
-                c.moveWithBugNav(rc, c.getWellLoc());
+                c.moveWithBugNav(rc, c.wellLoc);
             }
         }
         else if(c.amountResourcesHeld == Carrier.MAX_RESOURCE_CAPACITY && c.hqLoc != null){

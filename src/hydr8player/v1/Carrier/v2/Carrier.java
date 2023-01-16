@@ -15,13 +15,12 @@ public class Carrier {
             Direction.NORTHWEST
     };
     public static final int MAX_RESOURCE_CAPACITY = GameConstants.CARRIER_CAPACITY;
-    MapLocation wellLoc;
-    public MapLocation getWellLoc() { return this.wellLoc; }
+    public MapLocation wellLoc;
     public int amountResourcesHeld = 0;
     public MapLocation hqLoc;
 
     public void searchForWell(RobotController rc) {
-        if(this.getWellLoc() == null) {
+        if(this.wellLoc == null) {
             WellInfo[] wells = rc.senseNearbyWells();
             if((wells != null) && (wells.length > 0)) {
                 this.wellLoc = wells[0].getMapLocation();

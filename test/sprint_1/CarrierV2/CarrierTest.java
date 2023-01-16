@@ -1,4 +1,4 @@
-package hydr8player.v1.Carrier.v2;
+package sprint_1.CarrierV2;
 
 import battlecode.common.MapLocation;
 import org.junit.Test;
@@ -47,6 +47,16 @@ public class CarrierTest {
     }
 
     @Test
+    public void ShouldSearchForHqByDefault() throws GameActionException {
+        setup();
+
+        cc.run(rc, mockCarrier);
+
+        op().searchForHq(rc);
+        noMore();
+    }
+
+    @Test
     public void ShouldTravelToWellWithBugNavWhenItCanHoldResourcesAndIsNotNextToWell() throws GameActionException {
         setup();
 
@@ -70,7 +80,7 @@ public class CarrierTest {
         when(rc.canCollectResource(any(), anyInt())).thenReturn(true);
         cc.run(rc, mockCarrier);
 
-        op().collectResources(rc, mockCarrier.wellLoc);
+        op().tryCollectResources(rc, mockCarrier.wellLoc);
         noMore();
     }
 
@@ -87,4 +97,37 @@ public class CarrierTest {
         op().tryTransferAllResources(rc, mockCarrier.hqLoc);
         noMore();
     }
+
+    @Test
+    public void ShouldPickUpAnchorFromHqWhenOneIsAvailableAndCarryingNothingElse() throws GameActionException {
+        setup();
+
+        mockCarrier.amountResourcesHeld = 0;
+        mockCarrier.hqLoc = new MapLocation(0,0);
+        mockCarrier.wellLoc = new MapLocation(3, 3);
+        when(rc.getLocation()).thenReturn(new MapLocation(1, 1));
+        when(rc.canTakeAnchor(any(), any())).thenReturn(true);
+
+        cc.run(rc, mockCarrier);
+
+        op().tryPickUpAnchor(rc, mockCarrier.hqLoc);
+        noMore();
+    }
+/*
+    @Test
+    public void ShouldDeliverAnchorWhenItHasOne() throws GameActionException {
+        setup();
+
+        mockCarrier.hasAnchor = true;
+        mockCarrier.hqLoc = new MapLocation(0,0);
+        when(rc.getLocation()).thenReturn(new MapLocation(1, 1));
+        mockCarrier.wellLoc = new MapLocation(3, 3);
+
+        cc.run(rc, mockCarrier);
+
+        op().deliverAnchor(rc);
+        noMore();
+    }
+    */
+
 }
