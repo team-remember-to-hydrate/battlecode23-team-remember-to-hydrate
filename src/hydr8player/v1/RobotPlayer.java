@@ -1,10 +1,8 @@
 package hydr8player.v1;
 
 import battlecode.common.*;
+import hydr8player.v1.Carrier.v2.Carrier;
 import hydr8player.v1.Carrier.v2.CarrierController;
-import hydr8player.v1.Carrier.v2.CarrierState;
-import hydr8player.v1.Carrier.v2.capabilities.RunRetrieveResources;
-import hydr8player.v1.Carrier.v2.capabilities.RunSearchForWell;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -45,10 +43,7 @@ public strictfp class RobotPlayer {
             Direction.NORTHWEST,
     };
 
-    static final RunSearchForWell runSearchForWell = new RunSearchForWell();
-    static final RunRetrieveResources runRetrieveResources = new RunRetrieveResources();
-    static final CarrierController carrierController = new CarrierController(runSearchForWell, runRetrieveResources);
-    static final CarrierState carrierState = new CarrierState();
+    static final CarrierController carrierController = new CarrierController();
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -82,7 +77,7 @@ public strictfp class RobotPlayer {
                 // this into a different control structure!
                 switch (rc.getType()) {
                     case HEADQUARTERS:  runHeadquarters(rc); break;
-                    case CARRIER:       carrierController.run(rc, carrierState); break;
+                    case CARRIER:       carrierController.run(rc, new Carrier()); break;
                     case LAUNCHER:      runLauncher(rc); break;
                     case BOOSTER:       // Examplefuncsplayer doesn't use any of these robot types below.
                     case DESTABILIZER:  // You might want to give them a try!

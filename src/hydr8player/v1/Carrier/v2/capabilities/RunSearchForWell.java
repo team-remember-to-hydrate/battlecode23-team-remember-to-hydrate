@@ -3,12 +3,11 @@ package hydr8player.v1.Carrier.v2.capabilities;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.WellInfo;
-import hydr8player.v1.Carrier.v2.CarrierState;
 
 /**
  * RunSearchForWell searches for wells
  * side effects: setFoundWell
- */
+
 public class RunSearchForWell {
     public void run(RobotController rc, CarrierState state) throws GameActionException {
         rc.setIndicatorString("Capability: RunSearchForWell");
@@ -24,3 +23,4 @@ public class RunSearchForWell {
         }
     }
 }
+*/
