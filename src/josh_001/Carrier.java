@@ -104,10 +104,9 @@ public class Carrier {
         if (wells.length > 1 && RobotPlayer.rng.nextInt(3) == 1) {
             WellInfo well_one = wells[0];
             Direction dir = RobotPlayer.movable_direction(rc, me.directionTo(well_one.getMapLocation()));
+            rc.setIndicatorString("Can see a well move cooldown is " + rc.getMovementCooldownTurns());
             if (rc.canMove(dir))
                 rc.move(dir);
         }
-
-
     }
 }

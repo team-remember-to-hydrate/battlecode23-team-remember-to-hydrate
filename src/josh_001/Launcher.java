@@ -27,7 +27,6 @@ public class Launcher {
         RobotInfo[] nearby_bots = rc.senseNearbyRobots();
         Team opponent = rc.getTeam().opponent();
         Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
-
         int closest_bot = 99;
 
         if(my_HQ > 3){
