@@ -1,11 +1,14 @@
-package examplefuncsplayer;
+package hydr8player.v0;
+/**
+ * author: hydr8
+ * Strategies:
+ * - Carrier I
+ */
 
 import battlecode.common.*;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -111,8 +114,15 @@ public strictfp class RobotPlayer {
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
      */
     static void runHeadquarters(RobotController rc) throws GameActionException {
+        WellInfo[] wells = rc.senseNearbyWells();
+        Direction dir = null;
+        if (rc.getLocation().equals(wells)) {
+            dir = directions[rng.nextInt(directions.length)];
+        } else {
+            dir = rc.getLocation().directionTo(wells[0].getMapLocation());
+        }
+
         // Pick a direction to build in.
-        Direction dir = directions[rng.nextInt(directions.length)];
         MapLocation newLoc = rc.getLocation().add(dir);
         if (rc.canBuildAnchor(Anchor.STANDARD)) {
             // If we can build an anchor do it!
@@ -134,6 +144,47 @@ public strictfp class RobotPlayer {
         }
     }
 
+    static Set<MapLocation> senseIslandLocations(RobotController rc) throws GameActionException {
+        int[] islands = rc.senseNearbyIslands();
+        Set<MapLocation> islandLocs = new HashSet<>();
+        for (int id : islands) {
+            MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
+            islandLocs.addAll(Arrays.asList(thisIslandLocs));
+        }
+        return islandLocs;
+    }
+
+    static void moveStraightTowards(RobotController rc, MapLocation loc) throws GameActionException {
+        rc.setIndicatorString("Moving my anchor towards " + loc);
+        while (!rc.getLocation().equals(loc)) {
+            Direction dir = rc.getLocation().directionTo(loc);
+            if (rc.canMove(dir)) {
+                rc.move(dir);
+            }
+        }
+    }
+
+    static void placeAnchor(RobotController rc) throws GameActionException {
+        if (rc.canPlaceAnchor()) {
+            rc.setIndicatorString("Huzzah, placed anchor!");
+            rc.placeAnchor();
+        }
+    }
+
+    static void collect(RobotController rc, MapLocation location) throws GameActionException {
+        int COLLECT_MAX_AMOUNT = -1;
+        if (rc.canCollectResource(location, COLLECT_MAX_AMOUNT)) {
+            if (rng.nextBoolean()){
+                rc.collectResource(location, COLLECT_MAX_AMOUNT);
+                rc.setIndicatorString("Collecting, now have, AD:" +
+                    rc.getResourceAmount(ResourceType.ADAMANTIUM) +
+                          rc.getResourceAmount(ResourceType.MANA) +
+                          rc.getResourceAmount(ResourceType.ELIXIR)
+                );
+            }
+        }
+    }
+
     /**
      * Run a single turn for a Carrier.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
@@ -141,43 +192,23 @@ public strictfp class RobotPlayer {
     static void runCarrier(RobotController rc) throws GameActionException {
         if (rc.getAnchor() != null) {
             // If I have an anchor singularly focus on getting it to the first island I see
-            int[] islands = rc.senseNearbyIslands();
-            Set<MapLocation> islandLocs = new HashSet<>();
-            for (int id : islands) {
-                MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
-                islandLocs.addAll(Arrays.asList(thisIslandLocs));
-            }
+            Set<MapLocation> islandLocs = senseIslandLocations(rc);
             if (islandLocs.size() > 0) {
                 MapLocation islandLocation = islandLocs.iterator().next();
-                rc.setIndicatorString("Moving my anchor towards " + islandLocation);
-                while (!rc.getLocation().equals(islandLocation)) {
-                    Direction dir = rc.getLocation().directionTo(islandLocation);
-                    if (rc.canMove(dir)) {
-                        rc.move(dir);
-                    }
-                }
-                if (rc.canPlaceAnchor()) {
-                    rc.setIndicatorString("Huzzah, placed anchor!");
-                    rc.placeAnchor();
-                }
+                moveStraightTowards(rc, islandLocation);
+                placeAnchor(rc);
             }
         }
+
         // Try to gather from squares around us.
         MapLocation me = rc.getLocation();
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 MapLocation wellLocation = new MapLocation(me.x + dx, me.y + dy);
-                if (rc.canCollectResource(wellLocation, -1)) {
-                    if (rng.nextBoolean()) {
-                        rc.collectResource(wellLocation, -1);
-                        rc.setIndicatorString("Collecting, now have, AD:" +
-                                rc.getResourceAmount(ResourceType.ADAMANTIUM) +
-                                " MN: " + rc.getResourceAmount(ResourceType.MANA) +
-                                " EX: " + rc.getResourceAmount(ResourceType.ELIXIR));
-                    }
-                }
+                collect(rc, wellLocation);
             }
         }
+
         // Occasionally try out the carriers attack
         if (rng.nextInt(20) == 1) {
             RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
