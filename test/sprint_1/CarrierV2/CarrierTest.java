@@ -113,4 +113,21 @@ public class CarrierTest {
         op().tryPickUpAnchor(rc, mockCarrier.hqLoc);
         noMore();
     }
+/*
+    @Test
+    public void ShouldDeliverAnchorWhenItHasOne() throws GameActionException {
+        setup();
+
+        mockCarrier.hasAnchor = true;
+        mockCarrier.hqLoc = new MapLocation(0,0);
+        when(rc.getLocation()).thenReturn(new MapLocation(1, 1));
+        mockCarrier.wellLoc = new MapLocation(3, 3);
+
+        cc.run(rc, mockCarrier);
+
+        op().deliverAnchor(rc);
+        noMore();
+    }
+    */
+
 }
