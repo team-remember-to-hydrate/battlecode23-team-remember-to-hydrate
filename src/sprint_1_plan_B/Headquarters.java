@@ -1,4 +1,4 @@
-package sprint_1;
+package sprint_1_plan_B;
 
 import battlecode.common.*;
 
@@ -15,7 +15,6 @@ public class Headquarters {
     static void runHeadquarters(RobotController rc) throws GameActionException {
         // generate info to make decisions
         RobotInfo[] nearby_bots = rc.senseNearbyRobots();
-        RobotInfo[] nearby_enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
         Team us = rc.getTeam();
         int num_launchers = 0;
 
@@ -90,47 +89,22 @@ public class Headquarters {
             rc.writeSharedArray(my_array_address,packed_info);
         }
 
-//        // if we are holding an anchor we saw an island, lets build a carrier.
-//        // Pick a direction to build in.
-//        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
-//        MapLocation newLoc = rc.getLocation().add(dir);
-//        if(rc.getNumAnchors(Anchor.STANDARD) > 0){
-//            // Let's try to build a carrier.
-//            rc.setIndicatorString("Trying to build a carrier");
-//            if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
-//                rc.buildRobot(RobotType.CARRIER, newLoc);
-//            }
-//        }
-
-        // Count enemy launchers in launcher attack distance,  carriers, to decide to build a carrier
-        RobotInfo[] enemyInLauncherRange = rc.senseNearbyRobots(16, rc.getTeam().opponent());
-        RobotInfo[] friendlyInSight = rc.senseNearbyRobots(-1, rc.getTeam());
-
-        int enemyLauncherCount = 0;
-        for (int i = 0; i < enemyInLauncherRange.length; i++) {
-            if (enemyInLauncherRange[0].getType() == RobotType.CARRIER){
-                enemyLauncherCount++;
-            }
-        }
-        int carrierCount = 0;
-        for (int i = 0; i < friendlyInSight.length; i++) {
-            if (friendlyInSight[0].getType() == RobotType.CARRIER){
-                carrierCount++;
-            }
-        }
-        // If we see no enemy launchers in launcher attack distance, and see less than 6 carriers, build a carrier
-        if ((enemyLauncherCount == 0) && (carrierCount < 6)){
-            Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
-            MapLocation newLoc = rc.getLocation().add(dir);
+        // if we are holding an anchor we saw an island, lets build a carrier.
+        // Pick a direction to build in.
+        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
+        MapLocation newLoc = rc.getLocation().add(dir);
+        if(rc.getNumAnchors(Anchor.STANDARD) > 0){
+            // Let's try to build a carrier.
             rc.setIndicatorString("Trying to build a carrier");
             if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
                 rc.buildRobot(RobotType.CARRIER, newLoc);
             }
         }
 
+
+
         if (num_launchers < 6) {
-            Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
-            MapLocation newLoc = rc.getLocation().add(dir);
+
 
             // Let's try to build a launcher.
             rc.setIndicatorString("Trying to build a launcher");
