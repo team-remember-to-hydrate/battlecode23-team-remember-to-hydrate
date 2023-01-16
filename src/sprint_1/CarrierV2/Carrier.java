@@ -19,7 +19,6 @@ public class Carrier {
     public MapLocation wellLoc;
     public int amountResourcesHeld = 0;
     public MapLocation hqLoc;
-    public boolean sensedAnchorAtHq;
 
     public void searchForWell(RobotController rc) {
         if(this.wellLoc == null) {
@@ -69,11 +68,11 @@ public class Carrier {
         }
     }
 
-    public void collectResources(RobotController rc, MapLocation wellLoc) throws GameActionException {
+    public void tryCollectResources(RobotController rc, MapLocation loc) throws GameActionException {
         int totalCarrying = this.getTotalCarrying(rc);
         if(totalCarrying < MAX_RESOURCE_CAPACITY && rc.getAnchor() == null) {
-            if (rc.canCollectResource(wellLoc, -1)) {
-                rc.collectResource(wellLoc, -1);
+            if (rc.canCollectResource(loc, -1)) {
+                rc.collectResource(loc, -1);
                 this.amountResourcesHeld = this.getTotalCarrying(rc);
             }
         }
@@ -99,7 +98,12 @@ public class Carrier {
         tryDropAllOfResourceToHq(rc, ResourceType.ELIXIR, hqLoc);
     }
 
-    public void tryPickUpAnchorFromHq(RobotController rc, MapLocation hqLoc) {
-
+    public void tryPickUpAnchor(RobotController rc, MapLocation loc) throws GameActionException {
+        if(rc.canTakeAnchor(loc, Anchor.ACCELERATING)){
+            rc.takeAnchor(loc, Anchor.ACCELERATING);
+        }
+        else if(rc.canTakeAnchor(loc, Anchor.STANDARD)){
+            rc.takeAnchor(loc, Anchor.STANDARD);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package sprint_1.CarrierV2;
 
+import battlecode.common.Anchor;
 import battlecode.common.MapLocation;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
@@ -70,7 +71,7 @@ public class CarrierTest {
         when(rc.canCollectResource(any(), anyInt())).thenReturn(true);
         cc.run(rc, mockCarrier);
 
-        op().collectResources(rc, mockCarrier.wellLoc);
+        op().tryCollectResources(rc, mockCarrier.wellLoc);
         noMore();
     }
 
@@ -93,13 +94,14 @@ public class CarrierTest {
         setup();
 
         mockCarrier.amountResourcesHeld = 0;
-        mockCarrier.sensedAnchorAtHq = true;
         mockCarrier.hqLoc = new MapLocation(0,0);
         mockCarrier.wellLoc = new MapLocation(1, 1);
         when(rc.getLocation()).thenReturn(new MapLocation(2, 2));
+        when(rc.canTakeAnchor(any(), any())).thenReturn(true);
+
         cc.run(rc, mockCarrier);
 
-        op().tryPickUpAnchorFromHq(rc, mockCarrier.hqLoc);
+        op().tryPickUpAnchor(rc, mockCarrier.hqLoc);
         noMore();
     }
 }

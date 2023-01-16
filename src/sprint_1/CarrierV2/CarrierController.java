@@ -18,13 +18,13 @@ public class CarrierController {
             c.moveRandom(rc);
         }
         else if(c.amountResourcesHeld < Carrier.MAX_RESOURCE_CAPACITY){
-            if(c.sensedAnchorAtHq) {
+            if(rc.canTakeAnchor(c.hqLoc, Anchor.ACCELERATING) || rc.canTakeAnchor(c.hqLoc, Anchor.STANDARD)) {
                 rc.setIndicatorString("picking up anchor from hq");
-                c.tryPickUpAnchorFromHq(rc, c.hqLoc);
+                c.tryPickUpAnchor(rc, c.hqLoc);
             }
             else if(rc.getLocation().distanceSquaredTo(c.wellLoc) <= 2){
                 rc.setIndicatorString("collecting resources");
-                c.collectResources(rc, c.wellLoc);
+                c.tryCollectResources(rc, c.wellLoc);
             }
             else {
                 rc.setIndicatorString("moving to well");
