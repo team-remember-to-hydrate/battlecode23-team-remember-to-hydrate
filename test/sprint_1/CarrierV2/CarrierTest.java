@@ -87,4 +87,19 @@ public class CarrierTest {
         op().tryTransferAllResources(rc, mockCarrier.hqLoc);
         noMore();
     }
+
+    @Test
+    public void ShouldPickUpAnchorFromHqWhenOneIsAvailableAndCarryingNothingElse() throws GameActionException {
+        setup();
+
+        mockCarrier.amountResourcesHeld = 0;
+        mockCarrier.sensedAnchorAtHq = true;
+        mockCarrier.hqLoc = new MapLocation(0,0);
+        mockCarrier.wellLoc = new MapLocation(1, 1);
+        when(rc.getLocation()).thenReturn(new MapLocation(2, 2));
+        cc.run(rc, mockCarrier);
+
+        op().tryPickUpAnchorFromHq(rc, mockCarrier.hqLoc);
+        noMore();
+    }
 }

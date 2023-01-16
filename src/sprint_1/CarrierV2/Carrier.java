@@ -19,6 +19,7 @@ public class Carrier {
     public MapLocation wellLoc;
     public int amountResourcesHeld = 0;
     public MapLocation hqLoc;
+    public boolean sensedAnchorAtHq;
 
     public void searchForWell(RobotController rc) {
         if(this.wellLoc == null) {
@@ -96,5 +97,9 @@ public class Carrier {
         tryDropAllOfResourceToHq(rc, ResourceType.ADAMANTIUM, hqLoc);
         tryDropAllOfResourceToHq(rc, ResourceType.MANA, hqLoc);
         tryDropAllOfResourceToHq(rc, ResourceType.ELIXIR, hqLoc);
+    }
+
+    public void tryPickUpAnchorFromHq(RobotController rc, MapLocation hqLoc) {
+
     }
 }

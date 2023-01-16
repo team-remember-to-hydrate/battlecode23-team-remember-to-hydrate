@@ -12,13 +12,17 @@ public class CarrierController {
                 }
             }
         }
-        else if(c.wellLoc == null){
+        else if(c.wellLoc == null){ // game mechanic: robot also spawns within sight of a well
             rc.setIndicatorString("searching for a well");
             c.searchForWell(rc);
             c.moveRandom(rc);
         }
         else if(c.amountResourcesHeld < Carrier.MAX_RESOURCE_CAPACITY){
-            if(rc.getLocation().distanceSquaredTo(c.wellLoc) <= 2){
+            if(c.sensedAnchorAtHq) {
+                rc.setIndicatorString("picking up anchor from hq");
+                c.tryPickUpAnchorFromHq(rc, c.hqLoc);
+            }
+            else if(rc.getLocation().distanceSquaredTo(c.wellLoc) <= 2){
                 rc.setIndicatorString("collecting resources");
                 c.collectResources(rc, c.wellLoc);
             }
