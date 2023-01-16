@@ -1,4 +1,4 @@
-package examplefuncsplayer;
+package josh_001;
 
 import battlecode.common.*;
 
@@ -33,16 +33,17 @@ public strictfp class RobotPlayer {
 
     /** Array containing all the possible movement directions. */
     static final Direction[] directions = {
-            Direction.NORTH,
-            Direction.NORTHEAST,
-            Direction.EAST,
-            Direction.SOUTHEAST,
-            Direction.SOUTH,
-            Direction.SOUTHWEST,
-            Direction.WEST,
-            Direction.NORTHWEST,
+        Direction.NORTH,
+        Direction.NORTHEAST,
+        Direction.EAST,
+        Direction.SOUTHEAST,
+        Direction.SOUTH,
+        Direction.SOUTHWEST,
+        Direction.WEST,
+        Direction.NORTHWEST,
     };
 
+    static MapLocation birth_location;
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * It is like the main function for your robot. If this method returns, the robot dies!
@@ -59,6 +60,9 @@ public strictfp class RobotPlayer {
 
         // You can also use indicators to save debug notes in replays.
         rc.setIndicatorString("Hello world!");
+
+        // keep track of where we started so carriers can return Resources
+        MapLocation birth_location = rc.getLocation();
 
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
@@ -114,11 +118,6 @@ public strictfp class RobotPlayer {
         // Pick a direction to build in.
         Direction dir = directions[rng.nextInt(directions.length)];
         MapLocation newLoc = rc.getLocation().add(dir);
-        if (rc.canBuildAnchor(Anchor.STANDARD)) {
-            // If we can build an anchor do it!
-            rc.buildAnchor(Anchor.STANDARD);
-            rc.setIndicatorString("Building anchor! " + rc.getAnchor());
-        }
         if (rng.nextBoolean()) {
             // Let's try to build a carrier.
             rc.setIndicatorString("Trying to build a carrier");
@@ -139,6 +138,9 @@ public strictfp class RobotPlayer {
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
      */
     static void runCarrier(RobotController rc) throws GameActionException {
+        if (birth_location == null){
+            birth_location = rc.getLocation();
+        }
         if (rc.getAnchor() != null) {
             // If I have an anchor singularly focus on getting it to the first island I see
             int[] islands = rc.senseNearbyIslands();
@@ -170,22 +172,42 @@ public strictfp class RobotPlayer {
                 if (rc.canCollectResource(wellLocation, -1)) {
                     if (rng.nextBoolean()) {
                         rc.collectResource(wellLocation, -1);
-                        rc.setIndicatorString("Collecting, now have, AD:" +
-                                rc.getResourceAmount(ResourceType.ADAMANTIUM) +
-                                " MN: " + rc.getResourceAmount(ResourceType.MANA) +
-                                " EX: " + rc.getResourceAmount(ResourceType.ELIXIR));
+                        rc.setIndicatorString("Collecting, now have, AD:" + 
+                            rc.getResourceAmount(ResourceType.ADAMANTIUM) + 
+                            " MN: " + rc.getResourceAmount(ResourceType.MANA) + 
+                            " EX: " + rc.getResourceAmount(ResourceType.ELIXIR));
                     }
                 }
             }
         }
-        // Occasionally try out the carriers attack
-        if (rng.nextInt(20) == 1) {
-            RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-            if (enemyRobots.length > 0) {
-                if (rc.canAttack(enemyRobots[0].location)) {
-                    rc.attack(enemyRobots[0].location);
+
+        // try to deliver resource to headquarters
+        RobotInfo[] nearby = rc.senseNearbyRobots(1, rc.getTeam());
+        for (RobotInfo bot : nearby){
+            if (bot.getType() == RobotType.HEADQUARTERS){
+                rc.setIndicatorString("Near Headquarters ");
+                if (rc.canTransferResource(bot.getLocation(), ResourceType.ADAMANTIUM, rc.getResourceAmount(ResourceType.ADAMANTIUM))){
+                    rc.transferResource(bot.getLocation(),ResourceType.ADAMANTIUM, rc.getResourceAmount(ResourceType.ADAMANTIUM));
+                    rc.setIndicatorString("Transferred Adamantium to Headquarters");
+                }
+                if (rc.canTransferResource(bot.getLocation(), ResourceType.MANA, rc.getResourceAmount(ResourceType.MANA))){
+                    rc.transferResource(bot.getLocation(),ResourceType.MANA, rc.getResourceAmount(ResourceType.MANA));
+                    rc.setIndicatorString("Transferred MANA to Headquarters");
                 }
             }
+        }
+
+
+            // If we are full move towards base
+        int ad_weight = rc.getResourceAmount(ResourceType.ADAMANTIUM);
+        int mana_weight = rc.getResourceAmount(ResourceType.MANA);
+        int total_weight = ad_weight + mana_weight;
+        if (total_weight >= 39) {
+            Direction dir = me.directionTo(birth_location);
+            rc.setIndicatorString("returning to " + birth_location );
+            if (rc.canMove(dir))
+
+                rc.move(dir);
         }
 
         // If we can see a well, move towards it
@@ -193,7 +215,7 @@ public strictfp class RobotPlayer {
         if (wells.length > 1 && rng.nextInt(3) == 1) {
             WellInfo well_one = wells[1];
             Direction dir = me.directionTo(well_one.getMapLocation());
-            if (rc.canMove(dir))
+            if (rc.canMove(dir)) 
                 rc.move(dir);
         }
         // Also try to move randomly.
@@ -217,7 +239,7 @@ public strictfp class RobotPlayer {
             MapLocation toAttack = rc.getLocation().add(Direction.EAST);
 
             if (rc.canAttack(toAttack)) {
-                rc.setIndicatorString("Attacking");
+                rc.setIndicatorString("Attacking");        
                 rc.attack(toAttack);
             }
         }
