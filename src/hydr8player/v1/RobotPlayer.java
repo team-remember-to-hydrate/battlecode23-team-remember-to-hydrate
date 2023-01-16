@@ -44,6 +44,7 @@ public strictfp class RobotPlayer {
     };
 
     static final CarrierController carrierController = new CarrierController();
+    static final Carrier carrier = new Carrier();
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -77,7 +78,7 @@ public strictfp class RobotPlayer {
                 // this into a different control structure!
                 switch (rc.getType()) {
                     case HEADQUARTERS:  runHeadquarters(rc); break;
-                    case CARRIER:       carrierController.run(rc, new Carrier()); break;
+                    case CARRIER:       carrierController.run(rc, carrier); break;
                     case LAUNCHER:      runLauncher(rc); break;
                     case BOOSTER:       // Examplefuncsplayer doesn't use any of these robot types below.
                     case DESTABILIZER:  // You might want to give them a try!

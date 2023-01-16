@@ -15,14 +15,15 @@ public class Carrier {
             Direction.NORTHWEST
     };
     public static final int MAX_RESOURCE_CAPACITY = 40;
-    public MapLocation wellLoc;
-    public int amountResourcesHeld;
+    MapLocation wellLoc;
+    public MapLocation getWellLoc() { return this.wellLoc; }
+    public int amountResourcesHeld = 0;
     public MapLocation hqLoc;
 
     public void searchForWell(RobotController rc) {
-        if(this.wellLoc == null) {
+        if(this.getWellLoc() == null) {
             WellInfo[] wells = rc.senseNearbyWells();
-            if(wells != null && wells.length > 0) {
+            if((wells != null) && (wells.length > 0)) {
                 this.wellLoc = wells[0].getMapLocation();
             }
         }
@@ -58,6 +59,9 @@ public class Carrier {
             for(int i = 0; i < 8; i++){
                 if (rc.canMove(currentDirection)) {
                     rc.move(currentDirection);
+                    break;
+                }
+                else {
                     currentDirection = currentDirection.rotateRight();
                 }
             }
@@ -65,14 +69,32 @@ public class Carrier {
     }
 
     public void collectResources(RobotController rc, MapLocation wellLoc) throws GameActionException {
-        int totalCarrying = rc.getResourceAmount(ResourceType.ADAMANTIUM) +
-                rc.getResourceAmount(ResourceType.MANA) +
-                rc.getResourceAmount(ResourceType.ELIXIR);
+        int totalCarrying = this.getTotalCarrying(rc);
         if(totalCarrying < MAX_RESOURCE_CAPACITY && rc.getAnchor() == null) {
-            rc.setIndicatorString("Retrieving resources");
             if (rc.canCollectResource(wellLoc, -1)) {
                 rc.collectResource(wellLoc, -1);
+                this.amountResourcesHeld = this.getTotalCarrying(rc);
             }
         }
+    }
+
+    private int getTotalCarrying(RobotController rc) throws GameActionException {
+        return rc.getResourceAmount(ResourceType.ADAMANTIUM) +
+                rc.getResourceAmount(ResourceType.MANA) +
+                rc.getResourceAmount(ResourceType.ELIXIR);
+    }
+
+    private void tryDropAllOfResourceToHq(RobotController rc, ResourceType rt, MapLocation loc) throws GameActionException {
+        int total = rc.getResourceAmount(rt);
+        if(rc.canTransferResource(loc, rt, rc.getResourceAmount(rt))){
+            rc.transferResource(loc, rt, total);
+            this.amountResourcesHeld = this.getTotalCarrying(rc);
+        }
+    }
+
+    public void tryTransferAllResources(RobotController rc, MapLocation hqLoc) throws GameActionException {
+        tryDropAllOfResourceToHq(rc, ResourceType.ADAMANTIUM, hqLoc);
+        tryDropAllOfResourceToHq(rc, ResourceType.MANA, hqLoc);
+        tryDropAllOfResourceToHq(rc, ResourceType.ELIXIR, hqLoc);
     }
 }
