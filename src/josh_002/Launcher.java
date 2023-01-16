@@ -39,7 +39,10 @@ public class Launcher {
             my_state = states.INITIAL;
         }
         // if we have reached our task destination we should switch to occupy island
-        if(rc.getLocation().distanceSquaredTo(target_location) < 1)  my_state = states.OCCUPY_ISLAND;
+        if(target_location != null){
+            if(rc.getLocation().distanceSquaredTo(target_location) < 1)  my_state = states.OCCUPY_ISLAND;
+        }
+
 
         // attack enemies within range visible bots gotta get them enemies
         int lowest_health = 100;

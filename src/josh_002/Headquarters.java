@@ -80,13 +80,16 @@ public class Headquarters {
                 num_launchers++;
             }
         }
+
         // Minimum Viable Product for group attack
         if(num_launchers >= 6){
             int my_task_array_location = 12 + my_array_address;
             MapLocation target = new MapLocation(rc.getMapWidth() / 2,rc.getMapHeight()/2);
             int mission = 0;
+            // sets a target location for a mission
             int target_array = RobotPlayer.packMapLocationExtra(target,mission);
             rc.writeSharedArray(my_task_array_location,target_array);
+            // changes HQ state in array
             int packed_info = RobotPlayer.packMapLocationExtra(rc.getLocation(),RobotPlayer.hq_states.TASK.ordinal());
             rc.writeSharedArray(my_array_address,packed_info);
         }
