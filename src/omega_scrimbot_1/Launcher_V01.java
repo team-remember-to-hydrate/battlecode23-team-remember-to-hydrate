@@ -1,6 +1,7 @@
 package omega_scrimbot_1;
 
 import battlecode.common.*;
+import omega_scrimbot_1.Pathfinding.Pathfinding_V01;
 
 import java.util.Random;
 
@@ -33,10 +34,22 @@ public class Launcher_V01 {
 
         }
 
-        // Also try to move randomly.
-        Direction dir = directions[rng.nextInt(directions.length)];
+        RobotInfo[] visibleEnemies = rc.senseNearbyRobots(-1, opponent);
+        for (RobotInfo enemy : visibleEnemies){
+            if (enemy.getType() != RobotType.HEADQUARTERS){
+                Direction dir = rc.getLocation().directionTo(enemy.getLocation());
+                if (rc.canMove(dir)){
+                    rc.move(dir);
+                    RobotPlayer.lastMoved = dir;
+                    break;
+                }
+            }
+        }
+        // Also try to move with clockwise momentum.
+        Direction dir = Pathfinding_V01.getRotateValidMove(rc, RobotPlayer.lastMoved, true);
         if (rc.canMove(dir)) {
             rc.move(dir);
+            RobotPlayer.lastMoved = dir;
         }
     }
 }
