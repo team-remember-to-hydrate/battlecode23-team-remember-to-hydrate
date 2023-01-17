@@ -113,7 +113,7 @@ public class CarrierTest {
         op().tryPickUpAnchor(rc, mockCarrier.hqLoc);
         noMore();
     }
-/*
+
     @Test
     public void ShouldDeliverAnchorWhenItHasOne() throws GameActionException {
         setup();
@@ -128,6 +128,4 @@ public class CarrierTest {
         op().deliverAnchor(rc);
         noMore();
     }
-    */
-
 }
