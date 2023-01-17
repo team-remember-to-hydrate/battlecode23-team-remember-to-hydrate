@@ -1,4 +1,4 @@
-package sprint_1.CarrierV2;
+package hydr8player.v1.Carrier.v2;
 
 import battlecode.common.MapLocation;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import battlecode.common.RobotController;
 import org.mockito.InOrder;
 import org.mockito.verification.VerificationMode;
 
-public class CarrierTest {
+public class CarrierStrategyTest {
     static RobotController rc = null;
     static CarrierController cc = null;
     static Carrier mockCarrier = null;
@@ -47,16 +47,6 @@ public class CarrierTest {
     }
 
     @Test
-    public void ShouldSearchForHqByDefault() throws GameActionException {
-        setup();
-
-        cc.run(rc, mockCarrier);
-
-        op().searchForHq(rc);
-        noMore();
-    }
-
-    @Test
     public void ShouldTravelToWellWithBugNavWhenItCanHoldResourcesAndIsNotNextToWell() throws GameActionException {
         setup();
 
@@ -80,7 +70,7 @@ public class CarrierTest {
         when(rc.canCollectResource(any(), anyInt())).thenReturn(true);
         cc.run(rc, mockCarrier);
 
-        op().tryCollectResources(rc, mockCarrier.wellLoc);
+        op().collectResources(rc, mockCarrier.wellLoc);
         noMore();
     }
 
@@ -95,37 +85,6 @@ public class CarrierTest {
 
         op().moveWithBugNav(rc, mockCarrier.hqLoc);
         op().tryTransferAllResources(rc, mockCarrier.hqLoc);
-        noMore();
-    }
-
-    @Test
-    public void ShouldPickUpAnchorFromHqWhenOneIsAvailableAndCarryingNothingElse() throws GameActionException {
-        setup();
-
-        mockCarrier.amountResourcesHeld = 0;
-        mockCarrier.hqLoc = new MapLocation(0,0);
-        mockCarrier.wellLoc = new MapLocation(3, 3);
-        when(rc.getLocation()).thenReturn(new MapLocation(1, 1));
-        when(rc.canTakeAnchor(any(), any())).thenReturn(true);
-
-        cc.run(rc, mockCarrier);
-
-        op().tryPickUpAnchor(rc, mockCarrier.hqLoc);
-        noMore();
-    }
-
-    @Test
-    public void ShouldDeliverAnchorWhenItHasOne() throws GameActionException {
-        setup();
-
-        mockCarrier.hasAnchor = true;
-        mockCarrier.hqLoc = new MapLocation(0,0);
-        when(rc.getLocation()).thenReturn(new MapLocation(1, 1));
-        mockCarrier.wellLoc = new MapLocation(3, 3);
-
-        cc.run(rc, mockCarrier);
-
-        op().deliverAnchor(rc);
         noMore();
     }
 }

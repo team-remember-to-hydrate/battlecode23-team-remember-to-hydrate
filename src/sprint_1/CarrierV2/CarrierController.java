@@ -2,10 +2,6 @@ package sprint_1.CarrierV2;
 
 import battlecode.common.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public class CarrierController {
     public void run(RobotController rc, Carrier c) throws GameActionException {
         if(c.hqLoc == null) {
