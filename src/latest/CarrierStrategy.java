@@ -11,7 +11,6 @@ public class CarrierStrategy {
     static MapLocation wellLoc;
     static boolean anchorMode = false;
     static int amountResourcesHeld = 0;
-    static Pathing pathing = new Pathing();
 
     public static void run(RobotController rc) throws GameActionException {
         if(hqLoc == null) {
@@ -25,18 +24,18 @@ public class CarrierStrategy {
         }
         else if(wellLoc == null){
             searchForWell(rc);
-            pathing.moveRandom(rc);
+            Pathing.moveRandom(rc);
         }
         else if(amountResourcesHeld < GameConstants.CARRIER_CAPACITY){
             if(rc.getLocation().distanceSquaredTo(wellLoc) <= 2){
                 tryCollectResources(rc, wellLoc);
             }
             else {
-                pathing.moveWithBugNav(rc, wellLoc);
+                Pathing.moveWithBugNav(rc, wellLoc);
             }
         }
         else if(amountResourcesHeld == GameConstants.CARRIER_CAPACITY){
-            pathing.moveWithBugNav(rc, hqLoc);
+            Pathing.moveWithBugNav(rc, hqLoc);
             tryDropAllResources(rc, hqLoc);
         }
         else {
@@ -70,6 +69,7 @@ public class CarrierStrategy {
         }
     }
     static void deliverAnchor(RobotController rc) throws GameActionException {
+        rc.setIndicatorString("deliverAnchor");
         int[] islands = rc.senseNearbyIslands();
         Set<MapLocation> islandLocs = new HashSet<>();
         for (int id : islands) {
@@ -78,12 +78,8 @@ public class CarrierStrategy {
         }
         if (islandLocs.size() > 0) {
             MapLocation islandLocation = islandLocs.iterator().next();
-            rc.setIndicatorString("Moving my anchor towards " + islandLocation);
-            while (!rc.getLocation().equals(islandLocation)) {
-                Direction dir = rc.getLocation().directionTo(islandLocation);
-                if (rc.canMove(dir)) {
-                    rc.move(dir);
-                }
+            if(!rc.getLocation().equals(islandLocation)) {
+                Pathing.moveWithBugNav(rc, islandLocation);
             }
             if (rc.canPlaceAnchor()) {
                 rc.setIndicatorString("Huzzah, placed anchor!");
@@ -92,7 +88,7 @@ public class CarrierStrategy {
             }
         }
         else {
-            pathing.moveRandom(rc);
+            Pathing.moveRandom(rc);
         }
     }
     static void tryCollectResources(RobotController rc, MapLocation loc) throws GameActionException {

@@ -9,7 +9,7 @@ import static latest.RobotPlayer.directions;
 import static latest.RobotPlayer.rng;
 
 public class Pathing {
-    static void moveRandom(RobotController rc) throws GameActionException {
+    public static void moveRandom(RobotController rc) throws GameActionException {
         Direction dir = directions[rng.nextInt(directions.length)];
         if (rc.canMove(dir)) {
             rc.move(dir);
