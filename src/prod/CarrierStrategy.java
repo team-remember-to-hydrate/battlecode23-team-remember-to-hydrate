@@ -60,7 +60,6 @@ public class CarrierStrategy {
         }
     }
     static void tryPickUpAnchor(RobotController rc, MapLocation loc) throws GameActionException {
-        rc.setIndicatorString("tryPickUpAnchor");
         if(rc.canTakeAnchor(loc, Anchor.ACCELERATING)){
             rc.takeAnchor(loc, Anchor.ACCELERATING);
             anchorMode = true;
