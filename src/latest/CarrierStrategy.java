@@ -100,7 +100,7 @@ public class CarrierStrategy {
             }
         }
     }
-    static int getTotalCarrying(RobotController rc) throws GameActionException {
+    static int getTotalCarrying(RobotController rc) {
         return rc.getResourceAmount(ResourceType.ADAMANTIUM) +
                 rc.getResourceAmount(ResourceType.MANA) +
                 rc.getResourceAmount(ResourceType.ELIXIR);
