@@ -1,12 +1,12 @@
-package prod;
+package latest;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
-import static prod.RobotPlayer.directions;
-import static prod.RobotPlayer.rng;
+import static latest.RobotPlayer.directions;
+import static latest.RobotPlayer.rng;
 
 public class Pathing {
     static void moveRandom(RobotController rc) throws GameActionException {

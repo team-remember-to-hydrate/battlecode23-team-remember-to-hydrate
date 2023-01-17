@@ -1,4 +1,4 @@
-package prod;
+package latest;
 
 import battlecode.common.*;
 

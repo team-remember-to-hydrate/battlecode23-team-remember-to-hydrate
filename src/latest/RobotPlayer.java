@@ -1,7 +1,6 @@
-package prod;
+package latest;
 
 import battlecode.common.*;
-import prod.CarrierStrategy;
 
 import java.util.Random;
 
