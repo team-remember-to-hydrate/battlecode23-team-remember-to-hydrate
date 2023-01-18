@@ -2,10 +2,7 @@ package omega_scrimbot_1;
 
 import battlecode.common.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -20,6 +17,8 @@ public strictfp class RobotPlayer {
      * these variables are static, in Battlecode they aren't actually shared between your robots.
      */
     static int turnCount = 0;
+
+    static Direction lastMoved = Direction.NORTH;
 
     /**
      * A random number generator.
@@ -72,12 +71,12 @@ public strictfp class RobotPlayer {
                 // use different strategies on different robots. If you wish, you are free to rewrite
                 // this into a different control structure!
                 switch (rc.getType()) {
-                    case HEADQUARTERS:     runHeadquarters(rc);  break;
-                    case CARRIER:      runCarrier(rc);   break;
-                    case LAUNCHER: runLauncher(rc); break;
+                    case HEADQUARTERS:     HQ.runHeadquarters(rc);  break;
+                    case CARRIER:      Carrier.runCarrier(rc);   break;
+                    case LAUNCHER: Launcher.runLauncher(rc); break;
                     case BOOSTER: // Examplefuncsplayer doesn't use any of these robot types below.
                     case DESTABILIZER: // You might want to give them a try!
-                    case AMPLIFIER:       break;
+                    case AMPLIFIER: Amplifier.runAmplifier(rc);     break;
                 }
 
             } catch (GameActionException e) {
@@ -104,226 +103,10 @@ public strictfp class RobotPlayer {
         // Your code should never reach here (unless it's intentional)! Self-destruction imminent...
     }
 
-    /**
-     * Run a single turn for a Headquarters.
-     * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
-     */
-    static void runHeadquarters(RobotController rc) throws GameActionException {
-        /**
-         * Initial turn tasks:
-         * -Sense nearby wells
-         * -Sense nearby impassable spaces
-         * -Sense nearby islands
-         * -Sense nearby bases
-         * -Sense nearby map info
-         */
-        if (turnCount == 1) {
-            WellInfo[] nearbyWells = rc.senseNearbyWells();
-            MapLocation[] myVisibleSpaces = rc.getAllLocationsWithinRadiusSquared(rc.getLocation(),
-                    rc.getType().visionRadiusSquared);
-        }
-
-        /**
-         * Update surrounding info
-         * - Sense only known well locations (they are constant from turn 1, but type can change)
-         * - Sense known islands and get status
-         * -- who controls them
-         * -- type of anchor
-         * - Sense enemy bots, get count
-         * - Sense available spawn spaces
-         */
-
-        // Note current resource levels
-        int myAdamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
-        int myMana = rc.getResourceAmount(ResourceType.MANA);
-        int myElixer = rc.getResourceAmount(ResourceType.ELIXIR);
-
-        // Note spawn locations in range
-        MapLocation[] spawnRangeSpaces = rc.getAllLocationsWithinRadiusSquared(rc.getLocation(),
-                rc.getType().actionRadiusSquared);
-
-        // Note viable spawn locations
-        MapLocation[] validSpawns = new MapLocation[spawnRangeSpaces.length];
-        for (int i = 0; i < validSpawns.length; i++){
-            // TODO: Determine best way to check this.
-        }
 
 
 
 
-        // Pick a direction to build in. This should depend on current goal.
-        Direction dir = directions[rng.nextInt(directions.length)];
-        MapLocation newLoc = rc.getLocation().add(dir);
-        if (rc.getNumAnchors(Anchor.STANDARD) < 3 && rc.canBuildAnchor(Anchor.STANDARD)) {
-            // If we can build an anchor and don't have many, do it!
-            rc.buildAnchor(Anchor.STANDARD);
-            rc.setIndicatorString("Building anchor! " + rc.getAnchor());
-            myAdamantium -= 100;
-            myMana -= 100;
-        }
-        if (myAdamantium >= 50) {
-            // Let's try to build a carrier.
-            rc.setIndicatorString("Trying to build a carrier");
-            for (int i = 0; i < validSpawns.length; i++){
-                if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
-                    rc.buildRobot(RobotType.CARRIER, newLoc);
-                    break;
-                }
-            }
-        } else {
-            // Let's try to build a launcher.
-            rc.setIndicatorString("Trying to build a launcher");
-            for (int i = 0; i < validSpawns.length; i++){
-                if (rc.canBuildRobot(RobotType.LAUNCHER, newLoc)) {
-                    rc.buildRobot(RobotType.LAUNCHER, newLoc);
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
-     * Returns the location closest to the target that is available for robot placement.
-     */
-    static MapLocation bestBuildLocation(MapLocation[] visibleSpaces, MapLocation targetLocation, MapLocation[] occupiedSpaces){
-        return null; // TODO
-    }
-
-    // Scan for HQ
-    static MapLocation scanHQ(RobotController rc) throws GameActionException {
-        RobotInfo[] robots = rc.senseNearbyRobots();
-        for (RobotInfo robot : robots) {
-            if (robot.getTeam() == rc.getTeam() && robot.getType() == RobotType.HEADQUARTERS){
-                return robot.getLocation();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Run a single turn for a Carrier.
-     * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
-     */
-    static void runCarrier(RobotController rc) throws GameActionException {
-        /**
-         * First turn initialization
-         */
-        MapLocation mySpawnHQ = null;
-        if (turnCount == 1){
-            mySpawnHQ = scanHQ(rc);
-        }
 
 
-        // Start turn by updating my inventory status
-        int myAdamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
-        int myMana = rc.getResourceAmount(ResourceType.MANA);
-        int myElixer = rc.getResourceAmount(ResourceType.ELIXIR);
-        int total_resources = myElixer + myAdamantium + myMana;
-        boolean carryingMaxAmt = total_resources == 40;
-
-        // Update my location
-        MapLocation myLocation = rc.getLocation();
-
-        // If I am close to a HQ, I should try to deliver resources or grab an anchor.
-        // TODO Implement more than just anchor (out of time now)
-        if (rc.canTakeAnchor(mySpawnHQ, Anchor.STANDARD)) {
-            rc.takeAnchor(mySpawnHQ, Anchor.STANDARD);
-        }
-
-
-        if (rc.getAnchor() != null) {
-            // If I have an anchor singularly focus on getting it to the first island I see
-            int[] islands = rc.senseNearbyIslands();
-            Set<MapLocation> islandLocs = new HashSet<>();
-            for (int id : islands) {
-                MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
-                islandLocs.addAll(Arrays.asList(thisIslandLocs));
-            }
-            if (islandLocs.size() > 0) {
-                MapLocation islandLocation = islandLocs.iterator().next();
-                rc.setIndicatorString("Moving my anchor towards " + islandLocation);
-                while (!rc.getLocation().equals(islandLocation)) {
-                    Direction dir = rc.getLocation().directionTo(islandLocation);
-                    if (rc.canMove(dir)) {
-                        rc.move(dir);
-                    }
-                }
-                if (rc.canPlaceAnchor()) {
-                    rc.setIndicatorString("Huzzah, placed anchor!");
-                    rc.placeAnchor();
-                }
-            }
-        }
-        // Try to gather from squares around us. Only if we can carry more.
-        if (!carryingMaxAmt){
-            MapLocation me = rc.getLocation();
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = -1; dy <= 1; dy++) {
-                    MapLocation wellLocation = new MapLocation(me.x + dx, me.y + dy);
-                    if (rc.canCollectResource(wellLocation, -1)) {
-                        if (rng.nextBoolean()) {
-                            rc.collectResource(wellLocation, -1);
-                            rc.setIndicatorString("Collecting, now have, AD:" +
-                                    rc.getResourceAmount(ResourceType.ADAMANTIUM) +
-                                    " MN: " + rc.getResourceAmount(ResourceType.MANA) +
-                                    " EX: " + rc.getResourceAmount(ResourceType.ELIXIR));
-                        }
-                    }
-                }
-            }
-        }
-
-        // Occasionally try out the carriers attack
-        if (rng.nextInt(20) == 1) {
-            RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-            if (enemyRobots.length > 0) {
-                if (rc.canAttack(enemyRobots[0].location)) {
-                    rc.attack(enemyRobots[0].location);
-                }
-            }
-        }
-        
-        // If we can see a well, and can carry more resources, move towards it
-        if (!carryingMaxAmt && (rc.getAnchor() == null)){
-            WellInfo[] wells = rc.senseNearbyWells();
-            if (wells.length > 1 && rng.nextInt(3) == 1) {
-                WellInfo well_one = wells[1];
-                MapLocation me = rc.getLocation();
-                Direction dir = me.directionTo(well_one.getMapLocation());
-                if (rc.canMove(dir))
-                    rc.move(dir);
-            }
-            // Also try to move randomly.
-            Direction dir = directions[rng.nextInt(directions.length)];
-            if (rc.canMove(dir)) {
-                rc.move(dir);
-            }
-        }
-    }
-
-    /**
-     * Run a single turn for a Launcher.
-     * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
-     */
-    static void runLauncher(RobotController rc) throws GameActionException {
-        // Try to attack someone
-        int radius = rc.getType().actionRadiusSquared;
-        Team opponent = rc.getTeam().opponent();
-        RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
-        if (enemies.length >= 0) {
-            MapLocation toAttack = enemies[0].location;
-            //MapLocation toAttack = rc.getLocation().add(Direction.EAST);
-
-            if (rc.canAttack(toAttack)) {
-                rc.setIndicatorString("Attacking");        
-                rc.attack(toAttack);
-            }
-        }
-
-        // Also try to move randomly.
-        Direction dir = directions[rng.nextInt(directions.length)];
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-        }
-    }
 }
