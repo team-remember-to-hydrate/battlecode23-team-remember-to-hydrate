@@ -10,7 +10,7 @@ import battlecode.common.RobotController;
 import org.mockito.InOrder;
 import org.mockito.verification.VerificationMode;
 
-public class CarrierTest {
+public class CarrierStrategyTest {
     static RobotController rc = null;
     static CarrierController cc = null;
     static Carrier mockCarrier = null;
