@@ -18,6 +18,8 @@ public strictfp class RobotPlayer {
      */
     static int turnCount = 0;
 
+    static Direction lastMoved = Direction.NORTH;
+
     /**
      * A random number generator.
      * We will use this RNG to make some random moves. The Random class is provided by the java.util.Random
@@ -85,7 +87,7 @@ public strictfp class RobotPlayer {
                     case LAUNCHER:     Launcher.runLauncher(rc); break;
                     case BOOSTER: // Examplefuncsplayer doesn't use any of these robot types below.
                     case DESTABILIZER: // You might want to give them a try!
-                    case AMPLIFIER:       break;
+                    case AMPLIFIER:     Amplifier.runAmplifier(rc);   break;
                 }
 
             } catch (GameActionException e) {
