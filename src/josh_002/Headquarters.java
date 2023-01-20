@@ -1,8 +1,8 @@
 package josh_002;
 
 import battlecode.common.*;
-
-import java.util.Map;
+import java.util.HashSet;
+import java.util.List;
 
 public class Headquarters {
     static int my_array_address;
@@ -10,11 +10,16 @@ public class Headquarters {
     static WellInfo[] wells;
     static RobotPlayer.hq_states current_state;
     static MapLocation next_island;
+    static List<MapLocation> island_locations;
+    static HashSet<Integer> island_ids;
+
+
     /**
      * Run a single turn for a Headquarters.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
+     * @return
      */
-    static void runHeadquarters(RobotController rc) throws GameActionException {
+    public static void runHeadquarters(RobotController rc) throws GameActionException {
         // generate info to make decisions
         RobotInfo[] nearby_bots = rc.senseNearbyRobots();
         Team us = rc.getTeam();
@@ -106,11 +111,7 @@ public class Headquarters {
             }
         }
 
-
-
         if (num_launchers < 6) {
-
-
             // Let's try to build a launcher.
             rc.setIndicatorString("Trying to build a launcher");
             if (rc.canBuildRobot(RobotType.LAUNCHER, newLoc)) {
@@ -118,4 +119,24 @@ public class Headquarters {
             }
         }
     }
+
+    /**
+     * @param here is one maplocation of the island
+     * @param id is unique, and how we differentiate islands
+     * @return false is the island is already known. We can safely remove it from the communications
+     * array on this turn.
+     * @throws GameActionException is something goes wrong. boilerplate
+     */
+    static boolean add_island(MapLocation location, int id ) throws GameActionException {
+        if(island_ids.contains(id)) return false;
+        else {
+            island_ids.add(id);
+            island_locations.add(location);
+            return true;
+        }
+    }
+
+    static void set_next_island(){}
+
+
 }

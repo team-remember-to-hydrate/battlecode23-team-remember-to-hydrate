@@ -32,7 +32,7 @@ public class Launcher {
         MapLocation attack_location = new MapLocation(0,0);
         String indicator_string = "";
         Direction blocked_carrier_dir = Direction.CENTER;
-
+        // This runs on my first turn only
         if(my_HQ > 3){
             my_HQ = RobotPlayer.get_HQ_array_index(rc);
             my_HQ_location = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_HQ));
