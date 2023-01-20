@@ -145,5 +145,8 @@ public class Carrier {
                 this.hasAnchor = false;
             }
         }
+        else {
+            moveRandom(rc); // patch!
+        }
     }
 }

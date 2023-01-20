@@ -1,9 +1,8 @@
-package latest;
+package josh_002;
 
 import battlecode.common.*;
-
-import static latest.RobotPlayer.directions;
-import static latest.RobotPlayer.rng;
+import java.util.HashSet;
+import java.util.List;
 
 public class Headquarters {
     static int my_array_address;
@@ -11,14 +10,18 @@ public class Headquarters {
     static WellInfo[] wells;
     static RobotPlayer.hq_states current_state;
     static MapLocation next_island;
+    static List<MapLocation> island_locations;
+    static HashSet<Integer> island_ids;
+
+
     /**
      * Run a single turn for a Headquarters.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
+     * @return
      */
-    static void runHeadquarters(RobotController rc) throws GameActionException {
+    public static void runHeadquarters(RobotController rc) throws GameActionException {
         // generate info to make decisions
         RobotInfo[] nearby_bots = rc.senseNearbyRobots();
-        RobotInfo[] nearby_enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
         Team us = rc.getTeam();
         int num_launchers = 0;
 
@@ -82,86 +85,58 @@ public class Headquarters {
                 num_launchers++;
             }
         }
+
         // Minimum Viable Product for group attack
         if(num_launchers >= 6){
             int my_task_array_location = 12 + my_array_address;
             MapLocation target = new MapLocation(rc.getMapWidth() / 2,rc.getMapHeight()/2);
             int mission = 0;
+            // sets a target location for a mission
             int target_array = RobotPlayer.packMapLocationExtra(target,mission);
             rc.writeSharedArray(my_task_array_location,target_array);
-            int packed_info = RobotPlayer.packMapLocationExtra(rc.getLocation(), RobotPlayer.hq_states.TASK.ordinal());
+            // changes HQ state in array
+            int packed_info = RobotPlayer.packMapLocationExtra(rc.getLocation(),RobotPlayer.hq_states.TASK.ordinal());
             rc.writeSharedArray(my_array_address,packed_info);
         }
 
-//        // if we are holding an anchor we saw an island, lets build a carrier.
-//        // Pick a direction to build in.
-//        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
-//        MapLocation newLoc = rc.getLocation().add(dir);
-//        if(rc.getNumAnchors(Anchor.STANDARD) > 0){
-//            // Let's try to build a carrier.
-//            rc.setIndicatorString("Trying to build a carrier");
-//            if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
-//                rc.buildRobot(RobotType.CARRIER, newLoc);
-//            }
-//        }
-
-        // Count enemy launchers in launcher attack distance,  carriers, to decide to build a carrier
-        RobotInfo[] enemyInLauncherRange = rc.senseNearbyRobots(16, rc.getTeam().opponent());
-        RobotInfo[] friendlyInSight = rc.senseNearbyRobots(-1, rc.getTeam());
-
-        int enemyLauncherCount = 0;
-        for (int i = 0; i < enemyInLauncherRange.length; i++) {
-            if (enemyInLauncherRange[0].getType() == RobotType.CARRIER){
-                enemyLauncherCount++;
-            }
-        }
-        int carrierCount = 0;
-        for (int i = 0; i < friendlyInSight.length; i++) {
-            if (friendlyInSight[0].getType() == RobotType.CARRIER){
-                carrierCount++;
-            }
-        }
-        // If we see no enemy launchers in launcher attack distance, and see less than 6 carriers, build a carrier
-        if ((enemyLauncherCount == 0) && (carrierCount < 6)){
-            Direction dir = getBuildDirection(rc, wells);
-            MapLocation newLoc = rc.getLocation().add(dir);
-            //rc.setIndicatorString("Trying to build a carrier");
+        // if we are holding an anchor we saw an island, lets build a carrier.
+        // Pick a direction to build in.
+        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
+        MapLocation newLoc = rc.getLocation().add(dir);
+        if(rc.getNumAnchors(Anchor.STANDARD) > 0){
+            // Let's try to build a carrier.
+            rc.setIndicatorString("Trying to build a carrier");
             if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
                 rc.buildRobot(RobotType.CARRIER, newLoc);
             }
         }
 
         if (num_launchers < 6) {
-            Direction dir = directions[rng.nextInt(directions.length)];
-            MapLocation newLoc = rc.getLocation().add(dir);
-
             // Let's try to build a launcher.
-            //rc.setIndicatorString("Trying to build a launcher");
+            rc.setIndicatorString("Trying to build a launcher");
             if (rc.canBuildRobot(RobotType.LAUNCHER, newLoc)) {
                 rc.buildRobot(RobotType.LAUNCHER, newLoc);
             }
         }
+    }
 
-        // build an amplifier if nothing else to do
-        boolean buildAmplifiers = true;
-        if (buildAmplifiers) {
-            Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
-            MapLocation newLoc = rc.getLocation().add(dir);
-
-            // Let's try to build a launcher.
-            rc.setIndicatorString("Trying to build an amplifier");
-            if (rc.canBuildRobot(RobotType.AMPLIFIER, newLoc)) {
-                rc.buildRobot(RobotType.AMPLIFIER, newLoc);
-            }
+    /**
+     * @param here is one maplocation of the island
+     * @param id is unique, and how we differentiate islands
+     * @return false is the island is already known. We can safely remove it from the communications
+     * array on this turn.
+     * @throws GameActionException is something goes wrong. boilerplate
+     */
+    static boolean add_island(MapLocation location, int id ) throws GameActionException {
+        if(island_ids.contains(id)) return false;
+        else {
+            island_ids.add(id);
+            island_locations.add(location);
+            return true;
         }
     }
-    static Direction getBuildDirection(RobotController rc, WellInfo[] wells) throws GameActionException {
-        Direction dir = null;
-        if (rc.getLocation().equals(wells)) {
-            dir = directions[rng.nextInt(directions.length)];
-        } else {
-            dir = rc.getLocation().directionTo(wells[0].getMapLocation());
-        }
-        return dir;
-    }
+
+    static void set_next_island(){}
+
+
 }

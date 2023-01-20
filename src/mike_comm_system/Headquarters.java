@@ -1,9 +1,6 @@
-package latest;
+package mike_comm_system;
 
 import battlecode.common.*;
-
-import static latest.RobotPlayer.directions;
-import static latest.RobotPlayer.rng;
 
 public class Headquarters {
     static int my_array_address;
@@ -123,45 +120,23 @@ public class Headquarters {
         }
         // If we see no enemy launchers in launcher attack distance, and see less than 6 carriers, build a carrier
         if ((enemyLauncherCount == 0) && (carrierCount < 6)){
-            Direction dir = getBuildDirection(rc, wells);
+            Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
             MapLocation newLoc = rc.getLocation().add(dir);
-            //rc.setIndicatorString("Trying to build a carrier");
+            rc.setIndicatorString("Trying to build a carrier");
             if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
                 rc.buildRobot(RobotType.CARRIER, newLoc);
             }
         }
 
         if (num_launchers < 6) {
-            Direction dir = directions[rng.nextInt(directions.length)];
-            MapLocation newLoc = rc.getLocation().add(dir);
-
-            // Let's try to build a launcher.
-            //rc.setIndicatorString("Trying to build a launcher");
-            if (rc.canBuildRobot(RobotType.LAUNCHER, newLoc)) {
-                rc.buildRobot(RobotType.LAUNCHER, newLoc);
-            }
-        }
-
-        // build an amplifier if nothing else to do
-        boolean buildAmplifiers = true;
-        if (buildAmplifiers) {
             Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
             MapLocation newLoc = rc.getLocation().add(dir);
 
             // Let's try to build a launcher.
-            rc.setIndicatorString("Trying to build an amplifier");
-            if (rc.canBuildRobot(RobotType.AMPLIFIER, newLoc)) {
-                rc.buildRobot(RobotType.AMPLIFIER, newLoc);
+            rc.setIndicatorString("Trying to build a launcher");
+            if (rc.canBuildRobot(RobotType.LAUNCHER, newLoc)) {
+                rc.buildRobot(RobotType.LAUNCHER, newLoc);
             }
         }
-    }
-    static Direction getBuildDirection(RobotController rc, WellInfo[] wells) throws GameActionException {
-        Direction dir = null;
-        if (rc.getLocation().equals(wells)) {
-            dir = directions[rng.nextInt(directions.length)];
-        } else {
-            dir = rc.getLocation().directionTo(wells[0].getMapLocation());
-        }
-        return dir;
     }
 }

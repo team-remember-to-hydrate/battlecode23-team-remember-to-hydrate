@@ -1,11 +1,8 @@
-package josh_001;
+package mike_comm_system;
 
 import battlecode.common.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -40,11 +37,13 @@ public strictfp class RobotPlayer {
         Direction.WEST,
         Direction.NORTHWEST,
     };
-    static enum hq_states {
+
+    enum hq_states {
         INITIAL,
         SCOUT,
         RESOURCE,
-        TASK,};
+        TASK
+    };
 
     static MapLocation birth_location;
     /**
@@ -82,7 +81,7 @@ public strictfp class RobotPlayer {
                 // this into a different control structure!
                 switch (rc.getType()) {
                     case HEADQUARTERS: Headquarters.runHeadquarters(rc);  break;
-                    case CARRIER:      Carrier.runCarrier(rc);   break;
+                    case CARRIER:      CarrierStrategy.run(rc);   break;
                     case LAUNCHER:     Launcher.runLauncher(rc); break;
                     case BOOSTER: // Examplefuncsplayer doesn't use any of these robot types below.
                     case DESTABILIZER: // You might want to give them a try!
