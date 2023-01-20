@@ -26,7 +26,7 @@ public class comms {
      * [60-61] - Amplifier or HQ reporting enemy strength at location (technically usable by any unit, not just Amps/HQs).
      * [62-64] - Unused (yet)
      */
-    static final int index_hq           =  1;
+    static final int index_hq           =  0;
     static final int index_last_hq      =  3;
     static final int index_well         =  4;
     static final int index_last_well    = 10;
