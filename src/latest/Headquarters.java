@@ -2,6 +2,9 @@ package latest;
 
 import battlecode.common.*;
 
+import static latest.RobotPlayer.directions;
+import static latest.RobotPlayer.rng;
+
 public class Headquarters {
     static int my_array_address;
 
@@ -120,7 +123,7 @@ public class Headquarters {
         }
         // If we see no enemy launchers in launcher attack distance, and see less than 6 carriers, build a carrier
         if ((enemyLauncherCount == 0) && (carrierCount < 6)){
-            Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
+            Direction dir = getBuildDirection(rc, wells);
             MapLocation newLoc = rc.getLocation().add(dir);
             rc.setIndicatorString("Trying to build a carrier");
             if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
@@ -129,7 +132,7 @@ public class Headquarters {
         }
 
         if (num_launchers < 6) {
-            Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
+            Direction dir = directions[rng.nextInt(directions.length)];
             MapLocation newLoc = rc.getLocation().add(dir);
 
             // Let's try to build a launcher.
@@ -138,5 +141,14 @@ public class Headquarters {
                 rc.buildRobot(RobotType.LAUNCHER, newLoc);
             }
         }
+    }
+    static Direction getBuildDirection(RobotController rc, WellInfo[] wells) throws GameActionException {
+        Direction dir = null;
+        if (rc.getLocation().equals(wells)) {
+            dir = directions[rng.nextInt(directions.length)];
+        } else {
+            dir = rc.getLocation().directionTo(wells[0].getMapLocation());
+        }
+        return dir;
     }
 }
