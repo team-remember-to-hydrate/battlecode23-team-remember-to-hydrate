@@ -39,20 +39,57 @@ public class comms {
 
     static HashSet<Integer> known_islands;
 
+
+
+    ///   ***   ISLANDS  ***
+    /*
+     2 words
+     {[1 isLocation][1 friendly][2 combatStrength][12 location]}
+     {[1 isLocation][6 Island_id][1 Anchor_present][2 friendlies][2 enemies][4 TBD]}
+     */
+
     static boolean island_is_new(int id) throws GameActionException{
         return !known_islands.contains(id);
     }
 
-    static boolean set_island(RobotController rc, MapLocation location, int id, int friendlies, int enemies,int friendly_owned ) throws GameActionException {
-        return set_island_location_word(rc,location) & set_island_detail_word(rc,id,friendlies,enemies,friendly_owned);
+    static boolean set_island(RobotController rc, MapLocation location, int id, int friendlies, int enemies,boolean friendly_owned,int combatStrength ) throws GameActionException {
+        return set_island_location_word(rc,location,friendly_owned,combatStrength) & set_island_detail_word(rc,id,friendlies,enemies,friendly_owned);
     }
 
-    static boolean set_island_location_word(RobotController rc, MapLocation location) throws GameActionException{
-
-        return true;
+    /*
+        returns 99 if the array island reporting is full
+     */
+    static int get_available_island_index(RobotController rc) throws GameActionException{
+        for(int i = index_island; i <= index_last_island;i = i + 2){
+            int this_value = rc.readSharedArray(i);
+            if(this_value == 0){
+                return i;
+            }
+        }
+        return 99;
     }
 
-    static boolean set_island_detail_word(RobotController rc, int id, int friendlies, int enemies, int friendly_owned){
+    static boolean set_island_location_word(RobotController rc, MapLocation location, boolean friendly_owned, int combatStrength) throws GameActionException{
+        int island_index = get_available_island_index(rc);
+        MapLocation me = rc.getLocation();
+        //{[1 isLocation][1 friendly][2 combatStrength][12 location]}
+        if(island_index < index_last_island) {
+            int packed = 0b1000000000000000;
+            if (friendly_owned) {
+                packed += 0b0100000000000000;
+            }
+            packed = packed + (me.x << 6) + (me.y);
+            rc.writeSharedArray(island_index,packed);
+            return true;
+        }
+        else{
+            // no room in the array.
+            return false;
+        }
+
+    }
+
+    static boolean set_island_detail_word(RobotController rc, int id, int friendlies, int enemies, boolean friendly_owned){
 
         return true;
     }
@@ -77,7 +114,7 @@ public class comms {
     }
 
     // methods to retrieve MapLocation from LSB
-    static MapLocation unpackMapLocation(int target) {
+    static MapLocation get_MapLocation(int target) {
         int target_x = (target & 0b0000111111000000) >>> 6;
         int target_y = (target & 0b0000000000111111);
         return new MapLocation(target_x,target_y);
@@ -98,11 +135,24 @@ public class comms {
     }
     static int get_task_group(int array_data) { return (array_data & 0b0111100000000000) >>> 12; }
 
-    static void get_visible_island_ids(RobotController rc) throws GameActionException {
-        int[] island_ids = rc.senseNearbyIslands();
-        for(int island_id : island_ids){
-
+    /*
+        This command returns zero if there are no commands for the bot
+     */
+    static int get_command_for_me(RobotController rc) throws GameActionException {
+        MapLocation me = rc.getLocation();
+        for(int i = index_orders ; i <= index_last_orders; i = i+2){  // 2 words per command
+            int this_cmd = rc.readSharedArray(i);
+            int radius = get_task_radius(this_cmd);
+            MapLocation cmd_location = get_MapLocation(i);
+            if((radius * radius)  < me.distanceSquaredTo(cmd_location)){
+                return i;
+            }
         }
+        return 0;
+    }
+
+    static void create_command(RobotController rc, MapLocation location, int radius){
+
     }
 
 }

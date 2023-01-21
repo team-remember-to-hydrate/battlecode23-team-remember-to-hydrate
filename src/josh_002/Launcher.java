@@ -113,8 +113,9 @@ public class Launcher {
             rc.move(RobotPlayer.movable_direction(rc, dir));
         }
 
-        indicator_string += "target: " + me.add(dir);
-        indicator_string += " state: " + my_state + " blocking:  " + blocking_carrier;
+        indicator_string += " t: " + me.add(dir);
+        indicator_string += " s: " + my_state + " blk:  " + blocking_carrier;
+        indicator_string += " bc " + Clock.getBytecodeNum();
         rc.setIndicatorString(indicator_string);
     }
 
@@ -142,7 +143,6 @@ public class Launcher {
             if (new_spot.distanceSquaredTo(my_HQ_location) < RobotType.HEADQUARTERS.visionRadiusSquared &
                     my_state.equals(states.GROUP)) {
                 // if our direction carries us too far move the other direction.
-                indicator_string += "grouping ";
                 dir = dir.opposite();
             }
         }
