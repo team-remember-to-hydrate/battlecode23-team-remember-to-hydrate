@@ -18,6 +18,15 @@ public strictfp class RobotPlayer {
      */
     static int turnCount = 0;
 
+    static Direction lastMoved = Direction.NORTH;
+    static boolean didMoveLastTurn = false;
+
+    static int lastRoundScannedEnemies = -1;
+    static RobotInfo[] scannedEnemies = null;
+    static int lastRoundScannedMapInfos = -1;
+    static MapInfo[] scannedMapInfos = null;
+
+
     /**
      * A random number generator.
      * We will use this RNG to make some random moves. The Random class is provided by the java.util.Random
@@ -72,6 +81,9 @@ public strictfp class RobotPlayer {
             // loop, we call Clock.yield(), signifying that we've done everything we want to do.
 
             turnCount += 1;  // We have now been alive for one more turn!
+
+            didMoveLastTurn = false; // We did not yet moved this turn
+
 
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode.
             try {
