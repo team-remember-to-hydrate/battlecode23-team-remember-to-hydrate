@@ -52,8 +52,18 @@ public class comms {
         return !known_islands.contains(id);
     }
 
-    static boolean set_island(RobotController rc, MapLocation location, int id, int friendlies, int enemies,boolean friendly_owned,int combatStrength ) throws GameActionException {
-        return set_island_location_word(rc,location,friendly_owned,combatStrength) & set_island_detail_word(rc,id,friendlies,enemies,friendly_owned);
+    static boolean set_island(RobotController rc, MapLocation location, int id, int friendlies, int enemies,
+                              boolean friendly_owned,int combatStrength, boolean anchor_present )
+            throws GameActionException {
+        int island_index = get_available_island_index(rc);
+        if (island_index < index_last_island) {
+            set_island_location_word(rc, location, friendly_owned, combatStrength, island_index);
+            set_island_detail_word(rc, id, anchor_present, friendlies, enemies, island_index + 1);
+            return true;
+        }else{
+            // no room in the array.
+            return false;
+        }
     }
 
     /*
@@ -69,29 +79,24 @@ public class comms {
         return 99;
     }
 
-    static boolean set_island_location_word(RobotController rc, MapLocation location, boolean friendly_owned, int combatStrength) throws GameActionException{
-        int island_index = get_available_island_index(rc);
-        MapLocation me = rc.getLocation();
+    static void set_island_location_word(RobotController rc, MapLocation location, boolean friendly_owned,
+                                         int combatStrength, int island_index) throws GameActionException{
         //{[1 isLocation][1 friendly][2 combatStrength][12 location]}
-        if(island_index < index_last_island) {
-            int packed = 0b1000000000000000;
-            if (friendly_owned) {
-                packed += 0b0100000000000000;
-            }
-            packed = packed + (me.x << 6) + (me.y);
-            rc.writeSharedArray(island_index,packed);
-            return true;
-        }
-        else{
-            // no room in the array.
-            return false;
-        }
-
+        MapLocation me = rc.getLocation();
+        int packed = 0b1000000000000000;
+        if (friendly_owned) {packed += 0b0100000000000000;}
+        packed = packed + (me.x << 6) + (me.y);
+        rc.writeSharedArray(island_index, packed);
     }
 
-    static boolean set_island_detail_word(RobotController rc, int id, int friendlies, int enemies, boolean friendly_owned){
-
-        return true;
+    static void set_island_detail_word(RobotController rc, int id, boolean anchor_present, int friendlies,
+                                       int enemies, int island_index) throws GameActionException {
+        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][4 TBD]}
+        int packed = id << 9;
+        if(anchor_present) packed += 0b0000000100000000;
+        packed += (friendlies &      0b0000000011000000 ) << 6;
+        packed += (enemies &         0b0000000000110000 ) << 4;
+        rc.writeSharedArray(island_index, packed);
     }
 
     static void track_island_ids(RobotController rc) throws GameActionException{
