@@ -26,12 +26,16 @@ public class comms {
      * [60-61] - Amplifier or HQ reporting enemy strength at location (technically usable by any unit, not just Amps/HQs).
      * [62-64] - Unused (yet)
      */
-    static final int index_hq           =  1;
+    static final int index_hq           =  0;
     static final int index_last_hq      =  3;
     static final int index_well         =  4;
     static final int index_last_well    = 10;
     static final int index_island       = 11;
     static final int index_last_island  = 30;
+    static final int index_obstacle     = 31;
+    static final int index_last_obstacle = 36;
+    static final int index_orders       = 40;
+    static final int index_last_orders  = 59;
 
     static HashSet<Integer> known_islands;
 
@@ -67,9 +71,7 @@ public class comms {
         return (array_data & 0b1000000000000000) == 0;
     }
 
-    /**
-     * This method assume sthe two bytes for a map location are contiguous.
-     */
+
     static int get_island_id(RobotController rc, int array_data) throws GameActionException{
         return (array_data & 0b0111111000000000) >>> 9;
     }
@@ -80,4 +82,27 @@ public class comms {
         int target_y = (target & 0b0000000000111111);
         return new MapLocation(target_x,target_y);
     }
+
+    ///   ***   ORDERS   ***
+    /*
+     2 words
+     {[4 radius][12 location]}
+     {[1 isTask][4 group][3 botType][1 shouldOverride][1 outsideRadiusUnassign][4 taskType][2 TBD]}
+     */
+    static int get_task_radius(int array_data) {
+        return (array_data & 0b1111000000000000) >>> 12;
+    }
+
+    static boolean is_task(int array_data){
+        return (array_data & 0b1000000000000000) == 0;
+    }
+    static int get_task_group(int array_data) { return (array_data & 0b0111100000000000) >>> 12; }
+
+    static void get_visible_island_ids(RobotController rc) throws GameActionException {
+        int[] island_ids = rc.senseNearbyIslands();
+        for(int island_id : island_ids){
+
+        }
+    }
+
 }
