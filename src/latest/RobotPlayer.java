@@ -23,6 +23,8 @@ public strictfp class RobotPlayer {
 
     static int lastRoundScannedEnemies = -1;
     static RobotInfo[] scannedEnemies = null;
+    static int lastRoundScannedAllies = -1;
+    static RobotInfo[] scannedAllies = null;
     static int lastRoundScannedMapInfos = -1;
     static MapInfo[] scannedMapInfos = null;
 

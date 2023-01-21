@@ -25,65 +25,95 @@ public class Sensing {
         return null;
     }
 
-    // Scan all nearby enemies
     /**
-     * Scans for all enemies in vision radius, using less bytecode if a scan already occurred this turn (retains most
-     * recent scan).
+     *
+     * Scans for all bots from given team in vision radius, using less bytecode if a scan already occurred this turn
+     * (retains most recent scan).
+     *
      * @param rc
-     * @return Returns RobotInfo[] of all enemies in vision range.
+     * @param team
+     * @return Returns RobotInfo[] of all bots from given team in vision range.
      * @throws GameActionException
      */
-    public static RobotInfo[] smartScanEnemies(RobotController rc) throws GameActionException {
-        if (RobotPlayer.lastRoundScannedEnemies != rc.getRoundNum()){
-            RobotPlayer.scannedEnemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent()); //102 bc
-            RobotPlayer.lastRoundScannedEnemies = rc.getRoundNum();
+    public static RobotInfo[] smartScanMembersOfTeam(RobotController rc, Team team) throws GameActionException {
+        if (team == rc.getTeam().opponent()) {
+            if (RobotPlayer.lastRoundScannedEnemies != rc.getRoundNum()){
+                // Our old scan is outdated, do a new one.
+                RobotPlayer.scannedEnemies = rc.senseNearbyRobots(-1, team); //102 bc
+                RobotPlayer.lastRoundScannedEnemies = rc.getRoundNum();
+            }
+                // Just use our existing scan.
+                return RobotPlayer.scannedEnemies;
         }
-        return RobotPlayer.scannedEnemies;
+        else {
+            if (RobotPlayer.lastRoundScannedAllies != rc.getRoundNum()){
+                // Our old scan is outdated, do a new one.
+                RobotPlayer.scannedAllies = rc.senseNearbyRobots(-1, team); //102 bc
+                RobotPlayer.lastRoundScannedAllies = rc.getRoundNum();
+            }
+            // Just use our existing scan.
+            return RobotPlayer.scannedAllies;
+        }
     }
 
 
-    // Filter to nearby combat enemies
     /**
-     * Smart scans for all enemies in vision range and returns those that are Launchers or Destabilizers.
+     * Smart scans for all members of team in vision range and returns those that are Launchers or Destabilizers.
      * @param rc
-     * @return ArrayList of all visible enemy launchers and destabilizers.
+     * @return ArrayList of all visible launchers and destabilizers from given team.
      * @throws GameActionException
      */
-    public static ArrayList<RobotInfo> scanCombatEnemies(RobotController rc) throws GameActionException {
-        RobotInfo[] enemyRobots = smartScanEnemies(rc);
-        ArrayList<RobotInfo> enemyCombatRobots = new ArrayList<RobotInfo>();
-        int enemyRobotsLength = enemyRobots.length; // saves bytecode
-        for (int i = 0; i < enemyRobotsLength; i++){
-            //RobotInfo targetBot = enemyRobots[i]; // TODO: Check if bytecode decreases by alternate implementation.
-            if (enemyRobots[i].getType() == RobotType.LAUNCHER || enemyRobots[i].getType() == RobotType.DESTABILIZER){
-                enemyCombatRobots.add(enemyRobots[i]);
+    public static ArrayList<RobotInfo> scanCombatUnitsOfTeam(RobotController rc, Team team) throws GameActionException {
+        RobotInfo[] teamRobots = smartScanMembersOfTeam(rc, team);
+        ArrayList<RobotInfo> teamCombatRobots = new ArrayList<RobotInfo>();
+        int teamRobotsLength = teamRobots.length; // saves bytecode
+        for (int i = 0; i < teamRobotsLength; i++){
+            //RobotInfo targetBot = teamRobots[i]; // TODO: Check if bytecode decreases by alternate implementation.
+            if (teamRobots[i].getType() == RobotType.LAUNCHER || teamRobots[i].getType() == RobotType.DESTABILIZER){
+                teamCombatRobots.add(teamRobots[i]);
             }
         }
-        return enemyCombatRobots;
+        return teamCombatRobots;
     }
 
     // Filter to nearby econ enemies
-    public static ArrayList<RobotInfo> scanEconEnemies(RobotController rc) throws GameActionException {
-        RobotInfo[] enemyRobots = smartScanEnemies(rc);
-        ArrayList<RobotInfo> enemyEconRobots = new ArrayList<RobotInfo>();
-        int enemyRobotsLength = enemyRobots.length; // saves bytecode
-        for (int i = 0; i < enemyRobotsLength; i++){
-            //RobotInfo targetBot = enemyRobots[i]; // TODO: Check if bytecode decreases by alternate implementation.
-            if (enemyRobots[i].getType() == RobotType.CARRIER || enemyRobots[i].getType() == RobotType.BOOSTER){ //||
-                    //enemyRobots[i].getType() == RobotType.HEADQUARTERS){ // Removing this to prevent accidental targeting of HQs.
-                enemyEconRobots.add(enemyRobots[i]);
+
+    /**
+     * Smart scans for all members of team in vision range and returns those that are Carriers or Boosters.
+     * @param rc
+     * @param team team to get count of visible Econ bots from.
+     * @return ArrayList of all visible carriers and boosters from given team.
+     * @throws GameActionException
+     */
+    public static ArrayList<RobotInfo> scanEconUnitsOfTeam(RobotController rc, Team team) throws GameActionException {
+        RobotInfo[] teamRobots = smartScanMembersOfTeam(rc, team);
+        ArrayList<RobotInfo> teamEconRobots = new ArrayList<RobotInfo>();
+        int teamRobotsLength = teamRobots.length; // saves bytecode
+        for (int i = 0; i < teamRobotsLength; i++){
+            //RobotInfo targetBot = teamRobots[i]; // TODO: Check if bytecode decreases by alternate implementation.
+            if (teamRobots[i].getType() == RobotType.CARRIER || teamRobots[i].getType() == RobotType.BOOSTER){ //||
+                    //teamRobots[i].getType() == RobotType.HEADQUARTERS){ // Removing this to prevent accidental targeting of HQs.
+                teamEconRobots.add(teamRobots[i]);
             }
         }
-        return enemyEconRobots;
+        return teamEconRobots;
     }
 
-    // Sense single enemy Carrier with Anchor
-    public static RobotInfo scanEnemyAnchorCarrier(RobotController rc) throws GameActionException {
-        RobotInfo[] enemyRobots = smartScanEnemies(rc);
-        int enemyRobotsLength = enemyRobots.length; // saves bytecode
-        for (int i = 0; i < enemyRobotsLength; i++){
-            if (enemyRobots[i].getType() == RobotType.CARRIER && enemyRobots[i].getTotalAnchors() > 0){ //||
-                return enemyRobots[i];
+    // Sense single (first) enemy Carrier with Anchor
+
+    /**
+     * Smart scans for the first sensed carrier from given team in vision range that has an anchor and returns it.
+     * @param rc
+     * @param team team to find a visible anchor carrier from
+     * @return RobotInfo of anchor carrier from given team.
+     * @throws GameActionException
+     */
+    public static RobotInfo scanAnchorCarrierOfTeam(RobotController rc, Team team) throws GameActionException {
+        RobotInfo[] teamRobots = smartScanMembersOfTeam(rc, team);
+        int teamRobotsLength = teamRobots.length; // saves bytecode
+        for (int i = 0; i < teamRobotsLength; i++){
+            if (teamRobots[i].getType() == RobotType.CARRIER && teamRobots[i].getTotalAnchors() > 0){ //||
+                return teamRobots[i];
             }
         }
         return null;
