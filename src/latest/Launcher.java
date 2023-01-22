@@ -4,6 +4,7 @@ import battlecode.common.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class Launcher {
@@ -51,9 +52,9 @@ public class Launcher {
                 break;
 
             case GROUP:
-
-                dir = group_dir(rc, dir);
                 indicator_string += "GROUP ";
+                dir = group_dir(rc, dir);
+
                 break;
 
             case ATTACK:
@@ -87,12 +88,20 @@ public class Launcher {
                 int task_info = rc.readSharedArray(12 +my_HQ);
                 target_location = RobotPlayer.unpackMapLocation(task_info);
                 my_state = RobotPlayer.states.values()[RobotPlayer.unpackExtra(task_info)];
+                System.out.println("got at task " + my_state + " at " + target_location);
             }
         }
         // then we have a task to do, let get to it
         else
         {
             dir = me.directionTo(target_location);
+        }
+
+        // check for adjacent carrier, so we can move
+        Direction adjacent_carrier =  adjacent_carrier(rc, nearby_bots);
+        if(!adjacent_carrier.equals(Direction.CENTER)){
+            blocking_carrier = true;
+            blocked_carrier_dir = adjacent_carrier;
         }
 
         // if we are on an island lets stay unless we are blocking a carrier
@@ -107,8 +116,8 @@ public class Launcher {
             rc.move(RobotPlayer.movable_direction(rc, dir));
         }
 
-        indicator_string += "target: " + me.add(dir);
-        indicator_string += " state: " + my_state + " blocking:  " + blocking_carrier;
+        indicator_string += "dir:" + dir;
+        indicator_string += " " + my_state + " : " + blocking_carrier;
         rc.setIndicatorString(indicator_string);
     }
 
@@ -127,17 +136,15 @@ public class Launcher {
     }
 
     static Direction group_dir(RobotController rc, Direction dir) {
-        //replace random dir with dir toward center of map
-
-
-        // Stay near spawning headquarters
+        // Stay near spawning headquarters but move towards center
+        MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight()/2);
+        dir = rc.getLocation().directionTo(center);
         if (rc.canMove(RobotPlayer.movable_direction(rc, dir))) {
             MapLocation new_spot = rc.getLocation().add(dir);
-            if (new_spot.distanceSquaredTo(my_HQ_location) < RobotType.HEADQUARTERS.visionRadiusSquared &
+            if (new_spot.distanceSquaredTo(my_HQ_location) > RobotType.HEADQUARTERS.visionRadiusSquared &
                     my_state.equals(RobotPlayer.states.GROUP)) {
                 // if our direction carries us too far move the other direction.
-                indicator_string += "grouping ";
-                dir = dir.opposite();
+                dir = rc.getLocation().directionTo(my_HQ_location);
             }
         }
         return dir;
@@ -149,10 +156,8 @@ public class Launcher {
         int[] islands = rc.senseNearbyIslands();
         int closest = 1000;
         MapLocation myIsland = target_location;
-        Set<MapLocation> islandLocs = new HashSet<>();
         for (int id : islands) {
             MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
-            islandLocs.addAll(Arrays.asList(thisIslandLocs));
             for(MapLocation location : thisIslandLocs){
                 if(me.distanceSquaredTo(location) < closest & notOccupied(location,nearbyBots)){
                     closest = me.distanceSquaredTo(location);
@@ -165,13 +170,18 @@ public class Launcher {
 
     static boolean notOccupied(MapLocation location, RobotInfo[] nearbyBots){
         for(RobotInfo bot : nearbyBots){
-            if(me.equals(bot.location)) return false;
+            if(location.equals(bot.location)) return false;
         }
         return true;
     }
 
-    static MapLocation blocked_carrier(RobotController rc, RobotInfo nearby_bots){
-        return new MapLocation(0,0);
+    static Direction adjacent_carrier(RobotController rc, RobotInfo[] nearby_bots){
+        for(RobotInfo bot : nearby_bots){
+            if(bot.getType().equals(RobotType.CARRIER) & bot.location.isAdjacentTo(rc.getLocation())) {
+                return rc.getLocation().directionTo(bot.getLocation());
+            }
+        }
+        return Direction.CENTER;
     }
 
 }
