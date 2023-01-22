@@ -56,7 +56,6 @@ public class Sensing {
         }
     }
 
-
     /**
      * Smart scans for all members of team in vision range and returns those that are Launchers or Destabilizers.
      * @param rc
@@ -76,7 +75,6 @@ public class Sensing {
         return teamCombatRobots;
     }
 
-    // Filter to nearby econ enemies
 
     /**
      * Smart scans for all members of team in vision range and returns those that are Carriers or Boosters.
@@ -98,8 +96,6 @@ public class Sensing {
         }
         return teamEconRobots;
     }
-
-    // Sense single (first) enemy Carrier with Anchor
 
     /**
      * Smart scans for the first sensed carrier from given team in vision range that has an anchor and returns it.
@@ -167,11 +163,11 @@ public class Sensing {
                 impassableSpaces.add(nearbyInfos[i].getMapLocation());
             }
         }
-        return impassableSpaces; // TODO: Confirm impassable spaces don't include bots (otherwise filter).
+        return impassableSpaces;
     }
 
     // Scan all nearby clouds
 
     // Scan all nearby currents
-    //  Array of [dir 1] [direction] bitpacked.
+    //  Array of [dir 1] [location] bitpacked.
 }
