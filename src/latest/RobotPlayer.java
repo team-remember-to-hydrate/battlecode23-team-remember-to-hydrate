@@ -17,6 +17,16 @@ public strictfp class RobotPlayer {
      * these variables are static, in Battlecode they aren't actually shared between your robots.
      */
     static int turnCount = 0;
+    static Direction lastMoved = Direction.NORTH;
+    static boolean didMoveLastTurn = false;
+    static int lastRoundScannedEnemies = -1;
+    static RobotInfo[] scannedEnemies = null;
+    static int lastRoundScannedAllies = -1;
+    static RobotInfo[] scannedAllies = null;
+    static MapLocation lastLocationScannedMapInfos = null;
+    static MapInfo[] scannedMapInfos = null;
+    static int[][] map = new int[GameConstants.MAP_MAX_WIDTH][GameConstants.MAP_MAX_HEIGHT];
+
 
     static Direction lastMoved = Direction.NORTH;
 
@@ -45,7 +55,40 @@ public strictfp class RobotPlayer {
         SCOUT,
         RESOURCE,
         TASK
-    };
+    }
+
+    enum states {
+        INITIAL,
+        ATTACK,
+        ANCHOR,
+        OCCUPY,
+        GROUP,
+        SCOUT,
+        ADAMANTIUM,
+        MANA,
+        ELIXIR,
+    }
+
+    enum map_tiles{
+        UNKNOWN,
+        PLAIN,
+        ADAMANTIUM,
+        MANA,
+        ELIXIR,
+        WALL,
+        CLOUD,
+        HQ_ENEMY,
+        HQ_FRIENDLY,
+        CURRENT_N,
+        CURRENT_NE,
+        CURRENT_E,
+        CURRENT_SE,
+        CURRENT_S,
+        CURRENT_SW,
+        CURRENT_W,
+        CURRENT_NW,
+        ISLAND
+    }
 
     static MapLocation birth_location;
     /**
@@ -74,6 +117,9 @@ public strictfp class RobotPlayer {
             // loop, we call Clock.yield(), signifying that we've done everything we want to do.
 
             turnCount += 1;  // We have now been alive for one more turn!
+
+            didMoveLastTurn = false; // We did not yet moved this turn
+
 
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode.
             try {
@@ -114,11 +160,25 @@ public strictfp class RobotPlayer {
         // Your code should never reach here (unless it's intentional)! Self-destruction imminent...
     }
 
-
-
-
-
-
+    ///   **********************
+    //    ***   MAP  STUFF   ***
+    //    **********************
+    static void set_map_location(MapLocation location, map_tiles tile_type){
+        int x = location.x;
+        int y = location.y;
+        int tile = tile_type.ordinal();
+        map[x][y]=tile;
+    }
+    static boolean is_unknown(MapLocation location){
+        int x = location.x;
+        int y = location.y;
+        return map[x][y] == 0;
+    }
+    static map_tiles get_map_location(MapLocation location){
+        int x = location.x;
+        int y = location.y;
+        return map_tiles.values()[map[x][y]];
+    }
 
     // find closest movable direction
     static Direction movable_direction(RobotController rc, Direction desired_dir){
@@ -170,13 +230,5 @@ public strictfp class RobotPlayer {
         return 99;
     }
 
-    static Direction best_right_turn(RobotController rc, Direction desired_dir){
-        if(rc.canMove(desired_dir)) return desired_dir;
-        for (int rotation_offset = 1; rotation_offset <= 7; rotation_offset++){  // 7 other directions
-            Direction right_dir = Direction.values()[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
-            if (rc.canMove(right_dir)) return right_dir;
-        }
-        return Direction.CENTER;
-    }
 
 }
