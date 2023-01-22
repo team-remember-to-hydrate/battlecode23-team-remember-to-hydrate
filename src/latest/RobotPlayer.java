@@ -56,11 +56,15 @@ public strictfp class RobotPlayer {
     }
 
     enum states {
+        INITIAL,
         ATTACK,
         ANCHOR,
         OCCUPY,
         GROUP,
-        INITIAL
+        SCOUT,
+        ADAMANTIUM,
+        MANA,
+        ELIXIR,
     }
 
     enum map_tiles{
