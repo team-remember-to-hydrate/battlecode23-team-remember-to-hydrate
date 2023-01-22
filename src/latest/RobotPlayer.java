@@ -23,9 +23,9 @@ public strictfp class RobotPlayer {
     static RobotInfo[] scannedEnemies = null;
     static int lastRoundScannedAllies = -1;
     static RobotInfo[] scannedAllies = null;
-    static int lastRoundScannedMapInfos = -1;
+    static MapLocation lastLocationScannedMapInfos = null;
     static MapInfo[] scannedMapInfos = null;
-    static int[][] map = new int[60][60] ;
+    static int[][] map = new int[GameConstants.MAP_MAX_WIDTH][GameConstants.MAP_MAX_HEIGHT];
 
 
     /**
@@ -228,13 +228,5 @@ public strictfp class RobotPlayer {
         return 99;
     }
 
-    static Direction best_right_turn(RobotController rc, Direction desired_dir){
-        if(rc.canMove(desired_dir)) return desired_dir;
-        for (int rotation_offset = 1; rotation_offset <= 7; rotation_offset++){  // 7 other directions
-            Direction right_dir = Direction.values()[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
-            if (rc.canMove(right_dir)) return right_dir;
-        }
-        return Direction.CENTER;
-    }
 
 }
