@@ -17,16 +17,15 @@ public strictfp class RobotPlayer {
      * these variables are static, in Battlecode they aren't actually shared between your robots.
      */
     static int turnCount = 0;
-
     static Direction lastMoved = Direction.NORTH;
     static boolean didMoveLastTurn = false;
-
     static int lastRoundScannedEnemies = -1;
     static RobotInfo[] scannedEnemies = null;
     static int lastRoundScannedAllies = -1;
     static RobotInfo[] scannedAllies = null;
     static int lastRoundScannedMapInfos = -1;
     static MapInfo[] scannedMapInfos = null;
+    static int[][] map = new int[60][60] ;
 
 
     /**
@@ -54,7 +53,34 @@ public strictfp class RobotPlayer {
         SCOUT,
         RESOURCE,
         TASK
-    };
+    }
+
+    enum states {
+        ATTACK,
+        ANCHOR,
+        OCCUPY,
+        GROUP,
+        INITIAL
+    }
+
+    enum map_tiles{
+        ADAMANTIUM,
+        MANA,
+        ELIXIR,
+        WALL,
+        CLOUD,
+        HQ_ENEMY,
+        HQ_FRIENDLY,
+        CURRENT_N,
+        CURRENT_NE,
+        CURRENT_E,
+        CURRENT_SE,
+        CURRENT_S,
+        CURRENT_SW,
+        CURRENT_W,
+        CURRENT_NW,
+        ISLAND
+    }
 
     static MapLocation birth_location;
     /**
@@ -125,12 +151,25 @@ public strictfp class RobotPlayer {
 
         // Your code should never reach here (unless it's intentional)! Self-destruction imminent...
     }
-
-
-
-
-
-
+    ///   **********************
+    //    ***   MAP  STUFF   ***
+    //    **********************
+    static void set_map_location(MapLocation location, map_tiles tile_type){
+        int x = location.x;
+        int y = location.y;
+        int tile = tile_type.ordinal();
+        map[x][y]=tile;
+    }
+    static boolean is_unknown(MapLocation location){
+        int x = location.x;
+        int y = location.y;
+        return map[x][y] == 0;
+    }
+    static map_tiles get_map_location(MapLocation location){
+        int x = location.x;
+        int y = location.y;
+        return map_tiles.values()[map[x][y]];
+    }
 
     // find closest movable direction
     static Direction movable_direction(RobotController rc, Direction desired_dir){
