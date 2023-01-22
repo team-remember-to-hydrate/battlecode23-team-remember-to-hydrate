@@ -23,8 +23,14 @@ public strictfp class RobotPlayer {
     static RobotInfo[] scannedEnemies = null;
     static int lastRoundScannedAllies = -1;
     static RobotInfo[] scannedAllies = null;
+    static MapLocation myLastLocation = null;
     static MapLocation lastLocationScannedMapInfos = null;
     static MapInfo[] scannedMapInfos = null;
+    static MapLocation lastLocationScannedIslands = null;
+    static int[] scannedIslandIDs = null;
+    static MapLocation[] scannedIslandLocations = null;
+    static MapLocation lastLocationScannedWells = null;
+    static WellInfo[] scannedWellInfos = null;
     static int[][] map = new int[GameConstants.MAP_MAX_WIDTH][GameConstants.MAP_MAX_HEIGHT];
 
 
@@ -66,6 +72,7 @@ public strictfp class RobotPlayer {
         ADAMANTIUM,
         MANA,
         ELIXIR,
+        DEFAULT
     }
 
     enum map_tiles{
@@ -109,6 +116,10 @@ public strictfp class RobotPlayer {
 
         // keep track of where we started so carriers can return Resources
         MapLocation birth_location = rc.getLocation();
+
+        // Initialize myLastLocation to have a value
+        myLastLocation = birth_location;
+
 
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
