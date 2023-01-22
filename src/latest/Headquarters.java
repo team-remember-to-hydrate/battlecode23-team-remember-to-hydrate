@@ -86,7 +86,7 @@ public class Headquarters {
         if(num_launchers >= 6){
             int my_task_array_location = 12 + my_array_address;
             MapLocation target = new MapLocation(rc.getMapWidth() / 2,rc.getMapHeight()/2);
-            int mission = 0;
+            int mission = RobotPlayer.states.ATTACK.ordinal();
             int target_array = RobotPlayer.packMapLocationExtra(target,mission);
             rc.writeSharedArray(my_task_array_location,target_array);
             int packed_info = RobotPlayer.packMapLocationExtra(rc.getLocation(), RobotPlayer.hq_states.TASK.ordinal());
@@ -156,10 +156,8 @@ public class Headquarters {
         }
     }
     static Direction getBuildDirection(RobotController rc, WellInfo[] wells) throws GameActionException {
-        Direction dir = null;
-        if (rc.getLocation().equals(wells)) {
-            dir = directions[rng.nextInt(directions.length)];
-        } else {
+        Direction dir = directions[rng.nextInt(directions.length)];
+        if(wells.length > 0){
             dir = rc.getLocation().directionTo(wells[0].getMapLocation());
         }
         return dir;
