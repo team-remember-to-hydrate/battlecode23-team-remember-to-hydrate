@@ -45,18 +45,4 @@ public class Pathing {
             }
         }
     }
-    public static MapLocation getLocationInDirection(MapLocation l, Direction d) throws GameActionException {
-        MapLocation result = null;
-        switch(d){
-            case NORTH: result = new MapLocation(l.x, l.y + 1); break;
-            case EAST: result = new MapLocation(l.x + 1, l.y); break;
-            case SOUTH: result = new MapLocation(l.x, l.y - 1); break;
-            case WEST: result = new MapLocation(l.x - 1, l.y); break;
-            case NORTHEAST: result = new MapLocation(l.x + 1, l.y + 1); break;
-            case SOUTHEAST: result = new MapLocation(l.x + 1, l.y - 1); break;
-            case SOUTHWEST: result = new MapLocation(l.x - 1, l.y - 1); break;
-            case NORTHWEST: result = new MapLocation(l.x - 1, l.y + 1); break;
-        }
-        return result;
-    }
 }
