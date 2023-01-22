@@ -23,9 +23,9 @@ public strictfp class RobotPlayer {
     static RobotInfo[] scannedEnemies = null;
     static int lastRoundScannedAllies = -1;
     static RobotInfo[] scannedAllies = null;
-    static int lastRoundScannedMapInfos = -1;
+    static MapLocation lastLocationScannedMapInfos = null;
     static MapInfo[] scannedMapInfos = null;
-    static int[][] map = new int[60][60] ;
+    static int[][] map = new int[GameConstants.MAP_MAX_WIDTH][GameConstants.MAP_MAX_HEIGHT];
 
 
     /**
