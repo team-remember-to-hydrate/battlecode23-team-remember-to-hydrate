@@ -28,7 +28,6 @@ public strictfp class RobotPlayer {
     static int[][] map = new int[GameConstants.MAP_MAX_WIDTH][GameConstants.MAP_MAX_HEIGHT];
 
 
-    static Direction lastMoved = Direction.NORTH;
 
     /**
      * A random number generator.
