@@ -114,7 +114,12 @@ public class CarrierStrategy {
         Direction d = rc.getLocation().directionTo(targetLoc);
         if (!rc.canMove(d)) {
             MapLocation attemptedLoc = rc.adjacentLocation(d);
-            // if blocked by robot at attempted location, do something
+            if(rc.canSenseRobotAtLocation(attemptedLoc)) {
+                RobotInfo[] robots = rc.senseNearbyRobots(attemptedLoc, 1, rc.getTeam());
+                if(robots.length > 0 && robots[0].getType() == RobotType.CARRIER){
+                    //blocked by a carrier, do something
+                }
+            }
         }
     }
     static void tryDropAllResources(RobotController rc, MapLocation hqLoc) throws GameActionException {
