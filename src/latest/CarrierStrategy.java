@@ -35,6 +35,7 @@ public class CarrierStrategy {
             }
         }
         else if(amountResourcesHeld == GameConstants.CARRIER_CAPACITY){
+            tryConveyorBeltTransfer(rc);
             Pathing.moveWithBugNav(rc, hqLoc);
             tryDropAllResources(rc, hqLoc);
         }
@@ -104,6 +105,17 @@ public class CarrierStrategy {
         return rc.getResourceAmount(ResourceType.ADAMANTIUM) +
                 rc.getResourceAmount(ResourceType.MANA) +
                 rc.getResourceAmount(ResourceType.ELIXIR);
+    }
+    static void tryConveyorBeltTransfer(RobotController rc) throws GameActionException {
+        MapLocation targetLoc = hqLoc;
+        if (!rc.isActionReady()){
+            return;
+        }
+        Direction d = rc.getLocation().directionTo(targetLoc);
+        if (!rc.canMove(d)) {
+            MapLocation attemptedLoc = rc.adjacentLocation(d);
+            // if blocked by robot at attempted location, do something
+        }
     }
     static void tryDropAllResources(RobotController rc, MapLocation hqLoc) throws GameActionException {
         tryDropResource(rc, ResourceType.ADAMANTIUM, hqLoc);
