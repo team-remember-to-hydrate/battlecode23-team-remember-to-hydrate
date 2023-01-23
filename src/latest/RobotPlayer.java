@@ -100,7 +100,9 @@ public strictfp class RobotPlayer {
         CURRENT_SW,
         CURRENT_W,
         CURRENT_NW,
-        ISLAND
+        ISLAND_NEUTRAL,
+        ISLAND_FRIENDLY,
+        ISLAND_ENEMY
     }
 
     static MapLocation birth_location;
