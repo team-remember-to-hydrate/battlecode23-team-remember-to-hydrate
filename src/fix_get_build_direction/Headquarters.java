@@ -1,8 +1,7 @@
-package latest;
+package fix_get_build_direction;
 
 import battlecode.common.*;
 
-import static latest.RobotPlayer.directions;
 import static latest.RobotPlayer.rng;
 
 public class Headquarters {
