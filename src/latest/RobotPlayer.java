@@ -3,6 +3,7 @@ package latest;
 import battlecode.common.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -35,8 +36,8 @@ public strictfp class RobotPlayer {
     static WellInfo[] scannedWellInfos = null;
     static int[][] map = new int[GameConstants.MAP_MAX_WIDTH][GameConstants.MAP_MAX_HEIGHT];
     static int[] teamKnownIslandDetails = new int[GameConstants.MAX_NUMBER_ISLANDS + 1];
-    static ArrayList<ArrayList<MapLocation>> teamKnownIslandLocations =
-            new ArrayList<ArrayList<MapLocation>>(GameConstants.MAX_NUMBER_ISLANDS + 1);
+    static ArrayList<HashSet<MapLocation>> teamKnownIslandLocations =
+            new ArrayList<HashSet<MapLocation>>(GameConstants.MAX_NUMBER_ISLANDS + 1);
     static ArrayList<Integer> myIslandFullInfoBroadcastQueue = new ArrayList<>();
     static ArrayList<Integer> myIslandDetailsBroadcastQueue = new ArrayList<>();
     static ArrayList<Short> myWellBroadcastQueue = new ArrayList<>();
@@ -130,7 +131,7 @@ public strictfp class RobotPlayer {
 
         // teamKnownIslandLocations needs to be initialized to work.
         for (int i = 0; i < GameConstants.MAX_NUMBER_ISLANDS + 1; i++){
-            ArrayList<MapLocation> islandLocations = new ArrayList<MapLocation>(GameConstants.MAX_ISLAND_AREA);
+            HashSet<MapLocation> islandLocations = new HashSet<MapLocation>(GameConstants.MAX_ISLAND_AREA);
             teamKnownIslandLocations.add(islandLocations);
         }
 
