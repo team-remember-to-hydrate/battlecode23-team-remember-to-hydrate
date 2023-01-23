@@ -1,4 +1,4 @@
-package latest;
+package launchers_stop_attacking_HQ;
 
 import battlecode.common.*;
 
