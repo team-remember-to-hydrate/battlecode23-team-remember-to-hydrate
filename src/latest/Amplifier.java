@@ -72,7 +72,10 @@ public class Amplifier {
                                     friendlies, enemies);
                             if (RobotPlayer.teamKnownIslandDetails[id] != islandDetailBroadcast){
                                 // Just broadcast it if we can, otherwise it will be outdated if we queue it.
-                                rc.writeSharedArray(Comms.get_available_island_index(rc), islandDetailBroadcast);
+                                int target_index = Comms.get_available_island_index(rc);
+                                if (target_index < GameConstants.SHARED_ARRAY_LENGTH){
+                                    rc.writeSharedArray(Comms.get_available_island_index(rc), islandDetailBroadcast);
+                                }
                             }
                         }
                     }
