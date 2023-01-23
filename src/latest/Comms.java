@@ -32,7 +32,6 @@ public class Comms {
     static final int index_last_well    = 10;
     static final int index_island       = 11;
     static final int index_last_island  = 30;
-
     static final int index_obstacle     = 31;
     static final int index_last_obstacle = 36;
     static final int index_orders       = 40;
@@ -125,21 +124,19 @@ public class Comms {
         return new MapLocation(target_x,target_y);
     }
 
-    ///   ***   ORDERS   ***
+
+    ///   ***   TASKS   ***
     /*
      2 words
      {[4 radius][12 location]}
      {[1 isTask][4 group][3 botType][1 shouldOverride][1 outsideRadiusUnassign][4 taskType][2 TBD]}
      */
-    static int get_task_radius(int array_data) {
-        return (array_data & 0b1111000000000000) >>> 12;
-    }
 
-    static boolean is_task(int array_data){
-        return (array_data & 0b1000000000000000) == 0;
-    }
-    static int get_task_group(int array_data) { return (array_data & 0b0111100000000000) >>> 12; }
-
+    static int get_task_radius( int array_data) {return (array_data & 0b1111000000000000) >>> 12; }
+    static boolean is_task    ( int array_data) {return (array_data & 0b1000000000000000) ==   0; }
+    static int get_task_group ( int array_data) {return (array_data & 0b0111100000000000) >>> 12; }
+    static int get_bot_type   ( int array_data) {return (array_data & 0b0000011100000000) >>>  8;}
+    static int get_task_type  ( int array_data) {return (array_data & 0b0000000000111100) >>>  2; }
     /*
         This command returns zero if there are no commands for the bot
      */
@@ -156,8 +153,26 @@ public class Comms {
         return 0;
     }
 
-    static void create_command(RobotController rc, MapLocation location, int radius){
+
+    static void set_task(RobotController rc, MapLocation location, int radius,int group, int bot_type,
+                         boolean override, boolean unassign, int type){
 
     }
+    /*
+    returns 99 if the array island reporting is full
+ */
+    static int get_available_command_index(RobotController rc) throws GameActionException{
+        for(int i = index_orders; i <= index_last_orders;i = i + 2){
+            int this_value = rc.readSharedArray(i);
+            if(this_value == 0){
+                return i;
+            }
+        }
+        return 99;
+    }
 
+    static void clear_command(RobotController rc, int array_index) throws GameActionException{
+        rc.writeSharedArray(array_index, 0);
+        rc.writeSharedArray(array_index + 1, 0);
+    }
 }
