@@ -39,6 +39,34 @@ public class Comms {
 
     static HashSet<Integer> known_islands;
 
+    // Compressed Count
+    /**
+     * Compressed Count:
+     * These are used so we can communicate a general idea of a number, using less bits.
+     * Useful to send a count of enemy combatants visible at a location.
+     * Each index corresponds to its 2-bit binary representation (00 = index 0, 01 = index 1, ..., 11 = index 3).
+     * The value at that index is the minimum 'count' represented by these 2 bits.
+     * So, for example, if a location is provided with a count bits value of 10, we know that the true value of
+     * whatever was counted at that location is at minimum 3 (index b10 below) and must be less than 6 (value at index
+     * b11).
+     * We use this because often we don't care about the exact amount of something, but a general understanding of the
+     * situation. This breaks the enemy count down to categories of 0 enemies, 1-2 enemies, 3-5 enemies, or 6+.
+     */
+    public final static int[] countPartitions = {0,1,3,6};
+
+    // Returns compressed count. Saved on bytecode by not checking for negatives (bad practice normally).
+    static int compressCount(int trueCount){
+        for (int i = 0; i < countPartitions.length; i++){
+            if (trueCount < countPartitions[i]){
+                return i - 1;
+            }
+        }
+        return countPartitions.length - 1;
+    }
+
+    static int decompressCountToMinPossible(int compressedCount){
+        return countPartitions[compressedCount];
+    }
 
 
     ///   ***   ISLANDS  ***
