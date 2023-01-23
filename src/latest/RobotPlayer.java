@@ -130,7 +130,7 @@ public strictfp class RobotPlayer {
 
         // teamKnownIslandLocations needs to be initialized to work.
         for (int i = 0; i < GameConstants.MAX_NUMBER_ISLANDS + 1; i++){
-            ArrayList<MapLocation> islandLocations = new ArrayList<MapLocation>();
+            ArrayList<MapLocation> islandLocations = new ArrayList<MapLocation>(GameConstants.MAX_ISLAND_AREA);
             teamKnownIslandLocations.add(islandLocations);
         }
 
