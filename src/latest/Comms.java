@@ -72,8 +72,8 @@ public class Comms {
     ///   ***   ISLANDS  ***
     /*
      2 words
-     {[1 isLocation][1 friendly][2 combatStrength][12 location]}
-     {[1 isLocation][6 Island_id][1 Anchor_present][2 friendlies][2 enemies][4 TBD]}
+     {[1 isLocation][1 friendly][2 ownerCombatStrength][12 location]}
+     {[1 isLocation][6 Island_id][1 Anchor_present][2 friendlies][2 enemies][1 friendly_owned][3 TBD]}
      */
 
     static boolean island_is_new(int id) throws GameActionException{
@@ -86,7 +86,7 @@ public class Comms {
         int island_index = get_available_island_index(rc);
         if (island_index < index_last_island) {
             set_island_location_word(rc, location, friendly_owned, combatStrength, island_index);
-            set_island_detail_word(rc, id, anchor_present, friendlies, enemies, island_index + 1);
+            set_island_detail_word(rc, id, anchor_present, friendlies, enemies, friendly_owned, island_index + 1);
             return true;
         }else{
             // no room in the array.
@@ -135,12 +135,13 @@ public class Comms {
     }
 
     static void set_island_detail_word(RobotController rc, int id, boolean anchor_present, int friendlies,
-                                       int enemies, int island_index) throws GameActionException {
-        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][4 TBD]}
+                                       int enemies, boolean friendly_owned, int island_index) throws GameActionException {
+        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][1 friendly_owned][3 TBD]}
         int packed = id << 9;
         if(anchor_present) packed += 0b0000000100000000;
         packed += friendlies  << 6;
         packed += enemies << 4;
+        if (friendly_owned) packed += 0b0000000000001000;
         rc.writeSharedArray(island_index, packed);
     }
 

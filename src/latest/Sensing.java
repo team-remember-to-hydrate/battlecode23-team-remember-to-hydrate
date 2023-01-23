@@ -152,7 +152,7 @@ public class Sensing {
         packedLocation = packedLocation + (location.x << 6) + (location.y);
 
 
-        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][4 TBD]}
+        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][1 friendly][3 TBD]}
         int packedDetails = islandId << 9;
         if(anchor_present) packedDetails += 0b0000000100000000;
         packedDetails += friendlies  << 6;
@@ -163,12 +163,13 @@ public class Sensing {
     }
 
     static int packageIslandDetailBroadcast(RobotController rc, int islandId, boolean anchor_present, int friendlies,
-                                       int enemies) throws GameActionException {
-        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][4 TBD]}
+                                       int enemies, boolean friendlyOwned) throws GameActionException {
+        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][1 friendly][3 TBD]}
         int packedDetails = islandId << 9;
         if(anchor_present) packedDetails += 0b0000000100000000;
         packedDetails += friendlies  << 6;
         packedDetails += enemies << 4;
+        if (friendlyOwned) packedDetails += 0b0000000000001000;
         return packedDetails;
     }
 
