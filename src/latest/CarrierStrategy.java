@@ -6,11 +6,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static latest.OptimalResource.getOptimalResourceCount;
+
 public class CarrierStrategy {
     static MapLocation hqLoc;
     static MapLocation wellLoc;
     static boolean anchorMode = false;
     static int amountResourcesHeld = 0;
+    static int targetCarryCapacity = GameConstants.CARRIER_CAPACITY;
+    static int distanceToHq = 0;
 
     public static void run(RobotController rc) throws GameActionException {
         if(hqLoc == null) {
@@ -26,15 +30,19 @@ public class CarrierStrategy {
             searchForWell(rc);
             Pathing.moveRandom(rc);
         }
-        else if(amountResourcesHeld < GameConstants.CARRIER_CAPACITY){
+        else if(amountResourcesHeld < targetCarryCapacity){
             if(rc.getLocation().distanceSquaredTo(wellLoc) <= 2){
+                if(distanceToHq == 0) {
+                    distanceToHq = (int) Math.sqrt(rc.getLocation().distanceSquaredTo(hqLoc));
+                    targetCarryCapacity = getOptimalResourceCount(distanceToHq, false);
+                }
                 tryCollectResources(rc, wellLoc);
             }
             else {
                 Pathing.moveWithBugNav(rc, wellLoc);
             }
         }
-        else if(amountResourcesHeld == GameConstants.CARRIER_CAPACITY){
+        else if(amountResourcesHeld == targetCarryCapacity){
             Pathing.moveWithBugNav(rc, hqLoc);
             tryDropAllResources(rc, hqLoc);
         }
@@ -93,7 +101,7 @@ public class CarrierStrategy {
     }
     static void tryCollectResources(RobotController rc, MapLocation loc) throws GameActionException {
         int totalCarrying = getTotalCarrying(rc);
-        if(totalCarrying < GameConstants.CARRIER_CAPACITY && rc.getAnchor() == null) {
+        if(totalCarrying < targetCarryCapacity && rc.getAnchor() == null) {
             if (rc.canCollectResource(loc, -1)) {
                 rc.collectResource(loc, -1);
                 amountResourcesHeld = getTotalCarrying(rc);
