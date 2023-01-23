@@ -56,6 +56,9 @@ public class Launcher {
                 if(this_bot_distance < closest_bot){
                     closest_bot = this_bot_distance;
                     dir = rc.getLocation().directionTo(bot.getLocation()).opposite();
+                    if (!rc.onTheMap(rc.getLocation().add(dir))) {
+                        dir = dir.opposite();
+                    }
                 }
             }
         }
