@@ -128,6 +128,12 @@ public strictfp class RobotPlayer {
         // Initialize myLastLocation to have a value
         myLastLocation = birth_location;
 
+        // teamKnownIslandLocations needs to be initialized to work.
+        for (int i = 0; i < GameConstants.MAX_NUMBER_ISLANDS + 1; i++){
+            ArrayList<MapLocation> islandLocations = new ArrayList<MapLocation>();
+            teamKnownIslandLocations.add(islandLocations);
+        }
+
 
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
