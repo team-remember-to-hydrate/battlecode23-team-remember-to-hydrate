@@ -100,6 +100,8 @@ public class Amplifier {
 
 
         switch(my_state){
+            case INITIAL:
+                my_state = RobotPlayer.states.SCOUT;
             case SCOUT:
                 // Refresh MapInfo
                 // Try to move with clockwise momentum
