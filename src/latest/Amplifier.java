@@ -64,8 +64,15 @@ public class Amplifier {
 
                             int islandBroadcastPair = Sensing.makeIslandBroadcastPair(rc, islandLocations[0],
                                     friendlyOwned, ownerCombatStrength, id, anchorPresent, friendlies, enemies);
-                            // Store this until we can broadcast
-                            RobotPlayer.myIslandFullInfoBroadcastQueue.add(islandBroadcastPair);
+
+                            // Broadcast it if we can
+                            if (Comms.set_island_from_island_broadcast_pair(rc, islandBroadcastPair)){
+                                // It has now been written to the comm array
+                            }
+                            else{
+                                // Store this until we can broadcast
+                                RobotPlayer.myIslandFullInfoBroadcastQueue.add(islandBroadcastPair);
+                            }
                         }
                         else {
                             int islandDetailBroadcast = Sensing.packageIslandDetailBroadcast(rc, id, anchorPresent,

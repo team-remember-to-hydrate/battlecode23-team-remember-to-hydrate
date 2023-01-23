@@ -94,6 +94,23 @@ public class Comms {
         }
     }
 
+    static boolean set_island_from_island_broadcast_pair(RobotController rc, int fullyPackedIsland) throws GameActionException {
+        int island_index = get_available_island_index(rc);
+        if (island_index < index_last_island) {
+            // Set island location word
+            int island_location_packed = fullyPackedIsland >> 12;
+            rc.writeSharedArray(island_index, island_location_packed);
+
+            // Set island detail word
+            int island_detail_packed = ((fullyPackedIsland << 12) >> 12);
+            rc.writeSharedArray(island_index, island_detail_packed);
+            return true;
+        }else{
+            // no room in the array.
+            return false;
+        }
+    }
+
     /*
         returns 99 if the array island reporting is full
      */
