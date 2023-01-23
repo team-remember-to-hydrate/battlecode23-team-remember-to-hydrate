@@ -184,6 +184,9 @@ public class Comms {
     static int get_task_type  ( int array_data) {return (array_data & 0b0000000000111100) >>>  2; }
     /*
         This command returns zero if there are no commands for the bot
+        // TODO: This needs to handle edge cases:
+        // Edge cases: -bot receives multiple orders in one round (one to assign membership, one to assign task)
+        // - bot is implied in order due to group membership, not due to location (we only check for location here)
      */
     static int get_command_for_me(RobotController rc) throws GameActionException {
         MapLocation me = rc.getLocation();
