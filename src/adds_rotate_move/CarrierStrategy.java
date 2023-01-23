@@ -1,4 +1,4 @@
-package latest;
+package adds_rotate_move;
 
 import battlecode.common.*;
 

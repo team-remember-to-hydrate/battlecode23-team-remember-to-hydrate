@@ -1,4 +1,4 @@
-package latest;
+package adds_rotate_move;
 
 import battlecode.common.*;
 
@@ -44,7 +44,7 @@ public class Launcher {
 
         // attack enemies within range visible bots gotta get them enemies
         for(RobotInfo bot : nearby_bots){
-            if(bot.getTeam().equals(opponent) && !bot.getType().equals(RobotType.HEADQUARTERS)){
+            if(bot.getTeam().equals(opponent)){
                 if(rc.canAttack(bot.getLocation())){
                     rc.attack(bot.getLocation());
                     rc.setIndicatorString("Attacking " + bot.getLocation());
@@ -56,9 +56,6 @@ public class Launcher {
                 if(this_bot_distance < closest_bot){
                     closest_bot = this_bot_distance;
                     dir = rc.getLocation().directionTo(bot.getLocation()).opposite();
-                    if (!rc.onTheMap(rc.getLocation().add(dir))) {
-                        dir = dir.opposite();
-                    }
                 }
             }
         }

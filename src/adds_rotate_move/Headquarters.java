@@ -1,4 +1,4 @@
-package latest;
+package adds_rotate_move;
 
 import battlecode.common.*;
 
@@ -124,7 +124,7 @@ public class Headquarters {
         // If we see no enemy launchers in launcher attack distance, and see less than 6 carriers, build a carrier
         if ((enemyLauncherCount == 0) && (carrierCount < 6)){
             Direction dir = getBuildDirection(rc, wells);
-            MapLocation newLoc = closestPossibleBuildDirection(rc, RobotType.CARRIER, dir);
+            MapLocation newLoc = rc.getLocation().add(dir);
             rc.setIndicatorString("Trying to build a carrier");
             if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
                 rc.buildRobot(RobotType.CARRIER, newLoc);
@@ -132,8 +132,8 @@ public class Headquarters {
         }
 
         if (num_launchers < 6) {
-            Direction dir = rc.getLocation().directionTo(RobotPlayer.mapCenter).opposite();
-            MapLocation newLoc = closestPossibleBuildDirection(rc, RobotType.LAUNCHER, dir);
+            Direction dir = directions[rng.nextInt(directions.length)];
+            MapLocation newLoc = rc.getLocation().add(dir);
 
             // Let's try to build a launcher.
             rc.setIndicatorString("Trying to build a launcher");
@@ -143,24 +143,12 @@ public class Headquarters {
         }
     }
     static Direction getBuildDirection(RobotController rc, WellInfo[] wells) throws GameActionException {
-        // If we have no wells, spawn away from center
-        if (wells.length == 0){
-            return rc.getLocation().directionTo(RobotPlayer.mapCenter).opposite();
+        Direction dir = null;
+        if (rc.getLocation().equals(wells)) {
+            dir = directions[rng.nextInt(directions.length)];
+        } else {
+            dir = rc.getLocation().directionTo(wells[0].getMapLocation());
         }
-
-        // If we see wells, let's spawn towards one at random
-        int wellIndex = rng.nextInt(wells.length);
-        return rc.getLocation().directionTo(wells[wellIndex].getMapLocation());
-    }
-
-    static MapLocation closestPossibleBuildDirection(RobotController rc, RobotType RobotType, Direction desired_dir){
-        if(rc.canBuildRobot(RobotType, rc.getLocation().add(desired_dir))) return rc.getLocation().add(desired_dir);
-        for (int rotation_offset = 1; rotation_offset <= 4; rotation_offset++){  // 4 is 1/2 of the 8 possible directions
-            Direction left_dir = Direction.values()[(desired_dir.ordinal() +  rotation_offset) % 8];
-            Direction right_dir = Direction.values()[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
-            if (rc.canBuildRobot(RobotType, rc.getLocation().add(left_dir))) return rc.getLocation().add(desired_dir);
-            if (rc.canBuildRobot(RobotType, rc.getLocation().add(right_dir))) return rc.getLocation().add(desired_dir);
-        }
-        return rc.getLocation();
+        return dir;
     }
 }

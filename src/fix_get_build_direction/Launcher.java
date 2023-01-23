@@ -1,4 +1,4 @@
-package latest;
+package fix_get_build_direction;
 
 import battlecode.common.*;
 
@@ -44,7 +44,7 @@ public class Launcher {
 
         // attack enemies within range visible bots gotta get them enemies
         for(RobotInfo bot : nearby_bots){
-            if(bot.getTeam().equals(opponent) && !bot.getType().equals(RobotType.HEADQUARTERS)){
+            if(bot.getTeam().equals(opponent)){
                 if(rc.canAttack(bot.getLocation())){
                     rc.attack(bot.getLocation());
                     rc.setIndicatorString("Attacking " + bot.getLocation());

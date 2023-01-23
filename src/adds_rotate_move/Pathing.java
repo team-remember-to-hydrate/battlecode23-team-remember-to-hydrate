@@ -1,4 +1,4 @@
-package latest;
+package adds_rotate_move;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -72,17 +72,6 @@ public class Pathing {
             return Direction.CENTER;
         }
 
-    }
-
-    static Direction closestPossibleDirection(RobotController rc, Direction desired_dir){
-        if(rc.canMove(desired_dir)) return desired_dir;
-        for (int rotation_offset = 1; rotation_offset <= 4; rotation_offset++){  // 4 is 1/2 of the 8 possible directions
-            Direction left_dir = Direction.values()[(desired_dir.ordinal() +  rotation_offset) % 8];
-            Direction right_dir = Direction.values()[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
-            if (rc.canMove(left_dir)) return left_dir;
-            if (rc.canMove(right_dir)) return right_dir;
-        }
-        return Direction.CENTER;
     }
 
     public static void trackedMove(RobotController rc, Direction dir) throws GameActionException {

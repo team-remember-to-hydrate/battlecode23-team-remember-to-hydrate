@@ -1,4 +1,4 @@
-package latest;
+package fix_get_build_direction;
 
 import battlecode.common.*;
 
