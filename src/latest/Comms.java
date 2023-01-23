@@ -98,11 +98,11 @@ public class Comms {
         int island_index = get_available_island_index(rc);
         if (island_index < index_last_island) {
             // Set island location word
-            int island_location_packed = fullyPackedIsland >> 12;
+            int island_location_packed = fullyPackedIsland >> 16;
             rc.writeSharedArray(island_index, island_location_packed);
 
             // Set island detail word
-            int island_detail_packed = ((fullyPackedIsland << 12) >> 12);
+            int island_detail_packed = ((fullyPackedIsland << 16) >> 16);
             rc.writeSharedArray(island_index, island_detail_packed);
             return true;
         }else{
