@@ -1,4 +1,4 @@
-package latest;
+package adds_rotate_move;
 
 import battlecode.common.*;
 
@@ -11,15 +11,9 @@ public class CarrierStrategy {
     static MapLocation wellLoc;
     static boolean anchorMode = false;
     static int amountResourcesHeld = 0;
-    static int damageTakenLastTurn = 0;
-    static int healthLastTurn = 150;
 
     public static void run(RobotController rc) throws GameActionException {
-        trackHealthTrend(rc);
-        if(damageTakenLastTurn > 0 && getTotalCarrying(rc) > 0){
-            throwAllResourcesAtEnemy(rc);
-        }
-        else if(hqLoc == null) {
+        if(hqLoc == null) {
             searchForHq(rc);
         }
         else if(rc.canTakeAnchor(hqLoc, Anchor.ACCELERATING) || rc.canTakeAnchor(hqLoc, Anchor.STANDARD)) {
@@ -47,22 +41,6 @@ public class CarrierStrategy {
         else {
             throw new GameActionException(GameActionExceptionType.INTERNAL_ERROR, "Carrier internal error");
         }
-    }
-    static void throwAllResourcesAtEnemy(RobotController rc) throws GameActionException {
-        RobotInfo[] enemies = rc.senseNearbyRobots(rc.getLocation(), 20, rc.getTeam().opponent());
-        MapLocation enemyLoc = enemies[0].getLocation();
-        Direction d = rc.getLocation().directionTo(enemyLoc);
-        if(rc.canMove(d)){
-            rc.move(d);
-        }
-        if(rc.canAttack(enemyLoc)){
-            rc.setIndicatorString("Throwing resources at enemy [" + enemyLoc.x + ", " + enemyLoc.y + "]");
-            rc.attack(enemyLoc);
-        }
-    }
-    static void trackHealthTrend(RobotController rc) throws GameActionException {
-        damageTakenLastTurn = healthLastTurn - rc.getHealth();
-        healthLastTurn = rc.getHealth(); // update for next turn
     }
     static void searchForHq(RobotController rc) throws GameActionException {
         RobotInfo[] bots = rc.senseNearbyRobots(2);
