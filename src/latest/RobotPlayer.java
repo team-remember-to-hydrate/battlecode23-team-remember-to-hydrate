@@ -11,6 +11,10 @@ import java.util.Random;
  */
 public strictfp class RobotPlayer {
 
+    public static MapLocation myLastLocation;
+    public static MapLocation myCurrentLocation;
+    public static Direction lastMoved = Direction.NORTHEAST;
+
     /**
      * We will use this variable to count the number of turns this robot has been alive.
      * You can use static variables like this to save any information you want. Keep in mind that even though
@@ -65,6 +69,8 @@ public strictfp class RobotPlayer {
 
         // keep track of where we started so carriers can return Resources
         MapLocation birth_location = rc.getLocation();
+        myLastLocation = birth_location;
+        myCurrentLocation = birth_location;
 
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite

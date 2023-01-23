@@ -45,4 +45,42 @@ public class Pathing {
             }
         }
     }
+
+    public static Direction rotate(RobotController rc, Direction startDirection, boolean rotateClockwise){
+        if (rotateClockwise) {
+            return startDirection.rotateRight();
+        }
+        else {
+            return startDirection.rotateLeft();
+        }
+    }
+
+    public static Direction getRotateValidMove(RobotController rc, Direction startDirection, boolean rotateClockwise) {
+        if (rc.canMove(startDirection)){
+            return startDirection;
+        }
+        else {
+            Direction proposedDir = rotate(rc, startDirection, rotateClockwise);
+            while (proposedDir != startDirection){
+                if (rc.canMove(proposedDir)){
+                    return proposedDir;
+                }
+                else{
+                    proposedDir = rotate(rc, proposedDir, rotateClockwise);
+                }
+            }
+            return Direction.CENTER;
+        }
+
+    }
+
+    public static void trackedMove(RobotController rc, Direction dir) throws GameActionException {
+        if (rc.canMove(dir)) {
+            RobotPlayer.myLastLocation = rc.getLocation();
+            rc.move(dir);
+            RobotPlayer.lastMoved = dir;
+            RobotPlayer.myCurrentLocation = rc.getLocation();
+
+        }
+    }
 }
