@@ -44,7 +44,7 @@ public class Launcher {
 
         // attack enemies within range visible bots gotta get them enemies
         for(RobotInfo bot : nearby_bots){
-            if(bot.getTeam().equals(opponent)){
+            if(bot.getTeam().equals(opponent) && !bot.getType().equals(RobotType.HEADQUARTERS)){
                 if(rc.canAttack(bot.getLocation())){
                     rc.attack(bot.getLocation());
                     rc.setIndicatorString("Attacking " + bot.getLocation());
