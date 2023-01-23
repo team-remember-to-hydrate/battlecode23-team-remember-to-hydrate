@@ -64,6 +64,26 @@ public class Comms {
         return countPartitions.length - 1;
     }
 
+    static void getCommsUpdates(RobotController rc) throws GameActionException {
+        getIslandUpdates(rc);
+    }
+
+    private static void getIslandUpdates(RobotController rc) throws GameActionException {
+        for (int i = index_island; i < index_last_island + 1; i++){
+            int commArrayValue = rc.readSharedArray(i);
+            int detailValue = 0;
+            if (commArrayValue != 0){
+                if (is_location(commArrayValue)){
+                    // Get next comm array value
+                    i++;
+                    detailValue = rc.readSharedArray(i);
+
+                }
+            }
+        }
+    }
+
+
     static int decompressCountToMinPossible(int compressedCount){
         return countPartitions[compressedCount];
     }
