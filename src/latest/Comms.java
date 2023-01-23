@@ -200,11 +200,14 @@ public class Comms {
      */
     static int get_command_for_me(RobotController rc) throws GameActionException {
         MapLocation me = rc.getLocation();
+
         for(int i = index_orders ; i <= index_last_orders; i = i+2){  // 2 words per command
             int this_cmd = rc.readSharedArray(i);
             int radius = get_task_radius(this_cmd);
             MapLocation cmd_location = get_MapLocation(i);
             if((radius * radius)  < me.distanceSquaredTo(cmd_location)){
+                return i;
+            }else if(RobotPlayer.my_group == get_task_group(this_cmd)){
                 return i;
             }
         }
