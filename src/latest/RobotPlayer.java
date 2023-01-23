@@ -11,6 +11,7 @@ import java.util.Random;
  */
 public strictfp class RobotPlayer {
 
+    public static MapLocation mapCenter;
     public static MapLocation myLastLocation;
     public static MapLocation myCurrentLocation;
     public static Direction lastMoved = Direction.NORTHEAST;
@@ -66,6 +67,9 @@ public strictfp class RobotPlayer {
 
         // You can also use indicators to save debug notes in replays.
         rc.setIndicatorString("Hello world!");
+
+        // set mapCenter
+        mapCenter = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
 
         // keep track of where we started so carriers can return Resources
         MapLocation birth_location = rc.getLocation();
