@@ -1,9 +1,6 @@
 package latest;
 
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
 import java.util.Random;
 
@@ -38,9 +35,53 @@ public class Amplifier {
 
         // Update High Value Map Info
         myLocation = rc.getLocation();
-        if (RobotPlayer.scannedMapInfos == null || (myLocation != RobotPlayer.myLastLocation)) {
-            RobotPlayer.scannedMapInfos = rc.senseNearbyMapInfos();
+        // Scan Island Info and Queue/Report Changes - 200 bc + potentially over 100 per island in range
+        if (RobotPlayer.scannedIslandIDs == null || (myLocation != RobotPlayer.lastLocationScannedIslands)) {
+            RobotPlayer.scannedIslandIDs = rc.senseNearbyIslands();
+
+            if (Clock.getBytecodesLeft() > 1000){
+                Team ourTeam = rc.getTeam();
+                int friendlies = Sensing.scanCombatUnitsOfTeam(rc, ourTeam).size();
+                int enemies = Sensing.scanCombatUnitsOfTeam(rc, ourTeam.opponent()).size();
+                for (int i = 0; i <RobotPlayer.scannedIslandIDs.length; i++){
+                    if (Clock.getBytecodesLeft() > 1000){
+                        int id = RobotPlayer.scannedIslandIDs[i];
+                        Team occupier = rc.senseTeamOccupyingIsland(id);
+                        boolean anchorPresent = (occupier != Team.NEUTRAL);
+
+                        if (RobotPlayer.teamKnownIslandInfoPairs[id] != 0){
+                            // This is a new island, report location plus details.
+                            // TODO: Make this sense if the island changed hands first. Must read known island info.
+                            MapLocation[] islandLocations = rc.senseNearbyIslandLocations(id);
+                            boolean friendlyOwned = (rc.senseTeamOccupyingIsland(id) == ourTeam);
+                            int ownerCombatStrength;
+                            if (friendlyOwned) {
+                                ownerCombatStrength = friendlies;
+                            }
+                            else {
+                                ownerCombatStrength = enemies;
+                            }
+
+                            int islandBroadcastPair = Sensing.makeIslandBroadcastPair(rc, islandLocations[0],
+                                    friendlyOwned, ownerCombatStrength, id, anchorPresent, friendlies, enemies);
+                            // Store this until we can broadcast
+                            RobotPlayer.myIslandFullInfoBroadcastQueue.add(islandBroadcastPair);
+                        }
+                        else {
+                            int islandDetailBroadcast = Sensing.packageIslandDetailBroadcast(rc, id, anchorPresent,
+                                    friendlies, enemies);
+                            if (RobotPlayer.teamKnownIslandDetails[id] != islandDetailBroadcast){
+                                // Just broadcast it if we can, otherwise it will be outdated if we queue it.
+                                rc.writeSharedArray(Comms.get_available_island_index(rc), islandDetailBroadcast);
+                            }
+                        }
+                    }
+                }
+            }
         }
+
+        // Scan wells
+
         // Read Orders and change state and goals accordingly
 
         // Sense nearby enemies, possibly respond accordingly
@@ -51,25 +92,27 @@ public class Amplifier {
         switch(my_state){
             case SCOUT:
                 // Refresh MapInfo
+                // Try to move with clockwise momentum
+                Direction dir = Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, true);
+                Pathing.trackedMove(rc, dir);
+//                if (rc.canMove(dir)) {
+//                    rc.move(dir);
+//                    RobotPlayer.lastMoved = dir;
+//                }
             case DEFAULT:
                 my_state = RobotPlayer.states.SCOUT;
         }
 
+        // Communicate High Value Info
+
         // Update Low Value Map Info
         myLocation = rc.getLocation();
-        if (RobotPlayer.scannedMapInfos == null || (myLocation != RobotPlayer.myLastLocation)) {
+        if (RobotPlayer.scannedMapInfos == null || (myLocation != RobotPlayer.lastLocationScannedMapInfos)) {
             RobotPlayer.scannedMapInfos = rc.senseNearbyMapInfos();
+            RobotPlayer.lastLocationScannedMapInfos = myLocation;
         }
 
-
-        // Try to move with clockwise momentum
-        Direction dir = Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, true);
-        //Pathing.trackedMove(rc, dir);
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-            RobotPlayer.lastMoved = dir;
-        }
-
+        // Communicate Low Value Map Info
 
     }
 }

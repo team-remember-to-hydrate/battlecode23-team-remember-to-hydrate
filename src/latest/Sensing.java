@@ -137,6 +137,40 @@ public class Sensing {
     // Scan all newly visible island squares
     // Decided to abandon this, as at a vision range of 20 it would take over 200 bytecode to senseIsland on each newly
     //  visible square.
+    // Update: Maybe there is something to this, since you would know a confirmed location and avoid calling
+    //  senseNearbyIslandLocations for each. (additional 100 bytecode per island sensed).
+
+    static int makeIslandBroadcastPair(RobotController rc, MapLocation location, boolean friendly_owned,
+                                         int ownerCombatStrength, int islandId, boolean anchor_present, int friendlies,
+                                          int enemies) throws GameActionException{
+        //{[1 isLocation][1 friendly][2 ownerCombatStrength][12 location]}
+        //MapLocation me = rc.getLocation();
+        int packedLocation = 0b1000000000000000;
+        if (friendly_owned) {packedLocation += 0b0100000000000000;}
+        int compressedStrength = Comms.compressCount(ownerCombatStrength);
+        packedLocation += (compressedStrength << 12);
+        packedLocation = packedLocation + (location.x << 6) + (location.y);
+
+
+        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][4 TBD]}
+        int packedDetails = islandId << 9;
+        if(anchor_present) packedDetails += 0b0000000100000000;
+        packedDetails += friendlies  << 6;
+        packedDetails += enemies << 4;
+
+        int fullyPackedIsland = (packedLocation << 16) + packedDetails;
+        return fullyPackedIsland;
+    }
+
+    static int packageIslandDetailBroadcast(RobotController rc, int islandId, boolean anchor_present, int friendlies,
+                                       int enemies) throws GameActionException {
+        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][4 TBD]}
+        int packedDetails = islandId << 9;
+        if(anchor_present) packedDetails += 0b0000000100000000;
+        packedDetails += friendlies  << 6;
+        packedDetails += enemies << 4;
+        return packedDetails;
+    }
 
     //
     public static short senseBitpackedIslandLocation(RobotController rc, MapLocation targetLocation){

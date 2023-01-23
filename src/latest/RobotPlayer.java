@@ -2,6 +2,7 @@ package latest;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -24,6 +25,7 @@ public strictfp class RobotPlayer {
     static int lastRoundScannedAllies = -1;
     static RobotInfo[] scannedAllies = null;
     static MapLocation myLastLocation = null;
+    public static MapLocation myCurrentLocation;
     static MapLocation lastLocationScannedMapInfos = null;
     static MapInfo[] scannedMapInfos = null;
     static MapLocation lastLocationScannedIslands = null;
@@ -32,6 +34,11 @@ public strictfp class RobotPlayer {
     static MapLocation lastLocationScannedWells = null;
     static WellInfo[] scannedWellInfos = null;
     static int[][] map = new int[GameConstants.MAP_MAX_WIDTH][GameConstants.MAP_MAX_HEIGHT];
+    static int[] teamKnownIslandInfoPairs = new int[GameConstants.MAX_NUMBER_ISLANDS + 1];
+    static int[] teamKnownIslandDetails = new int[GameConstants.MAX_NUMBER_ISLANDS + 1];
+    static ArrayList<Integer> myIslandFullInfoBroadcastQueue = new ArrayList<>();
+    static ArrayList<Integer> myIslandDetailsBroadcastQueue = new ArrayList<>();
+    static ArrayList<Short> myWellBroadcastQueue = new ArrayList<>();
 
 
 

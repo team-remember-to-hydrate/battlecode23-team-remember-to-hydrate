@@ -76,8 +76,11 @@ public class Pathing {
 
     public static void trackedMove(RobotController rc, Direction dir) throws GameActionException {
         if (rc.canMove(dir)) {
+            RobotPlayer.myLastLocation = rc.getLocation();
             rc.move(dir);
             RobotPlayer.lastMoved = dir;
+            RobotPlayer.myCurrentLocation = rc.getLocation();
+
         }
     }
 
