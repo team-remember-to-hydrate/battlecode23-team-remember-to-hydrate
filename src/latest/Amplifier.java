@@ -34,61 +34,7 @@ public class Amplifier {
 
 
         // Update High Value Map Info
-        myLocation = rc.getLocation();
-        // Scan Island Info and Queue/Report Changes - 200 bc + potentially over 100 per island in range
-        if (RobotPlayer.scannedIslandIDs == null || (myLocation != RobotPlayer.lastLocationScannedIslands)) {
-            RobotPlayer.scannedIslandIDs = rc.senseNearbyIslands();
-
-            if (Clock.getBytecodesLeft() > 1000){
-                Team ourTeam = rc.getTeam();
-                int friendlies = Sensing.scanCombatUnitsOfTeam(rc, ourTeam).size();
-                int enemies = Sensing.scanCombatUnitsOfTeam(rc, ourTeam.opponent()).size();
-                for (int i = 0; i <RobotPlayer.scannedIslandIDs.length; i++){
-                    if (Clock.getBytecodesLeft() > 1000){
-                        int id = RobotPlayer.scannedIslandIDs[i];
-                        Team occupier = rc.senseTeamOccupyingIsland(id);
-                        boolean anchorPresent = (occupier != Team.NEUTRAL);
-                        boolean friendlyOwned = (occupier == ourTeam);
-
-                        if (RobotPlayer.teamKnownIslandLocations.get(id).size() != 0){
-                            // This is a new island, report location plus details.
-                            MapLocation[] islandLocations = rc.senseNearbyIslandLocations(id);
-                            int ownerCombatStrength;
-                            if (friendlyOwned) {
-                                ownerCombatStrength = friendlies;
-                            }
-                            else {
-                                ownerCombatStrength = enemies;
-                            }
-
-                            int islandBroadcastPair = Sensing.makeIslandBroadcastPair(rc, islandLocations[0],
-                                    friendlyOwned, ownerCombatStrength, id, anchorPresent, friendlies, enemies);
-
-                            // Broadcast it if we can
-                            if (Comms.set_island_from_island_broadcast_pair(rc, islandBroadcastPair)){
-                                // It has now been written to the comm array
-                            }
-                            else{
-                                // Store this until we can broadcast
-                                RobotPlayer.myIslandFullInfoBroadcastQueue.add(islandBroadcastPair);
-                            }
-                        }
-                        else {
-                            // Report it if the details are new
-                            int islandDetailBroadcast = Sensing.packageIslandDetailBroadcast(rc, id, anchorPresent,
-                                    friendlies, enemies, friendlyOwned);
-                            if (RobotPlayer.teamKnownIslandDetails[id] != islandDetailBroadcast){
-                                // Just broadcast it if we can, otherwise it may be outdated if we queue it.
-                                int target_index = Comms.get_available_island_index(rc);
-                                if (rc.canWriteSharedArray(target_index, 0)){
-                                    rc.writeSharedArray(target_index, islandDetailBroadcast);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        Sensing.scanAndUpdateIslands(rc); // very high bytecode cost
 
         // Scan wells
 
@@ -127,4 +73,5 @@ public class Amplifier {
         // Communicate Low Value Map Info
 
     }
+
 }
