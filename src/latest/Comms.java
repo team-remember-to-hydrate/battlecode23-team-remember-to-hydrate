@@ -94,8 +94,13 @@ public class Comms {
         }
     }
 
-    static boolean set_island_from_island_broadcast_pair(RobotController rc, int fullyPackedIsland) throws GameActionException {
+    static boolean set_island_from_island_broadcast_pair(RobotController rc, int fullyPackedIsland)
+            throws GameActionException {
         int island_index = get_available_island_index(rc);
+        if (!rc.canWriteSharedArray(island_index, 0)) {
+            return false;
+        }
+
         if (island_index < index_last_island) {
             // Set island location word
             int island_location_packed = fullyPackedIsland >> 16;
@@ -131,7 +136,9 @@ public class Comms {
         int packed = 0b1000000000000000;
         if (friendly_owned) {packed += 0b0100000000000000;}
         packed = packed + (me.x << 6) + (me.y);
-        rc.writeSharedArray(island_index, packed);
+        if (rc.canWriteSharedArray(island_index, packed)){
+            rc.writeSharedArray(island_index, packed);
+        }
     }
 
     static void set_island_detail_word(RobotController rc, int id, boolean anchor_present, int friendlies,
@@ -142,7 +149,9 @@ public class Comms {
         packed += friendlies  << 6;
         packed += enemies << 4;
         if (friendly_owned) packed += 0b0000000000001000;
-        rc.writeSharedArray(island_index, packed);
+        if (rc.canWriteSharedArray(island_index, packed)){
+            rc.writeSharedArray(island_index, packed);
+        }
     }
 
     static void track_island_ids(RobotController rc) throws GameActionException{

@@ -52,7 +52,6 @@ public class Amplifier {
 
                         if (RobotPlayer.teamKnownIslandLocations.get(id).size() != 0){
                             // This is a new island, report location plus details.
-                            // TODO: Make this sense if the island changed hands first. Must read known island info.
                             MapLocation[] islandLocations = rc.senseNearbyIslandLocations(id);
                             int ownerCombatStrength;
                             if (friendlyOwned) {
@@ -79,10 +78,10 @@ public class Amplifier {
                             int islandDetailBroadcast = Sensing.packageIslandDetailBroadcast(rc, id, anchorPresent,
                                     friendlies, enemies, friendlyOwned);
                             if (RobotPlayer.teamKnownIslandDetails[id] != islandDetailBroadcast){
-                                // Just broadcast it if we can, otherwise it will be outdated if we queue it.
+                                // Just broadcast it if we can, otherwise it may be outdated if we queue it.
                                 int target_index = Comms.get_available_island_index(rc);
-                                if (target_index < GameConstants.SHARED_ARRAY_LENGTH){
-                                    rc.writeSharedArray(Comms.get_available_island_index(rc), islandDetailBroadcast);
+                                if (rc.canWriteSharedArray(target_index, 0)){
+                                    rc.writeSharedArray(target_index, islandDetailBroadcast);
                                 }
                             }
                         }
