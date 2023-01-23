@@ -94,8 +94,8 @@ public class Comms {
         //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][4 TBD]}
         int packed = id << 9;
         if(anchor_present) packed += 0b0000000100000000;
-        packed += (friendlies &      0b0000000011000000 ) << 6;
-        packed += (enemies &         0b0000000000110000 ) << 4;
+        packed += friendlies  << 6;
+        packed += enemies << 4;
         rc.writeSharedArray(island_index, packed);
     }
 
@@ -153,14 +153,20 @@ public class Comms {
         return 0;
     }
 
+    static void set_group(RobotController rc, MapLocation location, int radius, int group, int bot_type,
+                          boolean override, boolean unassign, int type){
+
+    }
+
 
     static void set_task(RobotController rc, MapLocation location, int radius,int group, int bot_type,
                          boolean override, boolean unassign, int type){
 
     }
+
     /*
     returns 99 if the array island reporting is full
- */
+    */
     static int get_available_command_index(RobotController rc) throws GameActionException{
         for(int i = index_orders; i <= index_last_orders;i = i + 2){
             int this_value = rc.readSharedArray(i);
