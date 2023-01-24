@@ -73,6 +73,9 @@ public class CarrierStrategy {
         int[] islands = rc.senseNearbyIslands();
         Set<MapLocation> islandLocs = new HashSet<>();
         for (int id : islands) {
+            if (rc.senseTeamOccupyingIsland(id).equals(rc.getTeam())){
+                continue;
+            }
             MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
             islandLocs.addAll(Arrays.asList(thisIslandLocs));
         }
