@@ -1,4 +1,4 @@
-package latest;
+package carrier_ignores_friendly_islands.latest;
 
 import battlecode.common.*;
 
