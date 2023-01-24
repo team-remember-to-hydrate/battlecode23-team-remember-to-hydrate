@@ -111,7 +111,7 @@ public class Headquarters {
 
         int enemyLauncherCount = 0;
         for (int i = 0; i < enemyInLauncherRange.length; i++) {
-            if (enemyInLauncherRange[0].getType() == RobotType.CARRIER){
+            if (enemyInLauncherRange[0].getType() == RobotType.LAUNCHER){
                 enemyLauncherCount++;
             }
         }
