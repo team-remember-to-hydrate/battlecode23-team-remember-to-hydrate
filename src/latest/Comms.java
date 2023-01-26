@@ -123,11 +123,11 @@ public class Comms {
 
         if (island_index < index_last_island) {
             // Set island location word
-            int island_location_packed = fullyPackedIsland >> 16;
+            int island_location_packed = fullyPackedIsland >>> 16;
             rc.writeSharedArray(island_index, island_location_packed);
 
             // Set island detail word
-            int island_detail_packed = ((fullyPackedIsland << 16) >> 16);
+            int island_detail_packed = ((fullyPackedIsland << 16) >>> 16);
             rc.writeSharedArray(island_index, island_detail_packed);
             return true;
         }else{
@@ -201,11 +201,7 @@ public class Comms {
 
 
     ///   ***   TASKS   ***
-    /*
-     2 words
-     {[4 radius][12 location]}
-     {[1 isTask][4 group][3 botType][1 shouldOverride][1 outsideRadiusUnassign][4 taskType][2 TBD]}
-     */
+
 
     static int get_task_radius( int array_data) {return (array_data & 0b1111000000000000) >>> 12; }
     static boolean is_task    ( int array_data) {return (array_data & 0b1000000000000000) ==   0; }
@@ -220,31 +216,57 @@ public class Comms {
      */
     static int get_command_for_me(RobotController rc) throws GameActionException {
         MapLocation me = rc.getLocation();
-        for(int i = index_orders ; i <= index_last_orders; i = i+2){  // 2 words per command
+        for(int i = index_orders ; i <= index_last_orders; i = i + 2){  // 2 words per command
             int this_cmd = rc.readSharedArray(i);
             int radius = get_task_radius(this_cmd);
             MapLocation cmd_location = get_MapLocation(i);
             if((radius * radius)  < me.distanceSquaredTo(cmd_location)){
+                return i;
+            }else if(RobotPlayer.my_group == get_task_group(this_cmd)){
                 return i;
             }
         }
         return 0;
     }
 
-    static void set_group(RobotController rc, MapLocation location, int radius, int group, int bot_type,
-                          boolean override, boolean unassign, int type){
+    /**
+     * Use this to send a command.
+     * @param rc to write to the array
+     * @param location the center of a selection area, or the target location for a task
+     * @param radius the radius of a selection area
+     * @param group assign a group number, or select group for a task
+     * @param bot_type restrict group assignment to bot type
+     * @param override override the groups current assignment
+     * @param unassign remove the selected bots from a group
+     * @param task_type the type of task
+     * @param is_task whether this is a group assignment or a task.
+     * @throws GameActionException passed to game
+     */
+    static void send_command(RobotController rc, MapLocation location, int radius, int group, int bot_type,
+                          boolean override, boolean unassign, int task_type, boolean is_task) throws GameActionException {
+        int available_index = get_available_command_index(rc);
+        int first_word = (radius & 0b1111) << 12;
+        first_word += (location.x << 6) + location.y;
+
+        int second_word = 0;
+        if(is_task){second_word += 1 << 15;}
+        second_word += (group & 0b1111) << 11;
+        second_word += (bot_type & 0b111) << 8;
+        if(override){second_word += 1 << 7;}
+        if(unassign){second_word += 1 << 6;}
+        second_word += (task_type & 0b1111) << 2;
+
+        rc.writeSharedArray(available_index,first_word);
+        rc.writeSharedArray(available_index + 1, second_word);
 
     }
 
-
-    static void set_task(RobotController rc, MapLocation location, int radius,int group, int bot_type,
-                         boolean override, boolean unassign, int type){
-
-    }
-
-    /*
-    returns 99 if the array island reporting is full
-    */
+    /**
+     * This method returns a valid empty array location, or 99 if one is not available.
+     * @param rc needed to read array
+     * @return an index for the communication array that is empty
+     * @throws GameActionException passed to game
+     */
     static int get_available_command_index(RobotController rc) throws GameActionException{
         for(int i = index_orders; i <= index_last_orders;i = i + 2){
             int this_value = rc.readSharedArray(i);
@@ -255,7 +277,14 @@ public class Comms {
         return 99;
     }
 
+    /**
+     * Checks array_index for validity, then zeros both words
+     * @param rc needed to call writeSharedArray
+     * @param array_index the index of the first word of the command to clear
+     * @throws GameActionException passed to game
+     */
     static void clear_command(RobotController rc, int array_index) throws GameActionException{
+        if(array_index < index_last_orders & array_index >= index_orders)
         rc.writeSharedArray(array_index, 0);
         rc.writeSharedArray(array_index + 1, 0);
     }

@@ -19,6 +19,7 @@ public strictfp class RobotPlayer {
      * these variables are static, in Battlecode they aren't actually shared between your robots.
      */
     static int turnCount = 0;
+    static int my_group = 0;
     static Direction lastMoved = Direction.NORTH;
     static boolean didMoveLastTurn = false;
     static int lastRoundScannedEnemies = -1;

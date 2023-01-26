@@ -49,7 +49,7 @@ public class Launcher {
         int my_task = Comms.get_command_for_me(rc);
         if(my_task > 0){
             target_location = Comms.get_MapLocation(my_task);
-            my_state = RobotPlayer.states.values()[Comms.get_task_type(my_task)];
+            my_state = RobotPlayer.states.values()[Comms.get_task_type(rc.readSharedArray(my_task))];
         }
 
         switch(my_state){
