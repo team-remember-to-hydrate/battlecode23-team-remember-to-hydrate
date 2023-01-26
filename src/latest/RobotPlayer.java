@@ -23,6 +23,7 @@ public strictfp class RobotPlayer {
     static Direction lastMoved = Direction.NORTH;
     static boolean didMoveLastTurn = false;
     static boolean prefersClockwise = true;
+    static int myHealthLastTurn;
     static int lastRoundScannedEnemies = -1;
     static RobotInfo[] scannedEnemies = null;
     static int lastRoundScannedAllies = -1;
@@ -143,6 +144,9 @@ public strictfp class RobotPlayer {
             prefersClockwise = rng.nextBoolean();
         }
 
+        // Initialize myHealthLastTurn
+        myHealthLastTurn = rc.getHealth();
+
         // teamKnownIslandLocations needs to be initialized to work.
         for (int i = 0; i < GameConstants.MAX_NUMBER_ISLANDS + 1; i++){
             HashSet<MapLocation> islandLocations = new HashSet<MapLocation>(GameConstants.MAX_ISLAND_AREA);
@@ -174,6 +178,10 @@ public strictfp class RobotPlayer {
                     case DESTABILIZER: // You might want to give them a try!
                     case AMPLIFIER:     Amplifier.runAmplifier(rc);   break;
                 }
+
+                myHealthLastTurn = rc.getHealth();
+                myLastLocation = rc.getLocation();
+                myCurrentLocation = myLastLocation;
 
             } catch (GameActionException e) {
                 // Oh no! It looks like we did something illegal in the Battlecode world. You should
