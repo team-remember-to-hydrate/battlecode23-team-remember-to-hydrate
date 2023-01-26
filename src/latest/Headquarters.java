@@ -7,6 +7,7 @@ import static latest.RobotPlayer.rng;
 
 public class Headquarters {
     static int my_array_address;
+    static int amplifiers_built = 0;
 
     static WellInfo[] wells;
     static RobotPlayer.hq_states current_state;
@@ -150,8 +151,9 @@ public class Headquarters {
 
             // Let's try to build a launcher.
             rc.setIndicatorString("Trying to build an amplifier");
-            if (rc.canBuildRobot(RobotType.AMPLIFIER, newLoc)) {
+            if (rc.getRoundNum() / 100 > amplifiers_built && rc.canBuildRobot(RobotType.AMPLIFIER, newLoc)) {
                 rc.buildRobot(RobotType.AMPLIFIER, newLoc);
+                amplifiers_built++;
             }
         }
     }
