@@ -20,7 +20,7 @@ public class Pathing {
         if (rc.getLocation().equals(targetLoc)){
             return;
         }
-        if (!rc.isActionReady()){
+        if (!rc.isMovementReady()){
             return;
         }
         Direction d = rc.getLocation().directionTo(targetLoc);
@@ -33,26 +33,30 @@ public class Pathing {
             if (currentDirection == null){
                 currentDirection = d;
             }
-            // try to move in a way that keeps obstacle on our right
+            // try to move in a way that keeps obstacle to one side
             for(int i = 0; i < 8; i++){
                 if (rc.canMove(currentDirection)) {
                     rc.move(currentDirection);
                     break;
                 }
                 else {
-                    currentDirection = currentDirection.rotateRight();
+                    currentDirection = rotate(rc, currentDirection);
                 }
             }
         }
     }
 
-    public static Direction rotate(RobotController rc, Direction startDirection, boolean rotateClockwise){
+    public static Direction rotate(RobotController rc, Direction startDirection, boolean rotateClockwise) {
         if (rotateClockwise) {
             return startDirection.rotateRight();
         }
         else {
             return startDirection.rotateLeft();
         }
+    }
+
+    public static Direction rotate(RobotController rc, Direction startDirection) {
+        return rotate(rc, startDirection, RobotPlayer.prefersClockwise);
     }
 
     public static Direction getRotateValidMove(RobotController rc, Direction startDirection, boolean rotateClockwise) {
@@ -71,7 +75,26 @@ public class Pathing {
             }
             return Direction.CENTER;
         }
+    }
 
+    // find closest movable direction to desired direction
+    public static Direction getClosestValidMoveDirection(RobotController rc, Direction desired_dir, boolean preferClockwise){
+        if(rc.canMove(desired_dir)) return desired_dir;
+        for (int rotation_offset = 1; rotation_offset <= 4; rotation_offset++){  // 4 is 1/2 of the 8 possible movement
+            // directions
+            Direction left_dir = directions[(desired_dir.ordinal() + 8 + rotation_offset) % 8];
+            Direction right_dir = directions[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
+            if (preferClockwise) {
+                if (rc.canMove(right_dir)) return right_dir;
+            }
+            if (rc.canMove(left_dir)) return left_dir;
+            if (rc.canMove(right_dir)) return right_dir;
+        }
+        return Direction.CENTER;
+    }
+
+    public static Direction getClosestValidMoveDirection(RobotController rc, Direction desired_dir) {
+        return getClosestValidMoveDirection(rc, desired_dir, RobotPlayer.prefersClockwise);
     }
 
     public static void trackedMove(RobotController rc, Direction dir) throws GameActionException {

@@ -22,6 +22,7 @@ public strictfp class RobotPlayer {
     static int my_group = 0;
     static Direction lastMoved = Direction.NORTH;
     static boolean didMoveLastTurn = false;
+    static boolean prefersClockwise = true;
     static int lastRoundScannedEnemies = -1;
     static RobotInfo[] scannedEnemies = null;
     static int lastRoundScannedAllies = -1;
@@ -129,6 +130,11 @@ public strictfp class RobotPlayer {
 
         // Initialize myLastLocation to have a value
         myLastLocation = birth_location;
+
+        // Initialize clockwise preference randomly if not carrier
+        if (rc.getType() != RobotType.CARRIER) {
+            prefersClockwise = rng.nextBoolean();
+        }
 
         // teamKnownIslandLocations needs to be initialized to work.
         for (int i = 0; i < GameConstants.MAX_NUMBER_ISLANDS + 1; i++){
