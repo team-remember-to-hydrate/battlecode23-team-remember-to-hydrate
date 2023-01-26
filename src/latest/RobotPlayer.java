@@ -86,6 +86,13 @@ public strictfp class RobotPlayer {
         DEFAULT
     }
 
+    enum stance {
+        RUSH,
+        AGGRESSIVE,
+        CAUTIOUS,
+        RETREAT
+    }
+
     enum map_tiles{
         UNKNOWN,
         PLAIN,
