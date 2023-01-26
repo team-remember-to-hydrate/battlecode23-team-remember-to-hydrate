@@ -75,6 +75,12 @@ public class Sensing {
         return teamCombatRobots;
     }
 
+    public static int scanRelativeCombatStrength(RobotController rc) throws GameActionException {
+        int friendlyStrength = scanCombatUnitsOfTeam(rc, rc.getTeam()).size();
+        int enemyStrength = scanCombatUnitsOfTeam(rc, rc.getTeam().opponent()).size();
+        return friendlyStrength - enemyStrength;
+    }
+
 
     /**
      * Smart scans for all members of team in vision range and returns those that are Carriers or Boosters.
