@@ -25,7 +25,7 @@ public class Pathing {
         }
         Direction d = rc.getLocation().directionTo(targetLoc);
         if (rc.canMove(d) && d != Direction.CENTER) {
-            rc.move(d);
+            trackedMove(rc, d);
             currentDirection = null; // no obstacle
         }
         else {
@@ -36,7 +36,7 @@ public class Pathing {
             // try to move in a way that keeps obstacle to one side
             for(int i = 0; i < 8; i++){
                 if (rc.canMove(currentDirection)) {
-                    rc.move(currentDirection);
+                    trackedMove(rc, currentDirection);
                     break;
                 }
                 else {
