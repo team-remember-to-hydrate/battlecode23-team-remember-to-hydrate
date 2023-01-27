@@ -210,7 +210,7 @@ public strictfp class RobotPlayer {
     ///   **********************
     //    ***   MAP  STUFF   ***
     //    **********************
-    static void set_map_location(MapLocation location, map_tiles tile_type){
+    static void set_map_location_tile(MapLocation location, map_tiles tile_type){
         int x = location.x;
         int y = location.y;
         int tile = tile_type.ordinal();
@@ -221,7 +221,7 @@ public strictfp class RobotPlayer {
         int y = location.y;
         return map[x][y] == 0;
     }
-    static map_tiles get_map_location(MapLocation location){
+    static map_tiles get_map_location_tile(MapLocation location){
         int x = location.x;
         int y = location.y;
         return map_tiles.values()[map[x][y]];

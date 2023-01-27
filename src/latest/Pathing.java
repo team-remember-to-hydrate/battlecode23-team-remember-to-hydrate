@@ -128,5 +128,85 @@ public class Pathing {
 
     //_______________Advanced Map Based Pathfinding____________________//
 
+    static Direction getCurrentTileDir(map_tiles currentTile) {
+        switch (currentTile) {
+            case CURRENT_N:
+                return Direction.NORTH;
+            case CURRENT_NE:
+                return Direction.NORTHEAST;
+            case CURRENT_E:
+                return Direction.EAST;
+            case CURRENT_SE:
+                return Direction.SOUTHEAST;
+            case CURRENT_S:
+                return Direction.SOUTH;
+            case CURRENT_SW:
+                return Direction.SOUTHWEST;
+            case CURRENT_W:
+                return Direction.WEST;
+            case CURRENT_NW:
+                return Direction.NORTHWEST;
+            default:
+                return Direction.CENTER;
+        }
+    }
 
+    static MapLocation getResultOfMove(RobotController rc, MapLocation startLocation, Direction dir) throws GameActionException {
+        MapLocation targetMoveLocation = startLocation.add(dir);
+
+        // If it is off the map, return startLocation
+        if (!rc.onTheMap(targetMoveLocation)) {return startLocation;}
+
+        // Get type of destination, either from map or sensing
+        map_tiles knownTile = RobotPlayer.get_map_location_tile(targetMoveLocation);
+        if (knownTile.equals(map_tiles.UNKNOWN)) {
+            knownTile = Sensing.scanMapTileType(rc, targetMoveLocation);
+        }
+
+        // If it is a current, handle logic. Otherwise, return appropriate response
+        switch (knownTile) {
+            case UNKNOWN:
+            case PLAIN:
+            case ADAMANTIUM:
+            case MANA:
+            case ELIXIR:
+            case CLOUD:
+            case ISLAND_NEUTRAL:
+                return targetMoveLocation;
+            case WALL:
+            case HQ_ENEMY:
+            case HQ_FRIENDLY:
+                return startLocation;
+            case CURRENT_N:
+            case CURRENT_NE:
+            case CURRENT_E:
+            case CURRENT_SE:
+            case CURRENT_S:
+            case CURRENT_SW:
+            case CURRENT_W:
+            case CURRENT_NW:
+                Direction currentPush = getCurrentTileDir(knownTile);
+                MapLocation potentialPushLocation = targetMoveLocation.add(currentPush);
+
+                // If it is off the map, return targetMoveLocation
+                if (!rc.onTheMap(potentialPushLocation)) {return targetMoveLocation;}
+
+                // Get type of destination, either from map or sensing
+                map_tiles potentialPushTile = RobotPlayer.get_map_location_tile(potentialPushLocation);
+                if (potentialPushTile.equals(map_tiles.UNKNOWN)) {
+                    potentialPushTile = Sensing.scanMapTileType(rc, potentialPushLocation);
+                }
+
+                switch (potentialPushTile) {
+                    case WALL:
+                    case HQ_ENEMY:
+                    case HQ_FRIENDLY:
+                        return targetMoveLocation;
+                    default:
+                        return potentialPushLocation;
+                }
+        }
+        // If we somehow reach this point, just return startLocation
+        return startLocation;
+    }
 }
