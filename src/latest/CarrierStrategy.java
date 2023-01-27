@@ -9,6 +9,7 @@ public class CarrierStrategy {
     static MapLocation wellLoc;
     static boolean anchorMode = false;
     static int amountResourcesHeld = 0;
+    static MapLocation currentTargetIslandLocation = null;
 
     public static void run(RobotController rc) throws GameActionException {
         if(hqLoc == null) {
@@ -126,16 +127,33 @@ public class CarrierStrategy {
     }
     static void deliverAnchor(RobotController rc) throws GameActionException {
         rc.setIndicatorString("deliverAnchor");
-        int[] islands = rc.senseNearbyIslands();
         Set<MapLocation> islandLocs = new HashSet<>();
-        for (int id : islands) {
-            MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
-            islandLocs.addAll(Arrays.asList(thisIslandLocs));
+        if (currentTargetIslandLocation == null || !rc.canSenseLocation(currentTargetIslandLocation) ||
+                rc.senseTeamOccupyingIsland(rc.senseIsland(currentTargetIslandLocation)).equals(rc.getTeam())) {
+            currentTargetIslandLocation = null;
+            int[] islands = rc.senseNearbyIslands();
+            for (int id : islands) {
+                if (rc.senseTeamOccupyingIsland(id).equals(rc.getTeam())) {
+                    continue;
+                }
+                MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
+                // Get closest island location
+                currentTargetIslandLocation = thisIslandLocs[0];
+                int shortestDistance = rc.getLocation().distanceSquaredTo(currentTargetIslandLocation);
+                MapLocation myLocation = rc.getLocation();
+                for (int i = 1; i < thisIslandLocs.length; i++){
+                    int possibleDistance = myLocation.distanceSquaredTo(thisIslandLocs[i]);
+                    if (possibleDistance < shortestDistance) {
+                        currentTargetIslandLocation = thisIslandLocs[i];
+                        shortestDistance = possibleDistance;
+                    }
+                }
+            }
         }
-        if (islandLocs.size() > 0) {
-            MapLocation islandLocation = islandLocs.iterator().next();
-            if(!rc.getLocation().equals(islandLocation)) {
-                Pathing.moveWithBugNav(rc, islandLocation);
+
+        if (currentTargetIslandLocation != null) {
+            if(!rc.getLocation().equals(currentTargetIslandLocation)) {
+                Pathing.moveWithBugNav(rc, currentTargetIslandLocation);
             }
             if (rc.canPlaceAnchor()) {
                 rc.setIndicatorString("Huzzah, placed anchor!");
