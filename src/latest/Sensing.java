@@ -35,11 +35,11 @@ public class Sensing {
      * @return Returns RobotInfo[] of all bots from given team in vision range.
      * @throws GameActionException
      */
-    public static RobotInfo[] smartScanMembersOfTeam(RobotController rc, Team team) throws GameActionException {
+    public static RobotInfo[] smartScanMembersOfTeam(RobotController rc, Team team, int range) throws GameActionException {
         if (team == rc.getTeam().opponent()) {
             if (RobotPlayer.lastRoundScannedEnemies != rc.getRoundNum()){
                 // Our old scan is outdated, do a new one.
-                RobotPlayer.scannedEnemies = rc.senseNearbyRobots(-1, team); //102 bc
+                RobotPlayer.scannedEnemies = rc.senseNearbyRobots(range, team); //102 bc
                 RobotPlayer.lastRoundScannedEnemies = rc.getRoundNum();
             }
                 // Just use our existing scan.
@@ -48,12 +48,16 @@ public class Sensing {
         else {
             if (RobotPlayer.lastRoundScannedAllies != rc.getRoundNum()){
                 // Our old scan is outdated, do a new one.
-                RobotPlayer.scannedAllies = rc.senseNearbyRobots(-1, team); //102 bc
+                RobotPlayer.scannedAllies = rc.senseNearbyRobots(range, team); //102 bc
                 RobotPlayer.lastRoundScannedAllies = rc.getRoundNum();
             }
             // Just use our existing scan.
             return RobotPlayer.scannedAllies;
         }
+    }
+
+    public static RobotInfo[] smartScanMembersOfTeam(RobotController rc, Team team) throws GameActionException {
+        return smartScanMembersOfTeam(rc, team, -1);
     }
 
     /**
@@ -75,6 +79,30 @@ public class Sensing {
         return teamCombatRobots;
     }
 
+    public static ArrayList<RobotInfo> scanCombatUnitsOfTeamInRange(RobotController rc, Team team, int range) throws GameActionException {
+        RobotInfo[] teamRobots = smartScanMembersOfTeam(rc, team, range);
+        ArrayList<RobotInfo> teamCombatRobots = new ArrayList<RobotInfo>();
+        int teamRobotsLength = teamRobots.length; // saves bytecode
+        for (int i = 0; i < teamRobotsLength; i++){
+            if (teamRobots[i].getType() == RobotType.LAUNCHER || teamRobots[i].getType() == RobotType.DESTABILIZER){
+                teamCombatRobots.add(teamRobots[i]);
+            }
+        }
+        return teamCombatRobots;
+    }
+
+    public static ArrayList<RobotInfo> scanAnyUnitsOfTeamInRange(RobotController rc, Team team, int range) throws GameActionException {
+        RobotInfo[] teamRobots = smartScanMembersOfTeam(rc, team, range);
+        ArrayList<RobotInfo> teamNotHQRobots = new ArrayList<RobotInfo>();
+        int teamRobotsLength = teamRobots.length; // saves bytecode
+        for (int i = 0; i < teamRobotsLength; i++){
+            if (teamRobots[i].getType() != RobotType.HEADQUARTERS){
+                teamNotHQRobots.add(teamRobots[i]);
+            }
+        }
+        return teamNotHQRobots;
+    }
+
     public static int scanRelativeCombatStrength(RobotController rc) throws GameActionException {
         int friendlyStrength = scanCombatUnitsOfTeam(rc, rc.getTeam()).size();
         int enemyStrength = scanCombatUnitsOfTeam(rc, rc.getTeam().opponent()).size();
@@ -94,7 +122,6 @@ public class Sensing {
         ArrayList<RobotInfo> teamEconRobots = new ArrayList<RobotInfo>();
         int teamRobotsLength = teamRobots.length; // saves bytecode
         for (int i = 0; i < teamRobotsLength; i++){
-            //RobotInfo targetBot = teamRobots[i]; // TODO: Check if bytecode decreases by alternate implementation.
             if (teamRobots[i].getType() == RobotType.CARRIER || teamRobots[i].getType() == RobotType.BOOSTER){ //||
                     //teamRobots[i].getType() == RobotType.HEADQUARTERS){ // Removing this to prevent accidental targeting of HQs.
                 teamEconRobots.add(teamRobots[i]);
@@ -123,18 +150,21 @@ public class Sensing {
 
 
     // Return weakest Robot from set
-    public static RobotInfo scanWeakestBotInGroup(RobotController rc, RobotInfo[] botGroup) {
-        int lengthBotGroup = botGroup.length;
+    public static RobotInfo scanWeakestBotInGroup(RobotController rc, ArrayList<RobotInfo> botGroup) {
+        int lengthBotGroup = botGroup.size();
+        if (lengthBotGroup == 0) {
+            return null;
+        }
         int lowestHealthIndex = 0;
-        int lowestHealthSoFar = botGroup[lowestHealthIndex].getHealth();
+        int lowestHealthSoFar = botGroup.get(lowestHealthIndex).getHealth();
         for (int i = 0; i < lengthBotGroup; i++){
-            int botHealth = botGroup[i].getHealth();
+            int botHealth = botGroup.get(i).getHealth();
             if (botHealth < lowestHealthSoFar) {
                 lowestHealthSoFar = botHealth;
                 lowestHealthIndex = i;
             }
         }
-        return botGroup[lowestHealthIndex];
+        return botGroup.get(lowestHealthIndex);
     }
 
 
