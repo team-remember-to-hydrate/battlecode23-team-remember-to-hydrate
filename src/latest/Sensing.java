@@ -1,7 +1,7 @@
 package latest;
 
 import battlecode.common.*;
-
+import latest.RobotPlayer.map_tiles;
 import java.util.ArrayList;
 
 public class Sensing {
@@ -222,9 +222,84 @@ public class Sensing {
     // ____________Below this are things that won't change during a game________
     // Only need to sense each of these once (per bot). Skip sensing these if you sensed last turn and didn't move.
 
+    /**
+     * Scans for and returns the map_tiles enum best matching the location or UNKNOWN if unscannable.
+     * @param rc
+     * @param location the location to scan
+     * @return The map_tile enum best matching the location, or UNKNOWN if unscannable.
+     * @throws GameActionException
+     */
+    public static map_tiles scanMapTileType(RobotController rc, MapLocation location) throws GameActionException {
+        map_tiles tile_type = map_tiles.UNKNOWN;
+        if (!rc.canSenseLocation(location)) {return tile_type;}
+
+        MapInfo tileInfo = rc.senseMapInfo(location);
+        // Check for wall
+        if (!tileInfo.isPassable()) {return map_tiles.WALL;}
+        // Check for island
+        if (rc.senseIsland(location) > 0) {return map_tiles.ISLAND_NEUTRAL;}
+        // Check for well
+        WellInfo wellInfo = rc.senseWell(location);
+        if (!wellInfo.getResourceType().equals(ResourceType.NO_RESOURCE)) {
+            ResourceType type = wellInfo.getResourceType();
+            switch (type) {
+                case ADAMANTIUM:
+                    return map_tiles.ADAMANTIUM;
+                case MANA:
+                    return map_tiles.MANA;
+                case ELIXIR:
+                    return map_tiles.ELIXIR;
+            }
+        }
+        // Check for HQ
+        RobotInfo robotAtLocation = rc.senseRobotAtLocation(location);
+        if (robotAtLocation != null){
+            if (robotAtLocation.getType().equals(RobotType.HEADQUARTERS)){
+                if (robotAtLocation.getType().equals(rc.getTeam())) {
+                    return map_tiles.HQ_FRIENDLY;
+                }
+                else {
+                    return map_tiles.HQ_ENEMY;
+                }
+            }
+        }
+        // Check for cloud
+        if (tileInfo.hasCloud()) {return map_tiles.CLOUD;}
+        // Check for current
+        Direction currentDirection = tileInfo.getCurrentDirection();
+        if (currentDirection != Direction.CENTER) {
+            switch (currentDirection) {
+                case NORTH:
+                    return map_tiles.CURRENT_N;
+                case NORTHEAST:
+                    return map_tiles.CURRENT_NE;
+                case EAST:
+                    return map_tiles.CURRENT_E;
+                case SOUTHEAST:
+                    return map_tiles.CURRENT_SE;
+                case SOUTH:
+                    return map_tiles.CURRENT_S;
+                case SOUTHWEST:
+                    return map_tiles.CURRENT_SW;
+                case WEST:
+                    return map_tiles.CURRENT_W;
+                case NORTHWEST:
+                    return map_tiles.CURRENT_NW;
+
+            }
+        }
+        return map_tiles.PLAIN;
+    }
 
 
     // Scan all nearby walls
+
+    /**
+     * Scans for and returns an ArrayList of MapLocations of all walls in vision range
+     * @param rc
+     * @return ArrayList<MapLocation> of all walls in vision range.
+     * @throws GameActionException
+     */
     public static ArrayList<MapLocation> scanNearbyWalls(RobotController rc) throws GameActionException {
         MapInfo[] nearbyInfos = rc.senseNearbyMapInfos();
         int length = nearbyInfos.length;
