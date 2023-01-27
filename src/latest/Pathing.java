@@ -106,11 +106,11 @@ public class Pathing {
         }
     }
 
-    static Direction best_right_turn(RobotController rc, Direction desired_dir){
+    static Direction best_right_turn(RobotController rc, Direction desired_dir) throws GameActionException {
         if(rc.canMove(desired_dir)) return desired_dir;
         for (int rotation_offset = 1; rotation_offset <= 7; rotation_offset++){  // 7 other directions
             Direction right_dir = Direction.values()[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
-            if (rc.canMove(right_dir)) return right_dir;
+            trackedMove(rc, desired_dir);
         }
         return Direction.CENTER;
     }
