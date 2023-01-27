@@ -128,12 +128,14 @@ public class CarrierStrategy {
     static void deliverAnchor(RobotController rc) throws GameActionException {
         rc.setIndicatorString("deliverAnchor");
         Set<MapLocation> islandLocs = new HashSet<>();
-        if (currentTargetIslandLocation == null || !rc.canSenseLocation(currentTargetIslandLocation) ||
-                rc.senseTeamOccupyingIsland(rc.senseIsland(currentTargetIslandLocation)).equals(rc.getTeam())) {
+        if (currentTargetIslandLocation == null || !rc.canSenseLocation(currentTargetIslandLocation)) {
             currentTargetIslandLocation = null;
             int[] islands = rc.senseNearbyIslands();
             for (int id : islands) {
-                if (rc.senseTeamOccupyingIsland(id).equals(rc.getTeam())) {
+                // If we own it, skip it unless we can upgrade it.
+                if (rc.senseTeamOccupyingIsland(id).equals(rc.getTeam())
+                    && !(rc.getAnchor().equals(Anchor.ACCELERATING) && rc.senseAnchor(id).equals(Anchor.STANDARD))) {
+                    // It is an upgrade if we are holding an Accelerating and island has a Standard anchor.
                     continue;
                 }
                 MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
