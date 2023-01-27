@@ -30,7 +30,7 @@ public class CarrierStrategy {
         }
         else if(wellLoc == null){
             searchForWell(rc);
-            Pathing.moveRandom(rc);
+            Pathing.trackedMove(rc, Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, RobotPlayer.prefersClockwise));
         }
         else if(amountResourcesHeld < GameConstants.CARRIER_CAPACITY){
             if(rc.getLocation().distanceSquaredTo(wellLoc) <= 2){
@@ -144,7 +144,7 @@ public class CarrierStrategy {
             }
         }
         else {
-            Pathing.moveRandom(rc);
+            Pathing.trackedMove(rc, Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, RobotPlayer.prefersClockwise));
         }
     }
     static void tryCollectResources(RobotController rc, MapLocation loc) throws GameActionException {
