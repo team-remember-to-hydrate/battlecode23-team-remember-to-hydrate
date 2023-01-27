@@ -5,8 +5,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
-import static latest.RobotPlayer.directions;
-import static latest.RobotPlayer.rng;
+import static latest.RobotPlayer.*;
 
 public class Pathing {
     public static void moveRandom(RobotController rc) throws GameActionException {
@@ -37,10 +36,21 @@ public class Pathing {
             for(int i = 0; i < 8; i++){
                 if (rc.canMove(currentDirection)) {
                     trackedMove(rc, currentDirection);
+                    if (prefersClockwise){
+                        currentDirection = currentDirection.rotateRight();
+                    }
+                    else {
+                        currentDirection = currentDirection.rotateLeft();
+                    }
                     break;
                 }
                 else {
-                    currentDirection = rotate(rc, currentDirection);
+                    if (prefersClockwise){
+                        currentDirection = currentDirection.rotateLeft();
+                    }
+                    else {
+                        currentDirection = currentDirection.rotateRight();
+                    }
                 }
             }
         }
@@ -114,4 +124,9 @@ public class Pathing {
         }
         return Direction.CENTER;
     }
+
+
+    //_______________Advanced Map Based Pathfinding____________________//
+
+
 }
