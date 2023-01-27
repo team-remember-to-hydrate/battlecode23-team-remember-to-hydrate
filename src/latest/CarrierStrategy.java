@@ -2,9 +2,7 @@ package latest;
 
 import battlecode.common.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class CarrierStrategy {
     static MapLocation hqLoc;
@@ -15,6 +13,14 @@ public class CarrierStrategy {
     public static void run(RobotController rc) throws GameActionException {
         if(hqLoc == null) {
             searchForHq(rc);
+        }
+        else if (Sensing.scanRelativeCombatStrength(rc) < 0){
+            // Enemy combatants outnumber visible friendlies
+            fightIfConvenient(rc);
+        }
+        else if (rc.getHealth() < RobotPlayer.myHealthLastTurn){
+            // We have been hit!
+            fightBackAndRun(rc);
         }
         else if(rc.canTakeAnchor(hqLoc, Anchor.ACCELERATING) || rc.canTakeAnchor(hqLoc, Anchor.STANDARD)) {
             tryPickUpAnchor(rc, hqLoc);
@@ -42,6 +48,56 @@ public class CarrierStrategy {
             throw new GameActionException(GameActionExceptionType.INTERNAL_ERROR, "Carrier internal error");
         }
     }
+
+    private static void fightIfConvenient(RobotController rc) throws GameActionException {
+        // If I have resources, consider fighting.
+        if (amountResourcesHeld > 3){
+            // Find weakest hostile enemy in range, or nearest econ enemy in range
+            ArrayList<RobotInfo> nearbyEnemies = Sensing.scanCombatUnitsOfTeamInRange(rc, rc.getTeam().opponent(), 9);
+            // Carrier action radius not in game constants
+            if (nearbyEnemies.size() < 1) {
+                // Pick an enemy carrier in range
+                nearbyEnemies = Sensing.scanAnyUnitsOfTeamInRange(rc, rc.getTeam().opponent(), 9);
+            }
+
+            // Pick weakest target
+            RobotInfo targetBot = Sensing.scanWeakestBotInGroup(rc, nearbyEnemies);
+            // Hit them
+            if (rc.canAttack(targetBot.getLocation())){
+                rc.attack(rc.getLocation());
+                amountResourcesHeld = getTotalCarrying(rc);
+            }
+        }
+    }
+
+    private static void fightBackAndRun(RobotController rc) throws GameActionException {
+        // If I have resources, consider fighting.
+        // Find weakest hostile enemy in range, or nearest econ enemy in range
+        ArrayList<RobotInfo> nearbyEnemies = Sensing.scanCombatUnitsOfTeamInRange(rc, rc.getTeam().opponent(), 9);
+        // Carrier action radius not in game constants
+        if (nearbyEnemies.size() < 1) {
+            // Pick an enemy carrier in range
+            nearbyEnemies = Sensing.scanAnyUnitsOfTeamInRange(rc, rc.getTeam().opponent(), 9);
+        }
+
+        // Pick weakest target
+        RobotInfo targetBot = Sensing.scanWeakestBotInGroup(rc, nearbyEnemies);
+        // Hit them
+        if (targetBot != null && rc.canAttack(targetBot.getLocation())){
+            rc.attack(rc.getLocation());
+            amountResourcesHeld = getTotalCarrying(rc);
+        }
+
+        Direction retreatDirection = rc.getLocation().directionTo(hqLoc);
+
+        if (targetBot != null){
+            Pathing.getClosestValidMoveDirection(rc, rc.getLocation().directionTo(targetBot.getLocation()).opposite());
+        }
+
+        Pathing.trackedMove(rc, retreatDirection);
+        // TODO Switch to return to HQ mode
+    }
+
     static void searchForHq(RobotController rc) throws GameActionException {
         RobotInfo[] bots = rc.senseNearbyRobots(2);
         for (RobotInfo bot : bots) {
