@@ -229,14 +229,15 @@ public strictfp class RobotPlayer {
 
     // find closest movable direction
     static Direction movable_direction(RobotController rc, Direction desired_dir){
-        if(rc.canMove(desired_dir)) return desired_dir;
-        for (int rotation_offset = 1; rotation_offset <= 4; rotation_offset++){  // 4 is 1/2 of the 8 possible directions
-            Direction left_dir = Direction.values()[(desired_dir.ordinal() +  rotation_offset) % 8];
-            Direction right_dir = Direction.values()[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
-            if (rc.canMove(left_dir)) return left_dir;
-            if (rc.canMove(right_dir)) return right_dir;
-        }
-        return Direction.CENTER;
+        return Pathing.getClosestValidMoveDirection(rc, desired_dir, false);
+//        if(rc.canMove(desired_dir)) return desired_dir;
+//        for (int rotation_offset = 1; rotation_offset <= 4; rotation_offset++){  // 4 is 1/2 of the 8 possible directions
+//            Direction left_dir = Direction.values()[(desired_dir.ordinal() +  rotation_offset) % 8];
+//            Direction right_dir = Direction.values()[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
+//            if (rc.canMove(left_dir)) return left_dir;
+//            if (rc.canMove(right_dir)) return right_dir;
+//        }
+//        return Direction.CENTER;
     }
 
     // methods to retrieve packed information
