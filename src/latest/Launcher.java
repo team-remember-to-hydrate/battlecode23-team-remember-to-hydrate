@@ -55,7 +55,7 @@ public class Launcher {
 
         RobotInfo weakestBot = Sensing.scanWeakestBotInGroup(rc, target_bots);
         if (weakestBot != null) {
-            attack_location = Sensing.scanWeakestBotInGroup(rc, target_bots).getLocation();
+            attack_location = weakestBot.getLocation();
         }
 
         int my_task = Comms.get_command_for_me(rc);
@@ -106,21 +106,6 @@ public class Launcher {
             rc.setIndicatorString("Attacking " + attack_location);
         }
 
-        // if we are in a holding state check for orders
-        if(my_state.equals(RobotPlayer.states.INITIAL) || my_state.equals(RobotPlayer.states.GROUP)){
-            RobotPlayer.hq_states current_HQ_state = RobotPlayer.hq_states.values()[RobotPlayer.unpackExtra(rc.readSharedArray(my_HQ))];
-            // if we have a task lets get to it
-            if(current_HQ_state.equals(RobotPlayer.hq_states.TASK)){
-                int task_info = rc.readSharedArray(12 +my_HQ);
-                target_location = RobotPlayer.unpackMapLocation(task_info);
-                my_state = RobotPlayer.states.values()[RobotPlayer.unpackExtra(task_info)];
-            }
-        }
-        // then we have a task to do, let get to it
-        else
-        {
-            dir = me.directionTo(target_location);
-        }
 
         // check for adjacent carrier, so we can move
         Direction adjacent_carrier =  adjacent_carrier(rc, Sensing.smartScanMembersOfTeam(rc, rc.getTeam()));

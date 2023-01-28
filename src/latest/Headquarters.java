@@ -33,7 +33,10 @@ public class Headquarters {
         int num_launchers = 0;
 
         // stuff for the first round only
-        performRoundOneTasks(rc);
+        if(rc.getRoundNum() == 1){
+            performRoundOneTasks(rc);
+        }
+
 
         //decrease command delay if there is one
         if(command_decay > 0){command_decay--;}
@@ -45,7 +48,7 @@ public class Headquarters {
             }
         }
 
-        //round 10 print the array to console
+        //round 100 print the array to console
         if(rc.getRoundNum() == 100){
             MapLocation mine = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_array_address));
             System.out.println("advertising my location" + my_array_address + " as " + mine + " from " + rc.readSharedArray(my_array_address));
@@ -77,7 +80,7 @@ public class Headquarters {
             //System.out.println("array location " + island + " id " + this_island_id + " location " + this_island_location + " raw data " + rc.readSharedArray(island) + " " + rc.readSharedArray(island + 1));
             if(island_ids.contains(this_island_id)){
                 Comms.clear_island(rc, this_island_id);
-                System.out.println(island + " has been cleared from array");
+                System.out.println("index " + island + " has been cleared from array it's id is " + this_island_id);
             }else{
                 //This is a new map id, lets store it, and it's location
                 island_ids.add(this_island_id);
@@ -100,14 +103,18 @@ public class Headquarters {
             }
         }
         // Minimum Viable Product for group attack
-        if(num_launchers >= 6){
-            int my_task_array_location = 12 + my_array_address;
+        if(num_launchers >= 6 & command_decay < 1){
+            int my_task_array_location = Comms.get_available_command_index(rc);
             MapLocation target = new MapLocation(rc.getMapWidth() / 2,rc.getMapHeight()/2);
             int mission = RobotPlayer.states.ATTACK.ordinal();
             int target_array = RobotPlayer.packMapLocationExtra(target,mission);
-            rc.writeSharedArray(my_task_array_location,target_array);
-            int packed_info = RobotPlayer.packMapLocationExtra(rc.getLocation(), RobotPlayer.hq_states.TASK.ordinal());
-            rc.writeSharedArray(my_array_address,packed_info);
+            if(my_task_array_location < Comms.index_last_orders) {
+                rc.writeSharedArray(my_task_array_location, target_array);
+                int packed_info = RobotPlayer.packMapLocationExtra(rc.getLocation(), RobotPlayer.hq_states.TASK.ordinal());
+                rc.writeSharedArray(my_array_address, packed_info);
+                command_decay = 20;
+                my_recent_tasks.add(my_task_array_location);
+            }
         }
 
 //        // if we are holding an anchor we saw an island, lets build a carrier.
@@ -180,50 +187,47 @@ public class Headquarters {
     static void performRoundOneTasks(RobotController rc)throws GameActionException{
         // first round save our location to the array in the first available spot. 0-3
         // also track visible wells since HQ don't move
-        if(rc.getRoundNum() == 1) {
-            // use first available shared array slot
-            for (int i = 0; i < 4; i++) {
-                int array_int = rc.readSharedArray(i);
-                if (array_int == 0) {
-                    my_array_address = i;
-                    rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
-                    // System.out.println(rc.getLocation());
-                    // System.out.println(RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
-                    break;
-                }
+
+        // use first available shared array slot
+        for (int i = 0; i < 4; i++) {
+            int array_int = rc.readSharedArray(i);
+            if (array_int == 0) {
+                my_array_address = i;
+                rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
+                // System.out.println(rc.getLocation());
+                // System.out.println(RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
+                break;
             }
-            // still in the code for the first round only
-            // initialize my_recent_tasks
-            my_recent_tasks = new ArrayList<Integer>() {
-            };
-            // still in the code for the first round only
-            // sense visible wells mark them on array, change state to RESOURCE
-            wells = rc.senseNearbyWells();
-            if(wells.length > 0){
-                current_state = RobotPlayer.hq_states.RESOURCE;
-                for(WellInfo well : wells){
-                    for(int i = 4; i < 12; i++){
-                        int array_int = rc.readSharedArray(i);
-                        if(array_int == 0){
-                            rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), well.getResourceType().ordinal()));
-                            break;
-                        }
+        }
+        // initialize my_recent_tasks
+        my_recent_tasks = new ArrayList<Integer>() {
+        };
+        // still in the code for the first round only
+        // sense visible wells mark them on array, change state to RESOURCE
+        wells = rc.senseNearbyWells();
+        if(wells.length > 0){
+            current_state = RobotPlayer.hq_states.RESOURCE;
+            for(WellInfo well : wells){
+                for(int i = 4; i < 12; i++){
+                    int array_int = rc.readSharedArray(i);
+                    if(array_int == 0){
+                        rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), well.getResourceType().ordinal()));
+                        break;
                     }
                 }
             }
-            // still in the code for the first round only
-            // look for islands build anchor if there is at least one
-            int[] island_indexes = rc.senseNearbyIslands();
-            for(int island_index : island_indexes){
-                MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
-                if(rc.canBuildAnchor(Anchor.STANDARD)){
-                    rc.buildAnchor(Anchor.STANDARD);
-                }
-            }
-            // still in the code for the first round only
-            // populate valid build locations
-            populateValidAccessibleBuildLocations(rc);
         }
+        // look for islands build anchor if there is at least one
+        int[] island_indexes = rc.senseNearbyIslands();
+        for(int island_index : island_indexes){
+            MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
+            if(rc.canBuildAnchor(Anchor.STANDARD)){
+                rc.buildAnchor(Anchor.STANDARD);
+            }
+        }
+        // populate valid build locations
+        populateValidAccessibleBuildLocations(rc);
+
 
     }
 
