@@ -16,7 +16,7 @@ public class Headquarters {
     static WellInfo[] wells;
     static HashSet<MapLocation> validBuildLocations = new HashSet<>(40);
     static RobotPlayer.hq_states current_state;
-    static MapLocation[] island_locations = new MapLocation[34];
+    static MapLocation[] island_locations = new MapLocation[GameConstants.MAX_NUMBER_ISLANDS + 1];
     static List<Integer> island_ids = new ArrayList<>();
     static List<MapLocation> well_locations = new ArrayList<>();
     static List<Integer> my_recent_tasks = new ArrayList<>();
@@ -163,7 +163,7 @@ public class Headquarters {
         }
 
         // build an amplifier if nothing else to do
-/*        boolean buildAmplifiers = true;
+        boolean buildAmplifiers = true;
         if (buildAmplifiers) {
             Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
             MapLocation newLoc = rc.getLocation().add(dir);
@@ -174,7 +174,7 @@ public class Headquarters {
                 rc.buildRobot(RobotType.AMPLIFIER, newLoc);
                 amplifiers_built++;
             }
-        }*/
+        }
     }
 
     static void performRoundOneTasks(RobotController rc)throws GameActionException{

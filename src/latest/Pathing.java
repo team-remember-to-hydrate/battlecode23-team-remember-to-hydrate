@@ -161,7 +161,12 @@ public class Pathing {
         map_tiles knownTile = RobotPlayer.get_map_location_tile(targetMoveLocation);
         if (knownTile.equals(map_tiles.UNKNOWN)) {
             knownTile = Sensing.scanMapTileType(rc, targetMoveLocation);
+            if (!knownTile.equals(map_tiles.UNKNOWN)) {
+                RobotPlayer.set_map_location_tile(targetMoveLocation, knownTile);
+            }
         }
+
+        MapLocation returnLocation = startLocation;
 
         // If it is a current, handle logic. Otherwise, return appropriate response
         switch (knownTile) {
@@ -172,11 +177,13 @@ public class Pathing {
             case ELIXIR:
             case CLOUD:
             case ISLAND_NEUTRAL:
-                return targetMoveLocation;
+                returnLocation = targetMoveLocation;
+                break;
             case WALL:
             case HQ_ENEMY:
             case HQ_FRIENDLY:
-                return startLocation;
+                returnLocation = startLocation;
+                break;
             case CURRENT_N:
             case CURRENT_NE:
             case CURRENT_E:
@@ -195,18 +202,27 @@ public class Pathing {
                 map_tiles potentialPushTile = RobotPlayer.get_map_location_tile(potentialPushLocation);
                 if (potentialPushTile.equals(map_tiles.UNKNOWN)) {
                     potentialPushTile = Sensing.scanMapTileType(rc, potentialPushLocation);
+                    if (!potentialPushTile.equals(map_tiles.UNKNOWN)) {
+                        RobotPlayer.set_map_location_tile(potentialPushLocation, potentialPushTile);
+                    }
                 }
 
                 switch (potentialPushTile) {
                     case WALL:
                     case HQ_ENEMY:
                     case HQ_FRIENDLY:
-                        return targetMoveLocation;
+                        returnLocation = targetMoveLocation;
+                        break;
                     default:
-                        return potentialPushLocation;
+                        returnLocation = potentialPushLocation;
+                        break;
                 }
+                break;
+            default:
+                // Should never reach this.
+                returnLocation = startLocation;
         }
         // If we somehow reach this point, just return startLocation
-        return startLocation;
+        return returnLocation;
     }
 }
