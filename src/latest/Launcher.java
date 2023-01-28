@@ -15,6 +15,11 @@ public class Launcher {
     static String indicator_string = "";
     static MapLocation me;
     static int myLeaderID = Integer.MAX_VALUE;
+    static boolean blocking_carrier = false;
+    static boolean should_move = true;
+    static Team opponent;
+    static Direction blocked_carrier_dir = Direction.CENTER;
+    static Direction dir;
 
     /**
      * Run a single turn for a Launcher.
@@ -23,15 +28,15 @@ public class Launcher {
     static void runLauncher(RobotController rc) throws GameActionException {
         // initialize variables
         indicator_string = "";
-        boolean should_move = true;
-        boolean blocking_carrier = false;
+        should_move = true;
+        blocking_carrier = false;
 //        RobotInfo[] nearby_bots = rc.senseNearbyRobots();
-        Team opponent = rc.getTeam().opponent();
+        opponent = rc.getTeam().opponent();
         me = rc.getLocation();
-        Direction blocked_carrier_dir = Direction.CENTER;
+        blocked_carrier_dir = Direction.CENTER;
 
         // define variable for desired direction to move.
-        Direction dir = RobotPlayer.lastMoved; //RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
+        dir = RobotPlayer.lastMoved; //RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
         MapLocation map_center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
         MapLocation attack_location = new MapLocation(0,0);
 
