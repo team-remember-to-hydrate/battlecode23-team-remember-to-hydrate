@@ -16,6 +16,8 @@ public class Headquarters {
     static WellInfo[] wells;
     static HashSet<MapLocation> validBuildLocations = new HashSet<>(40);
     static RobotPlayer.hq_states current_state;
+    static List<MapLocation> island_locations;
+    static List<Integer> island_ids;
     static MapLocation next_island;
     static List<Integer> my_recent_tasks;
     static int command_decay = 0;
@@ -31,7 +33,7 @@ public class Headquarters {
         int num_launchers = 0;
 
 
-        //decrease command delay si there is one
+        //decrease command delay if there is one
         if(command_decay > 0){command_decay--;}
 
         // first round save our location to the array in the first available spot. 0-3
@@ -102,6 +104,29 @@ public class Headquarters {
             }
         }
 
+        //    ***   Check Comms for updates   ***
+        // get islands from array
+        HashSet<Integer> island_indexes = Comms.get_array_islands(rc);
+
+        for(int island : island_indexes){
+            int this_island_id = Comms.get_island_id(island);
+            MapLocation this_island_location = Comms.get_MapLocation(island);
+            // remove them from array if we already know about them
+            if(island_indexes.contains(this_island_id)){
+                Comms.clear_island(rc, this_island_id);
+            }else{
+                //This is a new map id, lets store it, and it's location
+                island_ids.add(this_island_id);
+                island_locations.add(this_island_location);
+                System.out.println("New island found at " + this_island_location);
+            }
+        }
+
+
+        ///   ***   Beginning HQ decision-making   ***
+
+
+
         // if there are 6 launchers send them on a raid to spot.
         for(RobotInfo bot : nearby_bots){
             if(bot.getTeam().equals(us) & bot.getType().equals(RobotType.LAUNCHER)){
@@ -158,6 +183,8 @@ public class Headquarters {
             }
         }
 
+
+
         if (num_launchers < 6) {
             Direction dir = directions[rng.nextInt(directions.length)];
             MapLocation newLoc = rc.getLocation().add(dir);
@@ -170,7 +197,7 @@ public class Headquarters {
         }
 
         // build an amplifier if nothing else to do
-        boolean buildAmplifiers = true;
+/*        boolean buildAmplifiers = true;
         if (buildAmplifiers) {
             Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
             MapLocation newLoc = rc.getLocation().add(dir);
@@ -181,7 +208,7 @@ public class Headquarters {
                 rc.buildRobot(RobotType.AMPLIFIER, newLoc);
                 amplifiers_built++;
             }
-        }
+        }*/
     }
     static Direction getBuildDirection(RobotController rc, WellInfo[] wells) throws GameActionException {
         Direction dir = directions[rng.nextInt(directions.length)];
