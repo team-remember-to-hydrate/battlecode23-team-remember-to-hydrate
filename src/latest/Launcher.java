@@ -25,7 +25,7 @@ public class Launcher {
         indicator_string = "";
         boolean should_move = true;
         boolean blocking_carrier = false;
-        RobotInfo[] nearby_bots = rc.senseNearbyRobots();
+//        RobotInfo[] nearby_bots = rc.senseNearbyRobots();
         Team opponent = rc.getTeam().opponent();
         me = rc.getLocation();
         Direction blocked_carrier_dir = Direction.CENTER;
@@ -85,7 +85,7 @@ public class Launcher {
 
             case OCCUPY:
                 indicator_string += "OCCUPY ";
-                dir = occupy_dir(rc,dir,nearby_bots);
+                dir = occupy_dir(rc,dir,null); //nearby_bots); - this wasn't needed, yet
                 break;
 
             case ANCHOR:
@@ -109,7 +109,6 @@ public class Launcher {
                 int task_info = rc.readSharedArray(12 +my_HQ);
                 target_location = RobotPlayer.unpackMapLocation(task_info);
                 my_state = RobotPlayer.states.values()[RobotPlayer.unpackExtra(task_info)];
-                System.out.println("got at task " + my_state + " at " + target_location);
             }
         }
         // then we have a task to do, let get to it
@@ -204,7 +203,7 @@ public class Launcher {
         for (int id : islands) {
             MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
             for(MapLocation location : thisIslandLocs){
-                if(me.distanceSquaredTo(location) < closest & notOccupied(location,nearbyBots)){
+                if(me.distanceSquaredTo(location) < closest && !rc.canSenseRobotAtLocation(location)){ //&& notOccupied(location,nearbyBots)){
                     closest = me.distanceSquaredTo(location);
                     myIsland = location;
                 }
@@ -213,6 +212,7 @@ public class Launcher {
         return me.directionTo(myIsland);
     }
 
+    // It is probably better to use rc.canSenseRobotAtLocation(location) for 5 BC cost vs looping through bots.
     static boolean notOccupied(MapLocation location, RobotInfo[] nearbyBots){
         for(RobotInfo bot : nearbyBots){
             if(location.equals(bot.location)) return false;
