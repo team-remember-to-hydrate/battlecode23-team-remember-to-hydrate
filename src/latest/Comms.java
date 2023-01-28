@@ -297,7 +297,13 @@ public class Comms {
      */
     static void clear_command(RobotController rc, int array_index) throws GameActionException{
         if(array_index < index_last_orders & array_index >= index_orders)
-        rc.writeSharedArray(array_index, 0);
-        rc.writeSharedArray(array_index + 1, 0);
+            rc.writeSharedArray(array_index, 0);
+            rc.writeSharedArray(array_index + 1, 0);
+    }
+
+    static void clear_island(RobotController rc, int array_index) throws GameActionException{
+        if(array_index < index_last_island & array_index >= index_island)
+            rc.writeSharedArray(array_index, 0);
+            rc.writeSharedArray(array_index + 1, 0);
     }
 }
