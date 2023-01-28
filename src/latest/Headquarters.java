@@ -18,7 +18,7 @@ public class Headquarters {
     static RobotPlayer.hq_states current_state;
     static MapLocation[] island_locations = new MapLocation[34];
     static List<Integer> island_ids = new ArrayList<>();
-    static MapLocation next_island;
+    static List<MapLocation> well_locations = new ArrayList<>();
     static List<Integer> my_recent_tasks = new ArrayList<>();
     static int command_decay = 0;
     /**
@@ -61,7 +61,7 @@ public class Headquarters {
 
         //    ***   Check Comms for updates   ***
         // get islands from array
-        HashSet<Integer> island_indexes = Comms.get_array_islands(rc);
+        List<Integer> island_indexes = Comms.get_array_islands(rc);
 
         for(int island : island_indexes){
             int this_island_id = Comms.get_island_id(island);

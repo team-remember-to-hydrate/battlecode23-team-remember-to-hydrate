@@ -4,6 +4,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -150,8 +151,8 @@ public class Comms {
         return 99;
     }
 
-    static HashSet<Integer> get_array_islands(RobotController rc) throws GameActionException{
-        HashSet<Integer> islands = new HashSet<>();
+    static List<Integer> get_array_islands(RobotController rc) throws GameActionException{
+        List<Integer> islands = new ArrayList<>();
         for(int i = index_island; i <= index_last_island;i = i + 2){
             int this_value = rc.readSharedArray(i);
             if(this_value != 0){
