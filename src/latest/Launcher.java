@@ -2,10 +2,7 @@ package latest;
 
 import battlecode.common.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Launcher {
 
@@ -17,6 +14,7 @@ public class Launcher {
     static MapLocation target_location;
     static String indicator_string = "";
     static MapLocation me;
+    static int myLeaderID = Integer.MAX_VALUE;
 
     /**
      * Run a single turn for a Launcher.
@@ -24,6 +22,7 @@ public class Launcher {
      */
     static void runLauncher(RobotController rc) throws GameActionException {
         // initialize variables
+        indicator_string = "";
         boolean should_move = true;
         boolean blocking_carrier = false;
         RobotInfo[] nearby_bots = rc.senseNearbyRobots();
@@ -32,24 +31,40 @@ public class Launcher {
         Direction blocked_carrier_dir = Direction.CENTER;
 
         // define variable for desired direction to move.
-        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
+        Direction dir = RobotPlayer.lastMoved; //RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
         MapLocation map_center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
         MapLocation attack_location = new MapLocation(0,0);
 
         // This runs on my first turn only
-        if(my_HQ > 3){
+        if(RobotPlayer.turnCount <= 1){
             my_HQ = RobotPlayer.get_HQ_array_index(rc);
             my_HQ_location = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_HQ));
             my_state = RobotPlayer.states.INITIAL;
         }
 
         // Always set an attack target if we can attack
-        attack_location = target_lowest_health(rc,nearby_bots,opponent,attack_location);
+        ArrayList<RobotInfo> target_bots = Sensing.scanCombatUnitsOfTeam(rc, rc.getTeam().opponent());
+        if (target_bots.size() < 1) {
+            target_bots = Sensing.scanAnyUnitsOfTeamInRange(rc, rc.getTeam().opponent(), -1);
+        }
+
+        RobotInfo weakestBot = Sensing.scanWeakestBotInGroup(rc, target_bots);
+        if (weakestBot != null) {
+            attack_location = Sensing.scanWeakestBotInGroup(rc, target_bots).getLocation();
+        }
 
         int my_task = Comms.get_command_for_me(rc);
+
         if(my_task > 0){
             target_location = Comms.get_MapLocation(my_task);
             my_state = RobotPlayer.states.values()[Comms.get_task_type(rc.readSharedArray(my_task))];
+            indicator_string += ("My state is: " + my_state.toString());
+        }
+
+        // Attack before moving, in case we move out of range
+        if(rc.canAttack(attack_location)){
+            rc.attack(attack_location);
+            indicator_string += ("Attacking " + attack_location);
         }
 
         switch(my_state){
@@ -87,7 +102,7 @@ public class Launcher {
         }
 
         // if we are in a holding state check for orders
- /*       if(my_state.equals(RobotPlayer.states.INITIAL) || my_state.equals(RobotPlayer.states.GROUP)){
+        if(my_state.equals(RobotPlayer.states.INITIAL) || my_state.equals(RobotPlayer.states.GROUP)){
             RobotPlayer.hq_states current_HQ_state = RobotPlayer.hq_states.values()[RobotPlayer.unpackExtra(rc.readSharedArray(my_HQ))];
             // if we have a task lets get to it
             if(current_HQ_state.equals(RobotPlayer.hq_states.TASK)){
@@ -101,10 +116,10 @@ public class Launcher {
         else
         {
             dir = me.directionTo(target_location);
-        }*/
+        }
 
         // check for adjacent carrier, so we can move
-        Direction adjacent_carrier =  adjacent_carrier(rc, nearby_bots);
+        Direction adjacent_carrier =  adjacent_carrier(rc, Sensing.smartScanMembersOfTeam(rc, rc.getTeam()));
         if(!adjacent_carrier.equals(Direction.CENTER)){
             blocking_carrier = true;
             blocked_carrier_dir = adjacent_carrier;
@@ -141,10 +156,18 @@ public class Launcher {
         return attack_location;
     }
 
-    static Direction group_dir(RobotController rc, Direction dir) {
+    static Direction group_dir(RobotController rc, Direction dir) throws GameActionException {
         // Stay near spawning headquarters but move towards center
         MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight()/2);
         dir = rc.getLocation().directionTo(center);
+
+        // Check for a leader, and follow them if we find one.
+        checkAndReplaceLeader(rc);
+        indicator_string += ("LeaderID: " + myLeaderID);
+        if (myLeaderID < Integer.MAX_VALUE && !(myLeaderID > rc.getID())) { //If I have a leader candidate better than myself.
+            dir = rc.getLocation().directionTo(rc.senseRobot(myLeaderID).getLocation());
+        }
+
         if (rc.canMove(RobotPlayer.movable_direction(rc, dir))) {
             MapLocation new_spot = rc.getLocation().add(dir);
             if (new_spot.distanceSquaredTo(my_HQ_location) > RobotType.HEADQUARTERS.visionRadiusSquared &
@@ -154,6 +177,22 @@ public class Launcher {
             }
         }
         return dir;
+    }
+
+    private static void checkAndReplaceLeader(RobotController rc) throws GameActionException {
+        if (!rc.canSenseRobot(myLeaderID)){
+            myLeaderID = Integer.MAX_VALUE;
+            ArrayList<RobotInfo> mySquad =  Sensing.scanCombatUnitsOfTeamInRange(rc, rc.getTeam(), 13);
+            if (mySquad.size() > 0) {
+                myLeaderID = mySquad.get(0).getID();
+            }
+            for (int i = 1; i < mySquad.size(); i++){
+                int id = mySquad.get(i).getID();
+                if (id < myLeaderID){
+                    myLeaderID = id;
+                }
+            }
+        }
     }
 
     static Direction occupy_dir(RobotController rc, Direction dir, RobotInfo[] nearbyBots) throws GameActionException {
