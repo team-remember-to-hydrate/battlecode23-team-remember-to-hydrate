@@ -21,7 +21,7 @@ public class Amplifier {
 
 
         // This runs on my first turn only
-        if(my_HQ > 3){
+        if(RobotPlayer.turnCount <= 1){
             my_HQ = RobotPlayer.get_HQ_array_index(rc);
             my_HQ_location = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_HQ));
             my_state = RobotPlayer.states.INITIAL;
@@ -48,17 +48,27 @@ public class Amplifier {
         switch(my_state){
             case INITIAL:
                 my_state = RobotPlayer.states.SCOUT;
+                break;
             case SCOUT:
                 // Refresh MapInfo
-                // Try to move with clockwise momentum
-                Direction dir = Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, true);
-                Pathing.trackedMove(rc, dir);
-//                if (rc.canMove(dir)) {
-//                    rc.move(dir);
-//                    RobotPlayer.lastMoved = dir;
-//                }
+
+                if (target_location != null) {
+                    // If we reached it, no need for the target location any more.
+                    if (rc.getLocation().isWithinDistanceSquared(target_location, 5)) {
+                        target_location = null;
+                    }
+                }
+                else {
+                    // Try to move according to clockwise preference
+                    Direction dir = Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, RobotPlayer.prefersClockwise);
+                    Pathing.trackedMove(rc, dir);
+                }
+
+                break;
+
             case DEFAULT:
                 my_state = RobotPlayer.states.SCOUT;
+                break;
         }
 
         // Communicate High Value Info
