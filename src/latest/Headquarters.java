@@ -277,47 +277,7 @@ public class Headquarters {
             validBuildLocations.add(farLocation);
         }
 
-
         System.out.println("Stop popValidBuild: " + Clock.getBytecodesLeft());
         System.out.println("Valid Spawns: " + validBuildLocations);
     }
-
-    //This used about 20k bytecode on its own...
-//    static void populateValidAccessibleBuildLocations(RobotController rc) throws GameActionException {
-//        // TODO: Remove bytecode text
-//        System.out.println("Start popValidBuild: " + Clock.getBytecodesLeft());
-//        // get list of all visible spaces
-//        MapInfo[] inRange = rc.senseNearbyMapInfos(9); // 9 is HQ action range, not in GAMECONSTANTS
-//        // check if space is impassable or a HQ or unknown (use scanMapTileType)
-//        HashSet<MapLocation> passableSpaces = new HashSet<>(40);
-//        for (int i = 0; i < inRange.length; i++) {
-//            RobotInfo blockingBot = rc.senseRobotAtLocation(inRange[i].getMapLocation());
-//            if (inRange[i].isPassable()
-//                    && (blockingBot == null || !blockingBot.getType().equals(RobotType.HEADQUARTERS))) {
-//                passableSpaces.add(inRange[i].getMapLocation());
-//            }
-//        }
-//
-//        // check if space is accessible from HQ (Simple way; don't want to do BFS, just want easy accessible ones).
-//        Iterator<MapLocation> i = passableSpaces.iterator();
-//        while (i.hasNext()) {
-//            MapLocation testSpace = i.next();
-//            MapLocation cur = rc.getLocation();
-//            while (!cur.equals(testSpace)){
-//                MapLocation next = cur.add(cur.directionTo(testSpace));
-//                if (!passableSpaces.contains(next)) {
-//                    break;
-//                }
-//                else {
-//                    cur = next;
-//                }
-//            }
-//            if (cur.equals(testSpace)){
-//                // add to hashset
-//                validBuildLocations.add(testSpace);
-//            }
-//        }
-//        System.out.println("Stop popValidBuild: " + Clock.getBytecodesLeft());
-//        System.out.println("Valid Spawns: " + validBuildLocations);
-//    }
 }
