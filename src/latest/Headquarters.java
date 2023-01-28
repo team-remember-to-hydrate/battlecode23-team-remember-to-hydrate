@@ -2,14 +2,18 @@ package latest;
 
 import battlecode.common.*;
 
-import static latest.RobotPlayer.directions;
-import static latest.RobotPlayer.rng;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import static latest.RobotPlayer.*;
 
 public class Headquarters {
     static int my_array_address;
     static int amplifiers_built = 0;
 
     static WellInfo[] wells;
+    static HashSet<MapLocation> validBuildLocations = new HashSet<>(40);
     static RobotPlayer.hq_states current_state;
     static MapLocation next_island;
     /**
@@ -61,6 +65,9 @@ public class Headquarters {
                     rc.buildAnchor(Anchor.STANDARD);
                 }
             }
+
+            // populate valid build locations
+            populateValidAccessibleBuildLocations(rc);
         }
 
         //round 10 print the array to console
@@ -129,6 +136,7 @@ public class Headquarters {
             //rc.setIndicatorString("Trying to build a carrier");
             if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
                 rc.buildRobot(RobotType.CARRIER, newLoc);
+                carrierCount++; //TODO: Carrier mass spawn up to 6 visible
             }
         }
 
@@ -164,4 +172,152 @@ public class Headquarters {
         }
         return dir;
     }
+
+    /**
+     * Updates Headquarters.validBuildLocations to contain list of proven accessible spawn locations from HQ.
+     * Uses ~7300 bytecode
+     * @param rc
+     * @throws GameActionException
+     */
+    static void populateValidAccessibleBuildLocations(RobotController rc) throws GameActionException {
+//        System.out.println("Start popValidBuild: " + Clock.getBytecodesLeft());
+        // get list of all visible spaces
+        MapLocation[] close = rc.getAllLocationsWithinRadiusSquared(rc.getLocation(), 2); // 9 is HQ action range, not in GAMECONSTANTS
+        // check if space is impassable or a HQ or unknown (use scanMapTileType)
+        MapLocation testLocation;
+        for (int i = 0; i < close.length; i++){
+            testLocation = close[i];
+            if (rc.sensePassability(testLocation)
+                    && (!rc.canSenseRobotAtLocation(testLocation)
+                    || !rc.senseRobotAtLocation(testLocation).getType().equals(RobotType.HEADQUARTERS))) {
+                validBuildLocations.add(testLocation);
+            }
+        }
+
+        // Now check a level out from close locations
+//        System.out.println("Start make array: " + Clock.getBytecodesLeft());
+//        MapLocation[] closeLocations = validBuildLocations.toArray(new MapLocation[validBuildLocations.size()]);
+//        System.out.println("Stop make array and start iterator: " + Clock.getBytecodesLeft());
+        Iterator<MapLocation> i = validBuildLocations.iterator();
+//        System.out.println("Stop make iterator, do setup: " + Clock.getBytecodesLeft());
+        ArrayList<MapLocation> level2Locations = new ArrayList<MapLocation>(16);
+        MapLocation level1Loc;
+        Direction outwards;
+        MapLocation test1;
+        MapLocation test2;
+//        MapLocation test3;
+//        System.out.println("Stop setup, start layer 2 loop: " + Clock.getBytecodesLeft());
+        //System.out.println("Set contains: " + validBuildLocations);
+
+        while (i.hasNext()){
+            level1Loc = i.next();
+            outwards = level1Loc.directionTo(rc.getLocation()).opposite();
+            test1 = level1Loc.add(outwards);
+            test2 = level1Loc.add(outwards.rotateLeft());
+//            test3 = level1Loc.add(outwards.rotateRight());
+            if (rc.onTheMap(test1)
+                    && rc.sensePassability(test1)
+                    && (!rc.canSenseRobotAtLocation(test1)
+                    // || !rc.senseRobotAtLocation(test1).getType().equals(RobotType.HEADQUARTERS)
+            )) {
+                level2Locations.add(test1);
+            }
+            if (rc.onTheMap(test2)
+                    && rc.sensePassability(test2)
+                    && (!rc.canSenseRobotAtLocation(test2)
+//                    || !rc.senseRobotAtLocation(test2).getType().equals(RobotType.HEADQUARTERS)
+            )) {
+                level2Locations.add(test2);
+            }
+//            if (rc.sensePassability(test3)
+//                    && (!rc.canSenseRobotAtLocation(test3)
+////                    || !rc.senseRobotAtLocation(test3).getType().equals(RobotType.HEADQUARTERS)
+//            )) {
+//                level2Locations.add(test3);
+//            }
+        }
+//        System.out.println("stop layer 2 loop, start add layer2: " + Clock.getBytecodesLeft());
+        //System.out.println("Set contains: " + validBuildLocations);
+        //System.out.println("Set 2 contains: " + level2Locations);
+
+        // Add layer2 to hashset
+        for (int j = 0; j < level2Locations.size(); j++){
+            validBuildLocations.add(level2Locations.get(j));
+        }
+//        System.out.println("stop add layer 2, start add final 4: " + Clock.getBytecodesLeft());
+
+        // Add last 4 spaces if they are valid
+        MapLocation startLocation = rc.getLocation();
+        MapLocation farLocation = startLocation.translate(-3,0);
+        if (rc.onTheMap(farLocation)
+                && rc.sensePassability(farLocation)
+                && !rc.canSenseRobotAtLocation(farLocation)
+                && validBuildLocations.contains(farLocation.add(farLocation.directionTo(startLocation)))) {
+            validBuildLocations.add(farLocation);
+        }
+        farLocation = startLocation.translate(3,0);
+        if (rc.onTheMap(farLocation)
+                && rc.sensePassability(farLocation)
+                && !rc.canSenseRobotAtLocation(farLocation)
+                && validBuildLocations.contains(farLocation.add(farLocation.directionTo(startLocation)))) {
+            validBuildLocations.add(farLocation);
+        }
+        farLocation = startLocation.translate(0,3);
+        if (rc.onTheMap(farLocation)
+                && rc.sensePassability(farLocation)
+                && !rc.canSenseRobotAtLocation(farLocation)
+                && validBuildLocations.contains(farLocation.add(farLocation.directionTo(startLocation)))) {
+            validBuildLocations.add(farLocation);
+        }
+        farLocation = startLocation.translate(0,-3);
+        if (rc.onTheMap(farLocation)
+                && rc.sensePassability(farLocation)
+                && !rc.canSenseRobotAtLocation(farLocation)
+                && validBuildLocations.contains(farLocation.add(farLocation.directionTo(startLocation)))) {
+            validBuildLocations.add(farLocation);
+        }
+
+
+        System.out.println("Stop popValidBuild: " + Clock.getBytecodesLeft());
+        System.out.println("Valid Spawns: " + validBuildLocations);
+    }
+
+    //This used about 20k bytecode on its own...
+//    static void populateValidAccessibleBuildLocations(RobotController rc) throws GameActionException {
+//        // TODO: Remove bytecode text
+//        System.out.println("Start popValidBuild: " + Clock.getBytecodesLeft());
+//        // get list of all visible spaces
+//        MapInfo[] inRange = rc.senseNearbyMapInfos(9); // 9 is HQ action range, not in GAMECONSTANTS
+//        // check if space is impassable or a HQ or unknown (use scanMapTileType)
+//        HashSet<MapLocation> passableSpaces = new HashSet<>(40);
+//        for (int i = 0; i < inRange.length; i++) {
+//            RobotInfo blockingBot = rc.senseRobotAtLocation(inRange[i].getMapLocation());
+//            if (inRange[i].isPassable()
+//                    && (blockingBot == null || !blockingBot.getType().equals(RobotType.HEADQUARTERS))) {
+//                passableSpaces.add(inRange[i].getMapLocation());
+//            }
+//        }
+//
+//        // check if space is accessible from HQ (Simple way; don't want to do BFS, just want easy accessible ones).
+//        Iterator<MapLocation> i = passableSpaces.iterator();
+//        while (i.hasNext()) {
+//            MapLocation testSpace = i.next();
+//            MapLocation cur = rc.getLocation();
+//            while (!cur.equals(testSpace)){
+//                MapLocation next = cur.add(cur.directionTo(testSpace));
+//                if (!passableSpaces.contains(next)) {
+//                    break;
+//                }
+//                else {
+//                    cur = next;
+//                }
+//            }
+//            if (cur.equals(testSpace)){
+//                // add to hashset
+//                validBuildLocations.add(testSpace);
+//            }
+//        }
+//        System.out.println("Stop popValidBuild: " + Clock.getBytecodesLeft());
+//        System.out.println("Valid Spawns: " + validBuildLocations);
+//    }
 }
