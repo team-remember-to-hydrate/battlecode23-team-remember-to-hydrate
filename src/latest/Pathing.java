@@ -161,6 +161,9 @@ public class Pathing {
         map_tiles knownTile = RobotPlayer.get_map_location_tile(targetMoveLocation);
         if (knownTile.equals(map_tiles.UNKNOWN)) {
             knownTile = Sensing.scanMapTileType(rc, targetMoveLocation);
+            if (!knownTile.equals(map_tiles.UNKNOWN)) {
+                RobotPlayer.set_map_location_tile(targetMoveLocation, knownTile);
+            }
         }
 
         MapLocation returnLocation = startLocation;
@@ -199,6 +202,9 @@ public class Pathing {
                 map_tiles potentialPushTile = RobotPlayer.get_map_location_tile(potentialPushLocation);
                 if (potentialPushTile.equals(map_tiles.UNKNOWN)) {
                     potentialPushTile = Sensing.scanMapTileType(rc, potentialPushLocation);
+                    if (!potentialPushTile.equals(map_tiles.UNKNOWN)) {
+                        RobotPlayer.set_map_location_tile(potentialPushLocation, potentialPushTile);
+                    }
                 }
 
                 switch (potentialPushTile) {
