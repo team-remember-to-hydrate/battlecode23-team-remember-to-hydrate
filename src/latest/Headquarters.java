@@ -5,6 +5,7 @@ import battlecode.common.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import static latest.RobotPlayer.*;
 
@@ -16,6 +17,8 @@ public class Headquarters {
     static HashSet<MapLocation> validBuildLocations = new HashSet<>(40);
     static RobotPlayer.hq_states current_state;
     static MapLocation next_island;
+    static List<Integer> my_recent_tasks;
+    static int command_decay = 0;
     /**
      * Run a single turn for a Headquarters.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
@@ -26,6 +29,16 @@ public class Headquarters {
         RobotInfo[] nearby_enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
         Team us = rc.getTeam();
         int num_launchers = 0;
+
+        // clear any commands that were given in previous turn, do this before setting current commands
+        if(!my_recent_tasks.isEmpty()){
+           for(int task : my_recent_tasks){
+               Comms.clear_command(rc,task);
+           }
+        }
+
+        //decrease command delay si there is one
+        if(command_decay > 0){command_decay--;}
 
         // first round save our location to the array in the first available spot. 0-3
         // also track visible wells since HQ don't move
@@ -41,7 +54,7 @@ public class Headquarters {
                     break;
                 }
             }
-
+            // still in the code for the first round only
             // sense visible wells mark them on array, change state to RESOURCE
             wells = rc.senseNearbyWells();
             if(wells.length > 0){
@@ -57,7 +70,7 @@ public class Headquarters {
                 }
             }
             // still in the code for the first round only
-            // look for islands build anchor is there is at least one
+            // look for islands build anchor if there is at least one
             int[] island_indexes = rc.senseNearbyIslands();
             for(int island_index : island_indexes){
                 MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
@@ -65,7 +78,7 @@ public class Headquarters {
                     rc.buildAnchor(Anchor.STANDARD);
                 }
             }
-
+            // still in the code for the first round only
             // populate valid build locations
             populateValidAccessibleBuildLocations(rc);
         }
