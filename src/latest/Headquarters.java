@@ -16,7 +16,7 @@ public class Headquarters {
     static WellInfo[] wells;
     static HashSet<MapLocation> validBuildLocations = new HashSet<>(40);
     static RobotPlayer.hq_states current_state;
-    static List<MapLocation> island_locations = new ArrayList<>();
+    static MapLocation[] island_locations = new MapLocation[34];
     static List<Integer> island_ids = new ArrayList<>();
     static MapLocation next_island;
     static List<Integer> my_recent_tasks = new ArrayList<>();
@@ -72,11 +72,13 @@ public class Headquarters {
             }else{
                 //This is a new map id, lets store it, and it's location
                 island_ids.add(this_island_id);
-                island_locations.add(this_island_location);
+                island_locations[this_island_id] = this_island_location;
                 System.out.println("New island found at " + this_island_location);
             }
         }
 
+        // get wells from array
+        //HashSet<MapLocation> well_locations == Comms.get_array_wells(rc);
 
         ///   ***   Beginning HQ decision-making   ***
 

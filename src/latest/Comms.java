@@ -161,6 +161,8 @@ public class Comms {
         return islands;
     }
 
+
+
     static void set_island_location_word(RobotController rc, MapLocation location, boolean friendly_owned,
                                          int combatStrength, int island_index) throws GameActionException{
         //{[1 isLocation][1 friendly][2 combatStrength][12 location]}
@@ -305,5 +307,11 @@ public class Comms {
         if(array_index < index_last_island & array_index >= index_island)
             rc.writeSharedArray(array_index, 0);
             rc.writeSharedArray(array_index + 1, 0);
+    }
+
+    static void clear_well(RobotController rc, int array_index) throws GameActionException{
+        if(array_index < index_last_well & array_index >= index_well){
+            rc.writeSharedArray(array_index, 0);
+        }
     }
 }
