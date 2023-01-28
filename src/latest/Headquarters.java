@@ -188,6 +188,7 @@ public class Headquarters {
         for (int i = 0; i < close.length; i++){
             testLocation = close[i];
             if (rc.sensePassability(testLocation)
+                    && !rc.senseCloud(testLocation)
                     && (!rc.canSenseRobotAtLocation(testLocation)
                     || !rc.senseRobotAtLocation(testLocation).getType().equals(RobotType.HEADQUARTERS))) {
                 validBuildLocations.add(testLocation);
@@ -219,6 +220,7 @@ public class Headquarters {
             test2 = level1Loc.add(outwards.rotateLeft());
 //            test3 = level1Loc.add(outwards.rotateRight());
             if (rc.onTheMap(test1)
+                    && !rc.senseCloud(test1)
                     && rc.sensePassability(test1)
                     && (!rc.canSenseRobotAtLocation(test1)
                     // || !rc.senseRobotAtLocation(test1).getType().equals(RobotType.HEADQUARTERS)
@@ -226,6 +228,7 @@ public class Headquarters {
                 level2Locations.add(test1);
             }
             if (rc.onTheMap(test2)
+                    && !rc.senseCloud(test2)
                     && rc.sensePassability(test2)
                     && (!rc.canSenseRobotAtLocation(test2)
 //                    || !rc.senseRobotAtLocation(test2).getType().equals(RobotType.HEADQUARTERS)
@@ -253,6 +256,7 @@ public class Headquarters {
         MapLocation startLocation = rc.getLocation();
         MapLocation farLocation = startLocation.translate(-3,0);
         if (rc.onTheMap(farLocation)
+                && !rc.senseCloud(farLocation)
                 && rc.sensePassability(farLocation)
                 && !rc.canSenseRobotAtLocation(farLocation)
                 && validBuildLocations.contains(farLocation.add(farLocation.directionTo(startLocation)))) {
@@ -260,6 +264,7 @@ public class Headquarters {
         }
         farLocation = startLocation.translate(3,0);
         if (rc.onTheMap(farLocation)
+                && !rc.senseCloud(farLocation)
                 && rc.sensePassability(farLocation)
                 && !rc.canSenseRobotAtLocation(farLocation)
                 && validBuildLocations.contains(farLocation.add(farLocation.directionTo(startLocation)))) {
@@ -267,6 +272,7 @@ public class Headquarters {
         }
         farLocation = startLocation.translate(0,3);
         if (rc.onTheMap(farLocation)
+                && !rc.senseCloud(farLocation)
                 && rc.sensePassability(farLocation)
                 && !rc.canSenseRobotAtLocation(farLocation)
                 && validBuildLocations.contains(farLocation.add(farLocation.directionTo(startLocation)))) {
@@ -274,6 +280,7 @@ public class Headquarters {
         }
         farLocation = startLocation.translate(0,-3);
         if (rc.onTheMap(farLocation)
+                && !rc.senseCloud(farLocation)
                 && rc.sensePassability(farLocation)
                 && !rc.canSenseRobotAtLocation(farLocation)
                 && validBuildLocations.contains(farLocation.add(farLocation.directionTo(startLocation)))) {
