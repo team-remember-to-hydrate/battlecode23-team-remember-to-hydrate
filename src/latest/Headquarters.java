@@ -30,12 +30,6 @@ public class Headquarters {
         Team us = rc.getTeam();
         int num_launchers = 0;
 
-        // clear any commands that were given in previous turn, do this before setting current commands
-        if(!my_recent_tasks.isEmpty()){
-           for(int task : my_recent_tasks){
-               Comms.clear_command(rc,task);
-           }
-        }
 
         //decrease command delay si there is one
         if(command_decay > 0){command_decay--;}
@@ -54,6 +48,10 @@ public class Headquarters {
                     break;
                 }
             }
+            // still in the code for the first round only
+            // initialize my_recent_tasks
+            my_recent_tasks = new ArrayList<Integer>() {
+            };
             // still in the code for the first round only
             // sense visible wells mark them on array, change state to RESOURCE
             wells = rc.senseNearbyWells();
@@ -81,6 +79,13 @@ public class Headquarters {
             // still in the code for the first round only
             // populate valid build locations
             populateValidAccessibleBuildLocations(rc);
+        }
+
+        // clear any commands that were given in previous turn, do this before setting current commands
+        if(!my_recent_tasks.isEmpty()){
+            for(int task : my_recent_tasks){
+                Comms.clear_command(rc,task);
+            }
         }
 
         //round 10 print the array to console
