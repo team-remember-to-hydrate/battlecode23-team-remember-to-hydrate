@@ -194,6 +194,9 @@ public class Headquarters {
             }
         }
 
+        // If HQ in a cloud, we will stop here.
+        if (rc.senseCloud(rc.getLocation())) {return;}
+
         // Now check a level out from close locations
 //        System.out.println("Start make array: " + Clock.getBytecodesLeft());
 //        MapLocation[] closeLocations = validBuildLocations.toArray(new MapLocation[validBuildLocations.size()]);
