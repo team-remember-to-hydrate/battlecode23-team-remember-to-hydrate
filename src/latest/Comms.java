@@ -190,7 +190,7 @@ public class Comms {
         for(int i = index_island; i <= index_last_island;i = i + 2){
             int this_value = rc.readSharedArray(i);
             if(is_location(this_value)){
-                int island_id = get_island_id(rc, i + 1);
+                int island_id = get_island_id(i + 1);
                 known_islands.add(island_id);  // the next array index contains the id
             }
         }
@@ -200,7 +200,7 @@ public class Comms {
         return (array_data & 0b1000000000000000) == 0;
     }
 
-    static int get_island_id(RobotController rc, int array_data) throws GameActionException{
+    static int get_island_id(int array_data) throws GameActionException{
         return (array_data & 0b0111111000000000) >>> 9;
     }
 
