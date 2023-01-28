@@ -5,6 +5,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
 import java.util.HashSet;
+import java.util.List;
 
 public class Comms {
     /**
@@ -147,6 +148,17 @@ public class Comms {
             }
         }
         return 99;
+    }
+
+    static HashSet<Integer> get_array_islands(RobotController rc) throws GameActionException{
+        HashSet<Integer> islands = new HashSet<>();
+        for(int i = index_island; i <= index_last_island;i = i + 2){
+            int this_value = rc.readSharedArray(i);
+            if(this_value != 0){
+                islands.add(i);
+            }
+        }
+        return islands;
     }
 
     static void set_island_location_word(RobotController rc, MapLocation location, boolean friendly_owned,
