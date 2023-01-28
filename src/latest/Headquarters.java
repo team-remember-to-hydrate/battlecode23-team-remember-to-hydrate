@@ -16,10 +16,10 @@ public class Headquarters {
     static WellInfo[] wells;
     static HashSet<MapLocation> validBuildLocations = new HashSet<>(40);
     static RobotPlayer.hq_states current_state;
-    static List<MapLocation> island_locations;
-    static List<Integer> island_ids;
+    static List<MapLocation> island_locations = new ArrayList<>();
+    static List<Integer> island_ids = new ArrayList<>();
     static MapLocation next_island;
-    static List<Integer> my_recent_tasks;
+    static List<Integer> my_recent_tasks = new ArrayList<>();
     static int command_decay = 0;
     /**
      * Run a single turn for a Headquarters.
