@@ -153,7 +153,7 @@ public class Comms {
 
     static List<Integer> get_array_islands(RobotController rc) throws GameActionException{
         List<Integer> islands = new ArrayList<>();
-        for(int i = index_island; i <= index_last_island;i = i + 2){
+        for(int i = index_island; i < index_last_island;i = i + 2){
             int this_value = rc.readSharedArray(i);
             if(this_value != 0){
                 islands.add(i);
@@ -161,6 +161,8 @@ public class Comms {
         }
         return islands;
     }
+
+
 
 
 

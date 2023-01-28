@@ -46,7 +46,7 @@ public class Headquarters {
         }
 
         //round 10 print the array to console
-        if(rc.getRoundNum() == 10){
+        if(rc.getRoundNum() == 100){
             MapLocation mine = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_array_address));
             System.out.println("advertising my location" + my_array_address + " as " + mine + " from " + rc.readSharedArray(my_array_address));
             if(my_array_address == 0){
@@ -54,9 +54,16 @@ public class Headquarters {
                     int this_well = rc.readSharedArray(i);
                     if(this_well != 0){
                         System.out.println("Well at " + RobotPlayer.unpackMapLocation(this_well) + " of type " + RobotPlayer.unpackResource(this_well));
+
                     }
                 }
             }
+            // lets print the whole array
+            for(int i = 0; i < 64; i++){
+                System.out.print(i + ": " + rc.readSharedArray(i) + " ");
+            }
+            System.out.println(" end ");
+            System.out.println("Island ids :" + island_ids.size());
         }
 
         //    ***   Check Comms for updates   ***
@@ -67,13 +74,15 @@ public class Headquarters {
             int this_island_id = Comms.get_island_id(island);
             MapLocation this_island_location = Comms.get_MapLocation(island);
             // remove them from array if we already know about them
-            if(island_indexes.contains(this_island_id)){
+            //System.out.println("array location " + island + " id " + this_island_id + " location " + this_island_location + " raw data " + rc.readSharedArray(island) + " " + rc.readSharedArray(island + 1));
+            if(island_ids.contains(this_island_id)){
                 Comms.clear_island(rc, this_island_id);
+                System.out.println(island + " has been cleared from array");
             }else{
                 //This is a new map id, lets store it, and it's location
                 island_ids.add(this_island_id);
                 island_locations[this_island_id] = this_island_location;
-                System.out.println("New island found at " + this_island_location);
+                System.out.println("New island " + this_island_id + " found at " + this_island_location + " ids: " + island_ids.size() );
             }
         }
 
