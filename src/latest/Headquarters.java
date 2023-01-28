@@ -32,56 +32,11 @@ public class Headquarters {
         Team us = rc.getTeam();
         int num_launchers = 0;
 
+        // stuff for the first round only
+        performRoundOneTasks(rc);
 
         //decrease command delay if there is one
         if(command_decay > 0){command_decay--;}
-
-        // first round save our location to the array in the first available spot. 0-3
-        // also track visible wells since HQ don't move
-        if(rc.getRoundNum() == 1) {
-            // use first available shared array slot
-            for (int i = 0; i < 4; i++) {
-                int array_int = rc.readSharedArray(i);
-                if (array_int == 0) {
-                    my_array_address = i;
-                    rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
-                    // System.out.println(rc.getLocation());
-                    // System.out.println(RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
-                    break;
-                }
-            }
-            // still in the code for the first round only
-            // initialize my_recent_tasks
-            my_recent_tasks = new ArrayList<Integer>() {
-            };
-            // still in the code for the first round only
-            // sense visible wells mark them on array, change state to RESOURCE
-            wells = rc.senseNearbyWells();
-            if(wells.length > 0){
-                current_state = RobotPlayer.hq_states.RESOURCE;
-                for(WellInfo well : wells){
-                    for(int i = 4; i < 12; i++){
-                        int array_int = rc.readSharedArray(i);
-                        if(array_int == 0){
-                            rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), well.getResourceType().ordinal()));
-                            break;
-                        }
-                    }
-                }
-            }
-            // still in the code for the first round only
-            // look for islands build anchor if there is at least one
-            int[] island_indexes = rc.senseNearbyIslands();
-            for(int island_index : island_indexes){
-                MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
-                if(rc.canBuildAnchor(Anchor.STANDARD)){
-                    rc.buildAnchor(Anchor.STANDARD);
-                }
-            }
-            // still in the code for the first round only
-            // populate valid build locations
-            populateValidAccessibleBuildLocations(rc);
-        }
 
         // clear any commands that were given in previous turn, do this before setting current commands
         if(!my_recent_tasks.isEmpty()){
@@ -210,6 +165,57 @@ public class Headquarters {
             }
         }*/
     }
+
+    static void performRoundOneTasks(RobotController rc)throws GameActionException{
+        // first round save our location to the array in the first available spot. 0-3
+        // also track visible wells since HQ don't move
+        if(rc.getRoundNum() == 1) {
+            // use first available shared array slot
+            for (int i = 0; i < 4; i++) {
+                int array_int = rc.readSharedArray(i);
+                if (array_int == 0) {
+                    my_array_address = i;
+                    rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
+                    // System.out.println(rc.getLocation());
+                    // System.out.println(RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
+                    break;
+                }
+            }
+            // still in the code for the first round only
+            // initialize my_recent_tasks
+            my_recent_tasks = new ArrayList<Integer>() {
+            };
+            // still in the code for the first round only
+            // sense visible wells mark them on array, change state to RESOURCE
+            wells = rc.senseNearbyWells();
+            if(wells.length > 0){
+                current_state = RobotPlayer.hq_states.RESOURCE;
+                for(WellInfo well : wells){
+                    for(int i = 4; i < 12; i++){
+                        int array_int = rc.readSharedArray(i);
+                        if(array_int == 0){
+                            rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), well.getResourceType().ordinal()));
+                            break;
+                        }
+                    }
+                }
+            }
+            // still in the code for the first round only
+            // look for islands build anchor if there is at least one
+            int[] island_indexes = rc.senseNearbyIslands();
+            for(int island_index : island_indexes){
+                MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
+                if(rc.canBuildAnchor(Anchor.STANDARD)){
+                    rc.buildAnchor(Anchor.STANDARD);
+                }
+            }
+            // still in the code for the first round only
+            // populate valid build locations
+            populateValidAccessibleBuildLocations(rc);
+        }
+
+    }
+
     static Direction getBuildDirection(RobotController rc, WellInfo[] wells) throws GameActionException {
         Direction dir = directions[rng.nextInt(directions.length)];
         if(wells.length > 0){
