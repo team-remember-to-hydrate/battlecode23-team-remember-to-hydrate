@@ -18,6 +18,7 @@ public class Headquarters {
     static RobotPlayer.hq_states current_state;
     static MapLocation next_island;
     static List<Integer> my_recent_tasks;
+    static int command_decay = 0;
     /**
      * Run a single turn for a Headquarters.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
@@ -36,6 +37,9 @@ public class Headquarters {
            }
         }
 
+        //decrease command delay si there is one
+        if(command_decay > 0){command_decay--;}
+
         // first round save our location to the array in the first available spot. 0-3
         // also track visible wells since HQ don't move
         if(rc.getRoundNum() == 1) {
@@ -50,7 +54,7 @@ public class Headquarters {
                     break;
                 }
             }
-
+            // still in the code for the first round only
             // sense visible wells mark them on array, change state to RESOURCE
             wells = rc.senseNearbyWells();
             if(wells.length > 0){
@@ -66,7 +70,7 @@ public class Headquarters {
                 }
             }
             // still in the code for the first round only
-            // look for islands build anchor is there is at least one
+            // look for islands build anchor if there is at least one
             int[] island_indexes = rc.senseNearbyIslands();
             for(int island_index : island_indexes){
                 MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
@@ -74,7 +78,7 @@ public class Headquarters {
                     rc.buildAnchor(Anchor.STANDARD);
                 }
             }
-
+            // still in the code for the first round only
             // populate valid build locations
             populateValidAccessibleBuildLocations(rc);
         }
