@@ -43,7 +43,13 @@ public class Launcher {
         // This runs on my first turn only
         if(RobotPlayer.turnCount <= 1){
             my_HQ = RobotPlayer.get_HQ_array_index(rc);
-            my_HQ_location = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_HQ));
+            if(0 <= my_HQ & my_HQ < 5){
+
+                my_HQ_location =  RobotPlayer.unpackMapLocation(rc.readSharedArray(my_HQ));
+            } else {
+                my_HQ_location = RobotPlayer.birth_location;
+                System.out.println("My HQ is not 0-4 it is " + my_HQ );
+            }
             my_state = RobotPlayer.states.INITIAL;
         }
 

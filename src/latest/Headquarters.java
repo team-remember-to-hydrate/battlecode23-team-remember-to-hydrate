@@ -48,8 +48,8 @@ public class Headquarters {
             }
         }
 
-        //round 100 print the array to console
-        if(rc.getRoundNum() == 100){
+        //round 200 print the array to console
+        if(rc.getRoundNum() == 200){
             MapLocation mine = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_array_address));
             System.out.println("advertising my location" + my_array_address + " as " + mine + " from " + rc.readSharedArray(my_array_address));
             if(my_array_address == 0){
@@ -111,7 +111,7 @@ public class Headquarters {
             if(my_task_array_location < Comms.index_last_orders) {
                 rc.writeSharedArray(my_task_array_location, target_array);
                 int packed_info = RobotPlayer.packMapLocationExtra(rc.getLocation(), RobotPlayer.hq_states.TASK.ordinal());
-                rc.writeSharedArray(my_array_address, packed_info);
+                rc.writeSharedArray(my_task_array_location, packed_info);
                 command_decay = 20;
                 my_recent_tasks.add(my_task_array_location);
             }
