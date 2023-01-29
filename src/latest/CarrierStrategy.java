@@ -18,7 +18,14 @@ public class CarrierStrategy {
             searchForHq(rc);
             targetResourceType = ResourceType.values()[(rc.getID() % 2) + 1];
         }
-        else if (Sensing.scanRelativeCombatStrength(rc) < 0){
+
+        // Every turn do this:
+        // Read Comms:
+        RobotPlayer.process_array_islands(rc);
+        RobotPlayer.process_array_wells(rc);
+
+
+        if (Sensing.scanRelativeCombatStrength(rc) < 0){
             // Enemy combatants outnumber visible friendlies
             fightIfConvenient(rc);
         }
@@ -154,9 +161,26 @@ public class CarrierStrategy {
     static void deliverAnchor(RobotController rc) throws GameActionException {
         rc.setIndicatorString("deliverAnchor");
         Set<MapLocation> islandLocs = new HashSet<>();
+
+        // Add in Comms islands
+        for (int i = 0; i < RobotPlayer.island_ids.size(); i++){
+            int tempID = RobotPlayer.island_ids.get(i);
+            if (tempID != 0){
+                MapLocation tempLocation = RobotPlayer.island_locations[tempID];
+                if (!tempLocation.equals(null)){
+                    currentTargetIslandLocation = tempLocation;
+                    break;
+                }
+            }
+        }
+
         if (currentTargetIslandLocation == null || !rc.canSenseLocation(currentTargetIslandLocation)) {
             currentTargetIslandLocation = null;
             int[] islands = rc.senseNearbyIslands();
+
+        // End last minute anchor island edits
+
+
             for (int id : islands) {
                 // If we own it, skip it unless we can upgrade it.
                 if (rc.senseTeamOccupyingIsland(id).equals(rc.getTeam())
@@ -185,10 +209,14 @@ public class CarrierStrategy {
                 Pathing.moveWithBugNav(rc, currentTargetIslandLocation);
                 movesTaken++;
             }
-            if (rc.canPlaceAnchor()) {
+            if (rc.canPlaceAnchor()
+                    && !rc.senseTeamOccupyingIsland(rc.senseIsland(currentTargetIslandLocation)).equals(rc.getTeam())) { //prevents accel anchors though TODO
                 rc.setIndicatorString("Huzzah, placed anchor!");
                 rc.placeAnchor();
                 anchorMode = false;
+            }
+            else if (rc.getLocation().equals(currentTargetIslandLocation)) {
+                currentTargetIslandLocation = null;
             }
         }
         else {
