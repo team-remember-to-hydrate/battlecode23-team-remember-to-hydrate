@@ -103,7 +103,7 @@ public class Headquarters {
         }
     }
     static boolean isIslandClaimable(RobotController rc, int islandIndex) throws GameActionException {
-        return rc.senseTeamOccupyingIsland(islandIndex) != ourTeam; // neutral or enemy
+        return rc.senseTeamOccupyingIsland(islandIndex) == Team.NEUTRAL;
     }
     static void runLauncherRaid(RobotController rc) throws GameActionException {
         // if there are 6 launchers send them on a raid to spot.
