@@ -53,7 +53,7 @@ public class Headquarters {
             MapLocation mine = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_array_address));
             System.out.println("advertising my location" + my_array_address + " as " + mine + " from " + rc.readSharedArray(my_array_address));
             if(my_array_address == 0){
-                for(int i = 4; i < 12; i++){
+                for(int i = Comms.index_well; i <= Comms.index_last_well; i++){
                     int this_well = rc.readSharedArray(i);
                     if(this_well != 0){
                         System.out.println("Well at " + RobotPlayer.unpackMapLocation(this_well) + " of type " + RobotPlayer.unpackResource(this_well));
