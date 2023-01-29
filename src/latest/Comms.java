@@ -67,24 +67,24 @@ public class Comms {
         return countPartitions.length - 1;
     }
 
-    static void getCommsUpdates(RobotController rc) throws GameActionException {
-        getIslandUpdates(rc);
-    }
-
-    private static void getIslandUpdates(RobotController rc) throws GameActionException {
-        for (int i = index_island; i < index_last_island + 1; i++){
-            int commArrayValue = rc.readSharedArray(i);
-            int detailValue = 0;
-            if (commArrayValue != 0){
-                if (is_location(commArrayValue)){
-                    // Get next comm array value
-                    i++;
-                    detailValue = rc.readSharedArray(i);
-
-                }
-            }
-        }
-    }
+//    static void getCommsUpdates(RobotController rc) throws GameActionException {
+//        getIslandUpdates(rc);
+//    }
+//
+//    private static void getIslandUpdates(RobotController rc) throws GameActionException {
+//        for (int i = index_island; i < index_last_island + 1; i++){
+//            int commArrayValue = rc.readSharedArray(i);
+//            int detailValue = 0;
+//            if (commArrayValue != 0){
+//                if (is_location(commArrayValue)){
+//                    // Get next comm array value
+//                    i++;
+//                    detailValue = rc.readSharedArray(i);
+//
+//                }
+//            }
+//        }
+//    }
 
 
     static int decompressCountToMinPossible(int compressedCount){
@@ -225,7 +225,7 @@ public class Comms {
     }
 
     static boolean is_location(int array_data){
-        return (array_data & 0b1000000000000000) == 0;
+        return (array_data & 0b1000000000000000) == 1;
     }
 
     static int get_island_id(int array_data) throws GameActionException{
