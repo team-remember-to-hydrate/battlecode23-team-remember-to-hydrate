@@ -75,14 +75,9 @@ public class Headquarters {
 
 
         //    ***   Check Comms for updates   ***
-        // get islands from array
-        //{[1 isLocation][1 friendly][2 combatStrength][12 location]}
-        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][1 friendly_owned][3 TBD]}
 
         RobotPlayer.process_array_islands(rc);
-
-        // get wells from array
-        //HashSet<MapLocation> well_locations == Comms.get_array_wells(rc);
+        RobotPlayer.process_array_wells(rc);
 
         ///   ***   Beginning HQ decision-making   ***
 

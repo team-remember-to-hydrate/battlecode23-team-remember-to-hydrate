@@ -174,6 +174,8 @@ public class Comms {
         rc.writeSharedArray(array_index, packed_upgraded + packed_type + packed_location);
     }
 
+
+
     static MapLocation get_well_location(int data_array){
         return unpack_maplocation(data_array);
     }

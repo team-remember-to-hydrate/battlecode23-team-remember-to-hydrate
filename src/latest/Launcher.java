@@ -69,7 +69,6 @@ public class Launcher {
         if(my_task > 0){
             target_location = Comms.get_MapLocation(my_task);
             my_state = RobotPlayer.states.values()[Comms.get_task_type(rc.readSharedArray(my_task))];
-            indicator_string += ("My state is: " + my_state.toString());
         }
 
         // Attack before moving, in case we move out of range

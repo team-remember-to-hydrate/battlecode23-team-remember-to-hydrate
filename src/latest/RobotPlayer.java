@@ -48,6 +48,7 @@ public strictfp class RobotPlayer {
 
     static List<Integer> island_ids = new ArrayList<>();
     static MapLocation[] island_locations = new MapLocation[GameConstants.MAX_NUMBER_ISLANDS + 1];
+    static List<MapLocation> well_locations =  new ArrayList<>();
     static ArrayList<Integer> myIslandFullInfoBroadcastQueue = new ArrayList<>();
     static ArrayList<Integer> myIslandDetailsBroadcastQueue = new ArrayList<>();
     static ArrayList<Short> myWellBroadcastQueue = new ArrayList<>();
@@ -257,10 +258,34 @@ public strictfp class RobotPlayer {
                     island_locations[this_island_id] = this_island_location;
                 }
             }
-            if(is_location){i++;} // skip the details if this was a new island notification
+            if(is_location){i++;} // skip the details word if this was a new island notification
         }
     }
 
+    static void process_array_wells(RobotController rc) throws GameActionException{
+        for(int i = Comms.index_last_well ; i >= Comms.index_well; i--){
+            MapLocation this_well_location;
+            ResourceType this_well_type;
+
+            int raw_well_data = rc.readSharedArray(i);
+            this_well_location = Comms.get_MapLocation(raw_well_data);
+            this_well_type = Comms.get_well_type(raw_well_data);
+
+            if(known_well(this_well_location)& rc.getType().equals(RobotType.HEADQUARTERS)){
+                Comms.clear_well(rc, i);
+            }
+            else{
+                map[this_well_location.x][this_well_location.y] = this_well_type.ordinal();
+                well_locations.add(this_well_location);
+            }
+
+        }
+    }
+
+    static boolean known_well(MapLocation location){
+        int map_type = map[location.x][location.y];
+        return map_type == map_tiles.ADAMANTIUM.ordinal() || map_type == map_tiles.MANA.ordinal() || map_type == map_tiles.ELIXIR.ordinal();
+    }
 
     // find closest movable direction
     static Direction movable_direction(RobotController rc, Direction desired_dir){
