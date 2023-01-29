@@ -130,7 +130,7 @@ public class Comms {
 
             // Set island detail word
             int island_detail_packed = ((fullyPackedIsland << 16) >>> 16);
-            rc.writeSharedArray(island_index, island_detail_packed);
+            rc.writeSharedArray(island_index + 1, island_detail_packed);
             return true;
         }else{
             // no room in the array.

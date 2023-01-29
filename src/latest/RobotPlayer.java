@@ -39,11 +39,16 @@ public strictfp class RobotPlayer {
     static WellInfo[] scannedWellInfos = null;
     static int[][] map = new int[GameConstants.MAP_MAX_WIDTH][GameConstants.MAP_MAX_HEIGHT];
     static int[] teamKnownIslandDetails = new int[GameConstants.MAX_NUMBER_ISLANDS + 1];
-    static ArrayList<HashSet<MapLocation>> teamKnownIslandLocations =
-            new ArrayList<HashSet<MapLocation>>(GameConstants.MAX_NUMBER_ISLANDS + 1);
+
+    // Too much bytecode, and we only really need 1 location per island
+//    static ArrayList<HashSet<MapLocation>> teamKnownIslandLocations =
+//            new ArrayList<HashSet<MapLocation>>(GameConstants.MAX_NUMBER_ISLANDS + 1);
+
+    static MapLocation[] island_locations = new MapLocation[GameConstants.MAX_NUMBER_ISLANDS + 1];
     static ArrayList<Integer> myIslandFullInfoBroadcastQueue = new ArrayList<>();
     static ArrayList<Integer> myIslandDetailsBroadcastQueue = new ArrayList<>();
     static ArrayList<Short> myWellBroadcastQueue = new ArrayList<>();
+    public static states my_state;
 
 
 
@@ -125,6 +130,7 @@ public strictfp class RobotPlayer {
      **/
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
+//        System.out.println("Start of RobotPlayer bc remaining:" + Clock.getBytecodesLeft());
 
         // Hello world! Standard output is very useful for debugging.
         // Everything you say here will be directly viewable in your terminal when you run a match!
@@ -139,20 +145,23 @@ public strictfp class RobotPlayer {
         // Initialize myLastLocation to have a value
         myLastLocation = birth_location;
 
-        // Initialize clockwise preference randomly if not carrier
-        if (rc.getType() != RobotType.CARRIER) {
-            prefersClockwise = rng.nextBoolean();
-        }
+        // Initialize clockwise preference randomly
+        prefersClockwise = rng.nextBoolean();
+
 
         // Initialize myHealthLastTurn
         myHealthLastTurn = rc.getHealth();
 
-        // teamKnownIslandLocations needs to be initialized to work.
-        for (int i = 0; i < GameConstants.MAX_NUMBER_ISLANDS + 1; i++){
-            HashSet<MapLocation> islandLocations = new HashSet<MapLocation>(GameConstants.MAX_ISLAND_AREA);
-            teamKnownIslandLocations.add(islandLocations);
-        }
+        // Initialize my_state
+        my_state = states.INITIAL;
 
+        // Too much bytecode, and we didn't need every island anyway.
+//        // teamKnownIslandLocations needs to be initialized to work.
+//        for (int i = 0; i < GameConstants.MAX_NUMBER_ISLANDS + 1; i++){
+//            HashSet<MapLocation> islandLocations = new HashSet<MapLocation>(GameConstants.MAX_ISLAND_AREA);
+//            teamKnownIslandLocations.add(islandLocations);
+//        }
+//        System.out.println("Start of RobotPlayer while loop bc remaining: " + Clock.getBytecodesLeft());
 
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
