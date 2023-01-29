@@ -79,10 +79,10 @@ public class Headquarters {
         List<Integer> island_indexes = Comms.get_array_islands(rc);
 
         for(int i = Comms.index_island; i < Comms.index_last_island ; i++){
-
             int this_island_id;
             MapLocation this_island_location;
-            boolean is_location = Comms.is_location(i);
+
+            boolean is_location = Comms.is_location(rc.readSharedArray(i));
             if (is_location){
                 this_island_id = Comms.get_island_id(rc.readSharedArray(i + 1));
             }
@@ -93,13 +93,13 @@ public class Headquarters {
 
             if(island_ids.contains(this_island_id)){
                 Comms.clear_island_location(rc, i, is_location);
-                System.out.println("clearing island");
+                //System.out.println("clearing island");
             }else {
                 this_island_location = Comms.get_MapLocation(rc.readSharedArray(i));
                 if(is_location){
                     island_ids.add(this_island_id);
                     island_locations[this_island_id] = this_island_location;
-                    System.out.println("New island " + this_island_id + " found at " + this_island_location + " ids: " + island_ids.size() );
+                    //System.out.println("New island " + this_island_id + " found at " + this_island_location + " ids: " + island_ids.size() );
                 }
 
 
