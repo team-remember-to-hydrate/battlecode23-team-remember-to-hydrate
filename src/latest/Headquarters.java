@@ -222,7 +222,7 @@ public class Headquarters {
         if(wells.length > 0){
             current_state = RobotPlayer.hq_states.RESOURCE;
             for(WellInfo well : wells){
-                for(int i = 4; i < 12; i++){
+                for(int i = Comms.index_well; i <= Comms.index_last_well; i++){
                     int array_int = rc.readSharedArray(i);
                     if(array_int == 0){
                         rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), well.getResourceType().ordinal()));
