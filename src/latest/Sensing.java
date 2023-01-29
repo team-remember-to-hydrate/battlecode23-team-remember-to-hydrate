@@ -248,7 +248,7 @@ public class Sensing {
         if (rc.senseIsland(location) > 0) {return map_tiles.ISLAND_NEUTRAL;}
         // Check for well
         WellInfo wellInfo = rc.senseWell(location);
-        if (!wellInfo.getResourceType().equals(ResourceType.NO_RESOURCE)) {
+        if (wellInfo != null && !wellInfo.getResourceType().equals(ResourceType.NO_RESOURCE)) {
             ResourceType type = wellInfo.getResourceType();
             switch (type) {
                 case ADAMANTIUM:

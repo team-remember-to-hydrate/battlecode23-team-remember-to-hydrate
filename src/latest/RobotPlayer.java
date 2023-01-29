@@ -150,7 +150,7 @@ public strictfp class RobotPlayer {
         myLastLocation = birth_location;
 
         // Initialize clockwise preference randomly
-        prefersClockwise = rng.nextBoolean();
+        prefersClockwise = (rc.getID() % 2) == 1;
 
 
         // Initialize myHealthLastTurn
@@ -289,7 +289,7 @@ public strictfp class RobotPlayer {
 
     // find closest movable direction
     static Direction movable_direction(RobotController rc, Direction desired_dir){
-        return Pathing.getClosestValidMoveDirection(rc, desired_dir, false);
+        return Pathing.getClosestValidMoveDirection(rc, desired_dir);
 //        if(rc.canMove(desired_dir)) return desired_dir;
 //        for (int rotation_offset = 1; rotation_offset <= 4; rotation_offset++){  // 4 is 1/2 of the 8 possible directions
 //            Direction left_dir = Direction.values()[(desired_dir.ordinal() +  rotation_offset) % 8];
