@@ -61,7 +61,7 @@ public class Headquarters {
                     }
                 }
             }
-            // lets print the whole array
+            // let's print the whole array
             for(int i = 0; i < 64; i++){
                 System.out.print(i + ": " + rc.readSharedArray(i) + " ");
             }
