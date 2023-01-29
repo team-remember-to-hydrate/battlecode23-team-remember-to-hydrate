@@ -9,6 +9,8 @@ public class Headquarters {
     static WellInfo[] wells;
     static RobotPlayer.hq_states current_state;
     static int roundNum = 0;
+    static Team ourTeam = null;
+    static int[] initiallySensedIslandIndexes = null;
     /**
      * Run a single turn for a Headquarters.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
@@ -16,6 +18,8 @@ public class Headquarters {
     static void runHeadquarters(RobotController rc) throws GameActionException {
         roundNum = rc.getRoundNum();
         if(roundNum == 1) {
+            ourTeam = rc.getTeam();
+            initiallySensedIslandIndexes = rc.senseNearbyIslands();
             communicateLocation(rc);
             communicateVisibleWells(rc);
             runStartingProduction(rc);
@@ -31,8 +35,8 @@ public class Headquarters {
             throw new GameActionException(GameActionExceptionType.INTERNAL_ERROR, "Dont call this method unless it is the first round");
         }
 
-        // build anchors for initially sensed islands
-        buildAnchorIfThereIsNearbyIsland(rc);
+        // build 1 anchor
+        rc.buildAnchor(Anchor.STANDARD);
 
         // build 2 carriers
         Direction dir = getBuildDirection(rc, wells);
@@ -48,7 +52,7 @@ public class Headquarters {
         rc.buildRobot(RobotType.LAUNCHER, newLoc);
     }
     static void runContinuousProduction(RobotController rc) throws GameActionException {
-        buildAnchorIfThereIsNearbyIsland(rc);
+        runBuildAnchorsIfThereIsClaimableIsland(rc);
         runLauncherRaid(rc);
     }
     static void communicateLocation(RobotController rc) throws GameActionException {
@@ -91,21 +95,19 @@ public class Headquarters {
             }
         }
     }
-    static void buildAnchorIfThereIsNearbyIsland(RobotController rc) throws GameActionException {
-        // still in the code for the first round only
-        // look for islands build anchor is there is at least one
-        int[] island_indexes = rc.senseNearbyIslands();
-        for(int island_index : island_indexes){
-            MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
-            if(rc.canBuildAnchor(Anchor.STANDARD)){
+    static void runBuildAnchorsIfThereIsClaimableIsland(RobotController rc) throws GameActionException {
+        for(int island_index : initiallySensedIslandIndexes){
+            if(isIslandClaimable(rc, island_index) && rc.canBuildAnchor(Anchor.STANDARD)){
                 rc.buildAnchor(Anchor.STANDARD);
             }
         }
     }
+    static boolean isIslandClaimable(RobotController rc, int islandIndex) throws GameActionException {
+        return rc.senseTeamOccupyingIsland(islandIndex) != ourTeam; // neutral or enemy
+    }
     static void runLauncherRaid(RobotController rc) throws GameActionException {
         // if there are 6 launchers send them on a raid to spot.
         RobotInfo[] nearby_bots = rc.senseNearbyRobots();
-        Team us = rc.getTeam();
         int num_launchers = 0;
         for(RobotInfo bot : nearby_bots){
             if(bot.getTeam().equals(us) & bot.getType().equals(RobotType.LAUNCHER)){
