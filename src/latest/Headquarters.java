@@ -43,7 +43,7 @@ public class Headquarters {
                 for(int i = Comms.index_well; i <= Comms.index_last_well; i++){
                     int this_well = rc.readSharedArray(i);
                     if(this_well != 0){
-                        System.out.println("Well at " + RobotPlayer.unpackMapLocation(this_well) + " of type " + RobotPlayer.unpackResource(this_well));
+                        System.out.println("Well at " + Comms.unpack_maplocation(this_well) + " of type " + Comms.get_task_type(this_well));
                     }
                 }
             }

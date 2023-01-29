@@ -174,6 +174,14 @@ public class Comms {
         rc.writeSharedArray(array_index, packed_upgraded + packed_type + packed_location);
     }
 
+    static MapLocation get_well_location(int data_array){
+        return unpack_maplocation(data_array);
+    }
+
+    static ResourceType get_well_type(int array_data){
+        return ResourceType.values()[(array_data & 0b0110000000000000) >>> 12];
+    }
+
     static List<Integer> get_array_islands(RobotController rc) throws GameActionException{
         List<Integer> islands = new ArrayList<>();
         for(int i = index_island; i < index_last_island;i++){
@@ -243,6 +251,13 @@ public class Comms {
         int x = location.x;
         int y = location.y;
         return (x << 6) + y;
+    }
+
+    static MapLocation unpack_maplocation(int array_data){
+        int map_int = array_data & 0b0000111111111111;
+        int x = map_int >>> 6;
+        int y = map_int & 0b111111;
+        return new MapLocation(x, y);
     }
 
     ///   ***   TASKS   ***
