@@ -15,7 +15,6 @@ public class Headquarters {
     static void runHeadquarters(RobotController rc) throws GameActionException {
         // generate info to make decisions
         RobotInfo[] nearby_bots = rc.senseNearbyRobots();
-        RobotInfo[] nearby_enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
         Team us = rc.getTeam();
         int num_launchers = 0;
 
@@ -28,8 +27,6 @@ public class Headquarters {
                 if (array_int == 0) {
                     my_array_address = i;
                     rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
-                    // System.out.println(rc.getLocation());
-                    // System.out.println(RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
                     break;
                 }
             }
