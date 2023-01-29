@@ -225,7 +225,7 @@ public class Comms {
     }
 
     static boolean is_location(int array_data){
-        return !((array_data & 0b1000000000000000) == 0);
+        return (array_data & 0b1000000000000000) != 0;
     }
 
     static int get_island_id(int array_data) throws GameActionException{
