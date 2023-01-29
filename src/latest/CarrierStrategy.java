@@ -6,6 +6,7 @@ import java.util.*;
 
 public class CarrierStrategy {
     static MapLocation hqLoc;
+    static ResourceType targetResourceType;
     static MapLocation wellLoc;
     static boolean anchorMode = false;
     static int amountResourcesHeld = 0;
@@ -13,7 +14,9 @@ public class CarrierStrategy {
 
     public static void run(RobotController rc) throws GameActionException {
         if(hqLoc == null) {
+            // Complete First Turn Actions
             searchForHq(rc);
+            targetResourceType = ResourceType.values()[(rc.getID() % 2) + 1];
         }
         else if (Sensing.scanRelativeCombatStrength(rc) < 0){
             // Enemy combatants outnumber visible friendlies
@@ -30,7 +33,8 @@ public class CarrierStrategy {
             deliverAnchor(rc);
         }
         else if(wellLoc == null){
-            searchForWell(rc);
+            //searchForWell(rc);
+            searchForWellOfType(rc, targetResourceType);
             Pathing.trackedMove(rc, Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, RobotPlayer.prefersClockwise));
         }
         else if(amountResourcesHeld < GameConstants.CARRIER_CAPACITY){
@@ -115,6 +119,20 @@ public class CarrierStrategy {
             }
         }
     }
+
+    static void searchForWellOfType(RobotController rc, ResourceType type) {
+        if(wellLoc == null) {
+            WellInfo[] wells = rc.senseNearbyWells();
+            if((wells != null)) {
+                for (int i = 0; i < wells.length; i++){
+                    if (wells[i].getResourceType().equals(type)){
+                        wellLoc = wells[i].getMapLocation();
+                    }
+                }
+            }
+        }
+    }
+
     static void tryPickUpAnchor(RobotController rc, MapLocation loc) throws GameActionException {
         if(rc.canTakeAnchor(loc, Anchor.ACCELERATING)){
             rc.takeAnchor(loc, Anchor.ACCELERATING);
