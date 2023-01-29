@@ -35,7 +35,11 @@ public class CarrierStrategy {
         else if(wellLoc == null){
             //searchForWell(rc);
             searchForWellOfType(rc, targetResourceType);
-            Pathing.trackedMove(rc, Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, RobotPlayer.prefersClockwise));
+            int movesTaken = 0;
+            while (movesTaken < 3) {
+                Pathing.trackedMove(rc, Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, RobotPlayer.prefersClockwise));
+                movesTaken++;
+            }
         }
         else if(amountResourcesHeld < GameConstants.CARRIER_CAPACITY){
             if(rc.getLocation().distanceSquaredTo(wellLoc) <= 2){
@@ -99,7 +103,11 @@ public class CarrierStrategy {
             Pathing.getClosestValidMoveDirection(rc, rc.getLocation().directionTo(targetBot.getLocation()).opposite());
         }
 
-        Pathing.trackedMove(rc, retreatDirection);
+        int movesTaken = 0;
+        while (movesTaken < 3){
+            Pathing.trackedMove(rc, retreatDirection);
+            movesTaken++;
+        }
         // TODO Switch to return to HQ mode
     }
 
@@ -171,9 +179,11 @@ public class CarrierStrategy {
             }
         }
 
+        int movesTaken = 0;
         if (currentTargetIslandLocation != null) {
-            if(!rc.getLocation().equals(currentTargetIslandLocation)) {
+            while (!rc.getLocation().equals(currentTargetIslandLocation) && movesTaken < 3) {
                 Pathing.moveWithBugNav(rc, currentTargetIslandLocation);
+                movesTaken++;
             }
             if (rc.canPlaceAnchor()) {
                 rc.setIndicatorString("Huzzah, placed anchor!");
@@ -182,7 +192,10 @@ public class CarrierStrategy {
             }
         }
         else {
-            Pathing.trackedMove(rc, Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, RobotPlayer.prefersClockwise));
+            while (!rc.getLocation().equals(currentTargetIslandLocation) && movesTaken < 3){
+                Pathing.trackedMove(rc, Pathing.getRotateValidMove(rc, RobotPlayer.lastMoved, RobotPlayer.prefersClockwise));
+                movesTaken++;
+            }
         }
     }
     static void tryCollectResources(RobotController rc, MapLocation loc) throws GameActionException {
