@@ -37,6 +37,28 @@ public class Headquarters {
             performRoundOneTasks(rc);
         }
 
+        //round 200 print the array to console
+        if(rc.getRoundNum() == 200){
+            MapLocation mine = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_array_address));
+            System.out.println("advertising my location" + my_array_address + " as " + mine + " from " + rc.readSharedArray(my_array_address));
+            if(my_array_address == 0){
+                for(int i = Comms.index_well; i <= Comms.index_last_well; i++){
+                    int this_well = rc.readSharedArray(i);
+                    if(this_well != 0){
+                        System.out.println("Well at " + RobotPlayer.unpackMapLocation(this_well) + " of type " + RobotPlayer.unpackResource(this_well));
+                    }
+                }
+            }
+            // let's print the whole array
+            for(int i = 0; i < 64; i++){
+                System.out.print(i + ": " + rc.readSharedArray(i) + " ");
+            }
+            System.out.println(" end ");
+            System.out.println("There are " + island_ids.size() + " known islands");
+            for(MapLocation location : island_locations){
+                System.out.println("island at " + location);
+            }
+        }
 
         //decrease command delay if there is one
         if(command_decay > 0){command_decay--;}
@@ -48,26 +70,7 @@ public class Headquarters {
             }
         }
 
-        //round 200 print the array to console
-        if(rc.getRoundNum() == 200){
-            MapLocation mine = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_array_address));
-            System.out.println("advertising my location" + my_array_address + " as " + mine + " from " + rc.readSharedArray(my_array_address));
-            if(my_array_address == 0){
-                for(int i = Comms.index_well; i <= Comms.index_last_well; i++){
-                    int this_well = rc.readSharedArray(i);
-                    if(this_well != 0){
-                        System.out.println("Well at " + RobotPlayer.unpackMapLocation(this_well) + " of type " + RobotPlayer.unpackResource(this_well));
 
-                    }
-                }
-            }
-            // let's print the whole array
-            for(int i = 0; i < 64; i++){
-                System.out.print(i + ": " + rc.readSharedArray(i) + " ");
-            }
-            System.out.println(" end ");
-            System.out.println("Island ids :" + island_ids.size());
-        }
 
         //    ***   Check Comms for updates   ***
         // get islands from array
@@ -75,21 +78,25 @@ public class Headquarters {
 
         for(int island : island_indexes){
             int this_island_id;
-            MapLocation this_island_location = null;
+            MapLocation this_island_location = Comms.get_MapLocation(rc.readSharedArray(island));
+            boolean is_location = Comms.is_location(island);
             if (Comms.is_location(island)){
                 this_island_id = Comms.get_island_id(rc.readSharedArray(island + 1));
                 this_island_location = Comms.get_MapLocation(rc.readSharedArray(island));
             }
             else {
                 this_island_id = Comms.get_island_id(rc.readSharedArray(island));
+                // do the updating for islands here
             }
 
             // remove them from array if we already know about them
-            //System.out.println("array location " + island + " id " + this_island_id + " location " + this_island_location + " raw data " + rc.readSharedArray(island) + " " + rc.readSharedArray(island + 1));
             if(island_ids.contains(this_island_id)){
                 if (Comms.is_location(island)) {
                     Comms.clear_island(rc, island);
-                    Comms.clear_island(rc, island + 1);
+                    if(is_location){
+                        Comms.clear_island(rc, island + 1);
+                    }
+
                 }
                 else {
                     Comms.clear_island(rc, island);
