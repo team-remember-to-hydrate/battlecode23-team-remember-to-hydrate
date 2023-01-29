@@ -264,8 +264,8 @@ public class Comms {
     Membership Assignment order:
  * Word 1:
  * [isTaskAssignment] [groupIDNumber] [botTypes] [shouldOverrideExistingMembership]
- * [existingMembersOutsideRadiusShouldUnassignMembership] [extraSelectionRadius]
- * [1] [4] [3] [1] [1] [2]
+ * [existingMembersOutsideRadiusShouldUnassignMembership] [extraSelectionRadius] [Unused]
+ * [1] [4] [3] [1] [1] [2] [4]
      * Word 2:
  * [selectionRadius] [location]
  * [4] [12]
@@ -280,7 +280,13 @@ public class Comms {
                                                    boolean shouldOverrideExistingMembership,
                                                    boolean existingMembersOutsideRadiusShouldUnassignMembership,
                                                    int extraSelectionRadius) {
-        return 0; // TODO
+        int wordOne = groupIDNumber << 11; // Leave left bit as 0, shift size 4 to next available bit.
+        wordOne = wordOne & (botType.ordinal() << 8);
+        if (shouldOverrideExistingMembership) {wordOne = wordOne & (1 << 7);}
+        if (existingMembersOutsideRadiusShouldUnassignMembership) {wordOne = wordOne & (1 << 6);}
+        wordOne = wordOne & (extraSelectionRadius << 4);
+
+        return wordOne;
     }
 
     static int createGroupMembershipCommandWordTwo(RobotController rc, MapLocation location,
