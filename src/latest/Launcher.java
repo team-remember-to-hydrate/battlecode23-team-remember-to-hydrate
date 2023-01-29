@@ -127,9 +127,9 @@ public class Launcher {
 
         //actually move away from blocked carrier or desired direction.
         if(blocking_carrier & rc.canMove(RobotPlayer.movable_direction(rc, blocked_carrier_dir.opposite()))){
-            rc.move(RobotPlayer.movable_direction(rc, blocked_carrier_dir.opposite()));
+            Pathing.trackedMove(rc, RobotPlayer.movable_direction(rc, blocked_carrier_dir.opposite()));
         } else if(rc.canMove(RobotPlayer.movable_direction(rc, dir)) & !blocking_carrier){
-            rc.move(RobotPlayer.movable_direction(rc, dir));
+            Pathing.trackedMove(rc, RobotPlayer.movable_direction(rc, dir));
         }
 
         indicator_string += "dir:" + dir;
