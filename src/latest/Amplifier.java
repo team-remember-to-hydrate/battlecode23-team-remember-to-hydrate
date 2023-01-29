@@ -8,10 +8,10 @@ public class Amplifier {
 
     final Direction[] directions = RobotPlayer.directions;
     final Random rng = RobotPlayer.rng;
-    static RobotPlayer.states my_state;
+    static RobotPlayer.states my_state = RobotPlayer.my_state;
     static int my_HQ = 99;
     static MapLocation my_HQ_location;
-
+    static MapLocation[] island_locations = RobotPlayer.island_locations;
     static MapLocation target_location;
     static String indicator_string = "";
     static MapLocation myLocation;
@@ -24,7 +24,6 @@ public class Amplifier {
         if(RobotPlayer.turnCount <= 1){
             my_HQ = RobotPlayer.get_HQ_array_index(rc);
             my_HQ_location = RobotPlayer.unpackMapLocation(rc.readSharedArray(my_HQ));
-            my_state = RobotPlayer.states.INITIAL;
             map_center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
         }
 
