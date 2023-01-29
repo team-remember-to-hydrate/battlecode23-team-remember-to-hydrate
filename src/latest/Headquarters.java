@@ -87,7 +87,7 @@ public class Headquarters {
             // remove them from array if we already know about them
             //System.out.println("array location " + island + " id " + this_island_id + " location " + this_island_location + " raw data " + rc.readSharedArray(island) + " " + rc.readSharedArray(island + 1));
             if(island_ids.contains(this_island_id)){
-                Comms.clear_island(rc, this_island_id);
+                Comms.clear_island(rc, island);
                 System.out.println("index " + island + " has been cleared from array it's id is " + this_island_id);
             }else{
                 //This is a new map id, lets store it, and it's location
