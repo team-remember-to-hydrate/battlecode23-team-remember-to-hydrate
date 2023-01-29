@@ -191,11 +191,17 @@ public class Sensing {
         //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][1 friendly][3 TBD]}
         int packedDetails = islandId << 9;
         if(anchor_present) packedDetails += 0b0000000100000000;
-        packedDetails += friendlies  << 6;
-        packedDetails += enemies << 4;
+        int compressedFriendlies = Comms.compressCount(friendlies);
+        packedDetails += compressedFriendlies  << 6;
+        int compressedEnemies = Comms.compressCount(enemies);
+        packedDetails += compressedEnemies << 4;
 
         int fullyPackedIsland = (packedLocation << 16) + packedDetails;
         return fullyPackedIsland;
+    }
+
+    static int islandDetailsFromBroadcastPair(int islandBroadcastPair){
+        return (islandBroadcastPair & 0x10);
     }
 
     static int packageIslandDetailBroadcast(RobotController rc, int islandId, boolean anchor_present, int friendlies,
@@ -203,8 +209,10 @@ public class Sensing {
         //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][1 friendly][3 TBD]}
         int packedDetails = islandId << 9;
         if(anchor_present) packedDetails += 0b0000000100000000;
-        packedDetails += friendlies  << 6;
-        packedDetails += enemies << 4;
+        int compressedFriendlies = Comms.compressCount(friendlies);
+        packedDetails += compressedFriendlies  << 6;
+        int compressedEnemies = Comms.compressCount(enemies);
+        packedDetails += compressedEnemies << 4;
         if (friendlyOwned) packedDetails += 0b0000000000001000;
         return packedDetails;
     }
@@ -313,10 +321,12 @@ public class Sensing {
     }
 
     static void scanAndUpdateIslands(RobotController rc) throws GameActionException {
-        Amplifier.myLocation = rc.getLocation();
+        RobotPlayer.myCurrentLocation = rc.getLocation();
         // Scan Island Info and Queue/Report Changes - 200 bc + potentially over 100 per island in range
-        if (RobotPlayer.scannedIslandIDs == null || (Amplifier.myLocation != RobotPlayer.lastLocationScannedIslands)) {
+        if (RobotPlayer.scannedIslandIDs == null
+                || (RobotPlayer.myCurrentLocation != RobotPlayer.lastLocationScannedIslands)) {
             RobotPlayer.scannedIslandIDs = rc.senseNearbyIslands();
+            RobotPlayer.lastLocationScannedIslands = rc.getLocation();
 
             if (Clock.getBytecodesLeft() > 1000){
                 Team ourTeam = rc.getTeam();
@@ -329,7 +339,7 @@ public class Sensing {
                         boolean anchorPresent = (occupier != Team.NEUTRAL);
                         boolean friendlyOwned = (occupier == ourTeam);
 
-                        if (RobotPlayer.teamKnownIslandLocations.get(id).size() != 0){
+                        if (RobotPlayer.island_locations[id] == null){
                             // This is a new island, report location plus details.
                             MapLocation[] islandLocations = rc.senseNearbyIslandLocations(id);
                             int ownerCombatStrength;
@@ -346,6 +356,9 @@ public class Sensing {
                             // Broadcast it if we can
                             if (Comms.set_island_from_island_broadcast_pair(rc, islandBroadcastPair)){
                                 // It has now been written to the comm array
+                                RobotPlayer.island_locations[id] = islandLocations[0];
+                                RobotPlayer.teamKnownIslandDetails[id] =
+                                        islandDetailsFromBroadcastPair(islandBroadcastPair);
                             }
                             else{
                                 // Store this until we can broadcast
@@ -357,6 +370,9 @@ public class Sensing {
                             int islandDetailBroadcast = packageIslandDetailBroadcast(rc, id, anchorPresent,
                                     friendlies, enemies, friendlyOwned);
                             if (RobotPlayer.teamKnownIslandDetails[id] != islandDetailBroadcast){
+                                System.out.println("Detected new details for id :" + id + " details: " + islandDetailBroadcast);
+                                System.out.println("Check Details. ID: " + id + " AnchorPresent:" + anchorPresent + " friendlies:" + friendlies + " enemies:" + enemies + " friendlyOwned:" + friendlyOwned );
+                                System.out.println("Previously Known Details for id" + RobotPlayer.teamKnownIslandDetails[id]);
                                 // Just broadcast it if we can, otherwise it may be outdated if we queue it.
                                 int target_index = Comms.get_available_island_index(rc);
                                 if (rc.canWriteSharedArray(target_index, 0)){
