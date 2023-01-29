@@ -94,6 +94,9 @@ public class Headquarters {
             MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
             Comms.send_command(rc,center,RobotType.HEADQUARTERS.visionRadiusSquared,1,1, false,false,1,true);
         }
+        if(rc.getNumAnchors(Anchor.STANDARD) < 1 && rc.canBuildAnchor(Anchor.STANDARD)) {
+            rc.buildAnchor(Anchor.STANDARD);
+        }
 
 //        // if we are holding an anchor we saw an island, lets build a carrier.
 //        // Pick a direction to build in.
@@ -213,6 +216,8 @@ public class Headquarters {
         }
         return dir;
     }
+
+
 
     /**
      * Updates Headquarters.validBuildLocations to contain list of proven accessible spawn locations from HQ.
