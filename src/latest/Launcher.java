@@ -68,7 +68,7 @@ public class Launcher {
 
         if(my_task > 0){
             target_location = Comms.get_MapLocation(my_task);
-            my_state = RobotPlayer.states.values()[Comms.get_task_type(rc.readSharedArray(my_task))];
+            my_state = RobotPlayer.states.values()[Comms.get_task_type(my_task)];
             indicator_string += " tsk " + my_task;
         }
 
