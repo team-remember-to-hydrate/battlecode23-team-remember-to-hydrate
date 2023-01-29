@@ -149,7 +149,7 @@ public strictfp class RobotPlayer {
         myLastLocation = birth_location;
 
         // Initialize clockwise preference randomly
-        prefersClockwise = rng.nextBoolean();
+        prefersClockwise = (rc.getID() % 2) == 1;
 
 
         // Initialize myHealthLastTurn
