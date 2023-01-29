@@ -181,7 +181,7 @@ public class Comms {
     }
 
     static ResourceType get_well_type(int array_data){
-        return ResourceType.values()[(array_data & 0b0110000000000000) >>> 12];
+        return ResourceType.values()[(array_data & 0b0110000000000000) >>> 13];
     }
 
     static List<Integer> get_array_islands(RobotController rc) throws GameActionException{
