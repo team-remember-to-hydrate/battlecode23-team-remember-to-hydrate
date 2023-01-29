@@ -176,7 +176,7 @@ public class Comms {
 
     static List<Integer> get_array_islands(RobotController rc) throws GameActionException{
         List<Integer> islands = new ArrayList<>();
-        for(int i = index_island; i < index_last_island;i = i + 2){
+        for(int i = index_island; i < index_last_island;i++){
             int this_value = rc.readSharedArray(i);
             if(this_value != 0){
                 islands.add(i);
@@ -334,11 +334,13 @@ public class Comms {
             rc.writeSharedArray(array_index + 1, 0);
     }
 
-    static void clear_island(RobotController rc, int array_index) throws GameActionException{
+    static void clear_island_location(RobotController rc, int array_index, boolean is_location) throws GameActionException{
         if(array_index < index_last_island & array_index >= index_island)
             rc.writeSharedArray(array_index, 0);
-            rc.writeSharedArray(array_index + 1, 0);
+        if(is_location){rc.writeSharedArray(array_index + 1, 0);}
     }
+
+
 
     static void clear_well(RobotController rc, int array_index) throws GameActionException{
         if(array_index < index_last_well & array_index >= index_well){

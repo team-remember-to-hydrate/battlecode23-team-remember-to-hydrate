@@ -74,40 +74,37 @@ public class Headquarters {
 
         //    ***   Check Comms for updates   ***
         // get islands from array
+        //{[1 isLocation][1 friendly][2 combatStrength][12 location]}
+        //{[1 isLocation][6 id][1 Anchor_present][2 friendlies][2 enemies][1 friendly_owned][3 TBD]}
         List<Integer> island_indexes = Comms.get_array_islands(rc);
 
-        for(int island : island_indexes){
+        for(int i = Comms.index_island; i < Comms.index_last_island ; i++){
+
             int this_island_id;
-            MapLocation this_island_location = Comms.get_MapLocation(rc.readSharedArray(island));
-            boolean is_location = Comms.is_location(island);
-            if (Comms.is_location(island)){
-                this_island_id = Comms.get_island_id(rc.readSharedArray(island + 1));
-                this_island_location = Comms.get_MapLocation(rc.readSharedArray(island));
+            MapLocation this_island_location;
+            boolean is_location = Comms.is_location(i);
+            if (is_location){
+                this_island_id = Comms.get_island_id(rc.readSharedArray(i + 1));
             }
             else {
-                this_island_id = Comms.get_island_id(rc.readSharedArray(island));
+                this_island_id = Comms.get_island_id(rc.readSharedArray(i));
                 // do the updating for islands here
             }
 
-            // remove them from array if we already know about them
             if(island_ids.contains(this_island_id)){
-                if (Comms.is_location(island)) {
-                    Comms.clear_island(rc, island);
-                    if(is_location){
-                        Comms.clear_island(rc, island + 1);
-                    }
+                Comms.clear_island_location(rc, i, is_location);
+                System.out.println("clearing island");
+            }else {
+                this_island_location = Comms.get_MapLocation(rc.readSharedArray(i));
+                if(is_location){
+                    island_ids.add(this_island_id);
+                    island_locations[this_island_id] = this_island_location;
+                    System.out.println("New island " + this_island_id + " found at " + this_island_location + " ids: " + island_ids.size() );
+                }
 
-                }
-                else {
-                    Comms.clear_island(rc, island);
-                }
-                System.out.println("index " + island + " has been cleared from array it's id is " + this_island_id);
-            }else{
-                //This is a new map id, lets store it, and it's location
-                island_ids.add(this_island_id);
-                island_locations[this_island_id] = this_island_location;
-                System.out.println("New island " + this_island_id + " found at " + this_island_location + " ids: " + island_ids.size() );
+
             }
+            if(is_location){i++;} // skip the details if this was a new island notification
         }
 
         // get wells from array
