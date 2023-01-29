@@ -8,7 +8,6 @@ public class Headquarters {
     static int my_array_address;
     static WellInfo[] wells;
     static RobotPlayer.hq_states current_state;
-    static MapLocation next_island;
     /**
      * Run a single turn for a Headquarters.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
