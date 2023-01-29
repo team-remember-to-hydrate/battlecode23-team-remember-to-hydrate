@@ -327,7 +327,6 @@ public class Sensing {
                 || (RobotPlayer.myCurrentLocation != RobotPlayer.lastLocationScannedIslands)) {
             RobotPlayer.scannedIslandIDs = rc.senseNearbyIslands();
             RobotPlayer.lastLocationScannedIslands = rc.getLocation();
-
             if (Clock.getBytecodesLeft() > 1000){
                 Team ourTeam = rc.getTeam();
                 int friendlies = scanCombatUnitsOfTeam(rc, ourTeam).size();
@@ -370,14 +369,16 @@ public class Sensing {
                             int islandDetailBroadcast = packageIslandDetailBroadcast(rc, id, anchorPresent,
                                     friendlies, enemies, friendlyOwned);
                             if (RobotPlayer.teamKnownIslandDetails[id] != islandDetailBroadcast){
-                                System.out.println("Detected new details for id :" + id + " details: " + islandDetailBroadcast);
-                                System.out.println("Check Details. ID: " + id + " AnchorPresent:" + anchorPresent + " friendlies:" + friendlies + " enemies:" + enemies + " friendlyOwned:" + friendlyOwned );
-                                System.out.println("Previously Known Details for id" + RobotPlayer.teamKnownIslandDetails[id]);
+//                                System.out.println("Detected new details for id :" + id + " details: " + islandDetailBroadcast);
+//                                System.out.println("Check Details. ID: " + id + " AnchorPresent:" + anchorPresent + " friendlies:" + friendlies + " enemies:" + enemies + " friendlyOwned:" + friendlyOwned );
+//                                System.out.println("Previously Known Details for id" + RobotPlayer.teamKnownIslandDetails[id]);
                                 // Just broadcast it if we can, otherwise it may be outdated if we queue it.
                                 int target_index = Comms.get_available_island_index(rc);
                                 if (rc.canWriteSharedArray(target_index, 0)){
                                     rc.writeSharedArray(target_index, islandDetailBroadcast);
                                 }
+//                                System.out.println("Was broadcasted. Comms value is: " + rc.readSharedArray(target_index));
+//                                System.out.println("This translates (according to Comms.get_island_id) to an island ID of: " + Comms.get_island_id(rc.readSharedArray(target_index)));
                             }
                         }
                     }
