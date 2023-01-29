@@ -14,46 +14,13 @@ public class Headquarters {
      */
     static void runHeadquarters(RobotController rc) throws GameActionException {
         // generate info to make decisions
-        RobotInfo[] nearby_bots = rc.senseNearbyRobots();
         Team us = rc.getTeam();
         int num_launchers = 0;
 
-        // first round save our location to the array in the first available spot. 0-3
-        // also track visible wells since HQ don't move
         if(rc.getRoundNum() == 1) {
-            // use first available shared array slot
-            for (int i = 0; i < 4; i++) {
-                int array_int = rc.readSharedArray(i);
-                if (array_int == 0) {
-                    my_array_address = i;
-                    rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
-                    break;
-                }
-            }
-
-            // sense visible wells mark them on array, change state to RESOURCE
-            wells = rc.senseNearbyWells();
-            if(wells.length > 0){
-                current_state = RobotPlayer.hq_states.RESOURCE;
-                for(WellInfo well : wells){
-                    for(int i = 4; i < 12; i++){
-                        int array_int = rc.readSharedArray(i);
-                        if(array_int == 0){
-                            rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), well.getResourceType().ordinal()));
-                            break;
-                        }
-                    }
-                }
-            }
-            // still in the code for the first round only
-            // look for islands build anchor is there is at least one
-            int[] island_indexes = rc.senseNearbyIslands();
-            for(int island_index : island_indexes){
-                MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
-                if(rc.canBuildAnchor(Anchor.STANDARD)){
-                    rc.buildAnchor(Anchor.STANDARD);
-                }
-            }
+            communicateLocation(rc);
+            communicateVisibleWells(rc);
+            buildAnchorIfThereIsNearbyIsland(rc);
         }
 
         //round 10 print the array to console
@@ -70,6 +37,7 @@ public class Headquarters {
             }
         }
 
+        RobotInfo[] nearby_bots = rc.senseNearbyRobots();
         // if there are 6 launchers send them on a raid to spot.
         for(RobotInfo bot : nearby_bots){
             if(bot.getTeam().equals(us) & bot.getType().equals(RobotType.LAUNCHER)){
@@ -136,6 +104,49 @@ public class Headquarters {
             }
         }
     }
+
+    static void communicateLocation(RobotController rc) throws GameActionException {
+        // first round save our location to the array in the first available spot. 0-3
+        // also track visible wells since HQ don't move
+        for (int i = 0; i < 4; i++) {
+            int array_int = rc.readSharedArray(i);
+            if (array_int == 0) {
+                my_array_address = i;
+                rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(rc.getLocation(), 0));
+                break;
+            }
+        }
+    }
+
+    static void communicateVisibleWells(RobotController rc) throws GameActionException {
+        // sense visible wells mark them on array, change state to RESOURCE
+        wells = rc.senseNearbyWells();
+        if(wells.length > 0){
+            current_state = RobotPlayer.hq_states.RESOURCE;
+            for(WellInfo well : wells){
+                for(int i = 4; i < 12; i++){
+                    int array_int = rc.readSharedArray(i);
+                    if(array_int == 0){
+                        rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), well.getResourceType().ordinal()));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    static void buildAnchorIfThereIsNearbyIsland(RobotController rc) throws GameActionException {
+        // still in the code for the first round only
+        // look for islands build anchor is there is at least one
+        int[] island_indexes = rc.senseNearbyIslands();
+        for(int island_index : island_indexes){
+            MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
+            if(rc.canBuildAnchor(Anchor.STANDARD)){
+                rc.buildAnchor(Anchor.STANDARD);
+            }
+        }
+    }
+
     static Direction getBuildDirection(RobotController rc, WellInfo[] wells) throws GameActionException {
         // If we have no wells, spawn away from center
         if (wells.length == 0){
