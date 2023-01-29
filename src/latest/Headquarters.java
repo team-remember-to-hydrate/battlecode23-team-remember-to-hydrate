@@ -216,7 +216,6 @@ public class Headquarters {
         // initialize my_recent_tasks
         my_recent_tasks = new ArrayList<Integer>() {
         };
-
         // still in the code for the first round only
         // sense visible wells mark them on array, change state to RESOURCE
         wells = rc.senseNearbyWells();
