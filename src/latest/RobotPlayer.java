@@ -4,6 +4,7 @@ import battlecode.common.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -44,6 +45,8 @@ public strictfp class RobotPlayer {
 //    static ArrayList<HashSet<MapLocation>> teamKnownIslandLocations =
 //            new ArrayList<HashSet<MapLocation>>(GameConstants.MAX_NUMBER_ISLANDS + 1);
 
+
+    static List<Integer> island_ids = new ArrayList<>();
     static MapLocation[] island_locations = new MapLocation[GameConstants.MAX_NUMBER_ISLANDS + 1];
     static ArrayList<Integer> myIslandFullInfoBroadcastQueue = new ArrayList<>();
     static ArrayList<Integer> myIslandDetailsBroadcastQueue = new ArrayList<>();
@@ -235,6 +238,29 @@ public strictfp class RobotPlayer {
         int y = location.y;
         return map_tiles.values()[map[x][y]];
     }
+
+    static void process_array_islands(RobotController rc) throws GameActionException {
+        for(int i = Comms.index_island; i < Comms.index_last_island ; i++){
+            int this_island_id;
+            MapLocation this_island_location;
+
+            boolean is_location = Comms.is_location(rc.readSharedArray(i));
+            int id_offset = is_location ? 1 : 0;
+            this_island_id = Comms.get_island_id(rc.readSharedArray(i + id_offset));
+
+            if(island_ids.contains(this_island_id) & rc.getType().equals(RobotType.HEADQUARTERS)){
+                Comms.clear_island_location(rc, i, is_location);
+            }else {
+                this_island_location = Comms.get_MapLocation(rc.readSharedArray(i));
+                if(is_location){
+                    island_ids.add(this_island_id);
+                    island_locations[this_island_id] = this_island_location;
+                }
+            }
+            if(is_location){i++;} // skip the details if this was a new island notification
+        }
+    }
+
 
     // find closest movable direction
     static Direction movable_direction(RobotController rc, Direction desired_dir){

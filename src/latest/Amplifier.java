@@ -35,7 +35,7 @@ public class Amplifier {
 
         // Read Comms and update worldview
         // get islands from array
-        List<Integer> island_indexes = Comms.get_array_islands(rc);
+      /*  List<Integer> island_indexes = Comms.get_array_islands(rc);
 
         for(int island : island_indexes){
             int this_island_id;
@@ -61,7 +61,11 @@ public class Amplifier {
                 island_locations[this_island_id] = this_island_location;
                 RobotPlayer.teamKnownIslandDetails[this_island_id] = islandDetails;
             }
-        }
+        }*/
+
+        //    ***   Check Comms for island updates   ***
+        // get islands from array
+        RobotPlayer.process_array_islands(rc);
 
         // Update High Value Map Info
         Sensing.scanAndUpdateIslands(rc); // very high bytecode cost
