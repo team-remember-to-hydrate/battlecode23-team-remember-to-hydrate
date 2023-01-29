@@ -216,18 +216,16 @@ public class Headquarters {
         // initialize my_recent_tasks
         my_recent_tasks = new ArrayList<Integer>() {
         };
+
         // still in the code for the first round only
         // sense visible wells mark them on array, change state to RESOURCE
         wells = rc.senseNearbyWells();
         if(wells.length > 0){
             current_state = RobotPlayer.hq_states.RESOURCE;
             for(WellInfo well : wells){
-                for(int i = 4; i < 12; i++){
-                    int array_int = rc.readSharedArray(i);
-                    if(array_int == 0){
-                        rc.writeSharedArray(i, RobotPlayer.packMapLocationExtra(well.getMapLocation(), well.getResourceType().ordinal()));
-                        break;
-                    }
+                int available_index = Comms.get_available_well_index(rc);
+                if(available_index < 99){
+                    Comms.send_well(rc,well.getMapLocation(),well.getResourceType(), available_index, well.isUpgraded());
                 }
             }
         }

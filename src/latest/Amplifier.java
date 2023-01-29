@@ -33,7 +33,7 @@ public class Amplifier {
 
 
         // Update High Value Map Info
-        Sensing.scanAndUpdateIslands(rc); // very high bytecode cost
+        //Sensing.scanAndUpdateIslands(rc); // very high bytecode cost
 
         // Scan wells
 

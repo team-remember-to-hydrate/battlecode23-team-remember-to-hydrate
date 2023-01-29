@@ -2,6 +2,7 @@ package latest;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
+import battlecode.common.ResourceType;
 import battlecode.common.RobotController;
 
 import java.util.ArrayList;
@@ -151,6 +152,28 @@ public class Comms {
         return 99;
     }
 
+    /*
+    returns 99 if the array island reporting is full
+ */
+    static int get_available_well_index(RobotController rc) throws GameActionException{
+        for(int i = index_well; i <= index_last_well;i = i + 2){
+            int this_value = rc.readSharedArray(i);
+            if(this_value == 0){
+                return i;
+            }
+        }
+        return 99;
+    }
+
+    // * [wellIsUpgraded Status] [wellType] [Unused] [Location]
+    static void send_well(RobotController rc, MapLocation location, ResourceType type, int array_index, boolean upgraded) throws GameActionException{
+        int packed_location = pack_maplocation(location);
+        int packed_type = type.ordinal() << 13;
+        int packed_upgraded = 1;
+        if(upgraded) {packed_upgraded += 1 << 15;}
+        rc.writeSharedArray(array_index, packed_upgraded + packed_type + packed_location);
+    }
+
     static List<Integer> get_array_islands(RobotController rc) throws GameActionException{
         List<Integer> islands = new ArrayList<>();
         for(int i = index_island; i < index_last_island;i = i + 2){
@@ -216,6 +239,11 @@ public class Comms {
         return new MapLocation(target_x,target_y);
     }
 
+    static int pack_maplocation(MapLocation location){
+        int x = location.x;
+        int y = location.y;
+        return (x << 6) + y;
+    }
 
     ///   ***   TASKS   ***
 
