@@ -2,12 +2,10 @@ package latest;
 
 import battlecode.common.*;
 
-import static latest.RobotPlayer.directions;
 import static latest.RobotPlayer.rng;
 
 public class Headquarters {
     static int my_array_address;
-
     static WellInfo[] wells;
     static RobotPlayer.hq_states current_state;
     static MapLocation next_island;
