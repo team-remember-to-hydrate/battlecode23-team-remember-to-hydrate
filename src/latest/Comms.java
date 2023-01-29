@@ -290,8 +290,11 @@ public class Comms {
     }
 
     static int createGroupMembershipCommandWordTwo(RobotController rc, MapLocation location,
-                                                   int extraSelectionRadius) {
-        return 0; // TODO
+                                                   int selectionRadius) {
+        int wordTwo = selectionRadius << 12;
+        wordTwo = wordTwo & RobotPlayer.packMapLocation(location);
+
+        return wordTwo;
     }
 
 

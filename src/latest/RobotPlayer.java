@@ -316,6 +316,11 @@ public strictfp class RobotPlayer {
         return ResourceType.values()[unpackExtra(target)];
     }
 
+    static int packMapLocation(MapLocation location) {
+        int x = location.x;
+        int y = location.y;
+        return (x << 6) & y;
+    }
 
     static int packMapLocationExtra(MapLocation here, int extra) {
         int x = here.x;
