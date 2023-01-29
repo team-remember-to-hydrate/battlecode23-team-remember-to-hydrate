@@ -2,6 +2,8 @@ package latest;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Amplifier {
@@ -16,6 +18,8 @@ public class Amplifier {
     static String indicator_string = "";
     static MapLocation myLocation;
     static MapLocation map_center;
+    static List<Integer> island_ids = new ArrayList<>();
+
 
     static void runAmplifier(RobotController rc) throws GameActionException {
 
@@ -30,10 +34,37 @@ public class Amplifier {
         // Each turn starts with these tasks before dealing with primary task:
 
         // Read Comms and update worldview
+        // get islands from array
+        List<Integer> island_indexes = Comms.get_array_islands(rc);
 
+        for(int island : island_indexes){
+            int this_island_id;
+            MapLocation this_island_location = null;
+            int islandDetails = 0;
+            if (Comms.is_location(island)){
+                islandDetails = rc.readSharedArray(island + 1);
+                this_island_id = Comms.get_island_id(islandDetails);
+                this_island_location = Comms.get_MapLocation(rc.readSharedArray(island));
+            }
+            else {
+                islandDetails = rc.readSharedArray(island);
+                this_island_id = Comms.get_island_id(islandDetails);
+            }
+
+            // remove them from array if we already know about them
+            //System.out.println("array location " + island + " id " + this_island_id + " location " + this_island_location + " raw data " + rc.readSharedArray(island) + " " + rc.readSharedArray(island + 1));
+            if(island_ids.contains(this_island_id)){
+                RobotPlayer.teamKnownIslandDetails[this_island_id] = islandDetails;
+            }else{
+                //This is a new map id, lets store it, and it's location
+                island_ids.add(this_island_id);
+                island_locations[this_island_id] = this_island_location;
+                RobotPlayer.teamKnownIslandDetails[this_island_id] = islandDetails;
+            }
+        }
 
         // Update High Value Map Info
-        //Sensing.scanAndUpdateIslands(rc); // very high bytecode cost
+        Sensing.scanAndUpdateIslands(rc); // very high bytecode cost
 
         // Scan wells
 
