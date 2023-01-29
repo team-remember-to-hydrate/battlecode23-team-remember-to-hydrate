@@ -110,7 +110,7 @@ public class Headquarters {
         RobotInfo[] nearby_bots = rc.senseNearbyRobots();
         int num_launchers = 0;
         for(RobotInfo bot : nearby_bots){
-            if(bot.getTeam().equals(us) & bot.getType().equals(RobotType.LAUNCHER)){
+            if(bot.getTeam().equals(ourTeam) & bot.getType().equals(RobotType.LAUNCHER)){
                 num_launchers++;
             }
         }
