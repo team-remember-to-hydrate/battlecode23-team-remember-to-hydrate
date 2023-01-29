@@ -8,6 +8,8 @@ import battlecode.common.RobotController;
 import static latest.RobotPlayer.*;
 
 public class Pathing {
+
+    static int bugNavTurnsStalled = 0;
     public static void moveRandom(RobotController rc) throws GameActionException {
         Direction dir = directions[rng.nextInt(directions.length)];
         if (rc.canMove(dir)) {
@@ -24,35 +26,46 @@ public class Pathing {
         }
         Direction d = rc.getLocation().directionTo(targetLoc);
         if (rc.canMove(d) && d != Direction.CENTER) {
+            bugNavTurnsStalled = 0;
             trackedMove(rc, d);
             currentDirection = null; // no obstacle
         }
         else {
+            // If bot is blocking, wait a turn
+            if (rc.canSenseRobotAtLocation(rc.getLocation().add(d)) && bugNavTurnsStalled < 1){
+                bugNavTurnsStalled += 1;
+                return;
+            }
             // Going around obstacle; cannot move towards d because of obstacle
             if (currentDirection == null){
                 currentDirection = d;
             }
+
             // try to move in a way that keeps obstacle to one side
-            for(int i = 0; i < 8; i++){
-                if (rc.canMove(currentDirection)) {
-                    trackedMove(rc, currentDirection);
-                    if (prefersClockwise){
-                        currentDirection = currentDirection.rotateRight();
-                    }
-                    else {
-                        currentDirection = currentDirection.rotateLeft();
-                    }
-                    break;
-                }
-                else {
-                    if (prefersClockwise){
-                        currentDirection = currentDirection.rotateLeft();
-                    }
-                    else {
-                        currentDirection = currentDirection.rotateRight();
-                    }
-                }
+            Direction smartDir = Pathing.getSmartClosestValidMoveDirection(rc, currentDirection);
+            if (rc.canMove(smartDir)){
+                trackedMove(rc, smartDir);
             }
+//            for(int i = 0; i < 8; i++){
+//                if (rc.canMove(currentDirection)) {
+//                    trackedMove(rc, currentDirection);
+//                    if (prefersClockwise){
+//                        currentDirection = currentDirection.rotateRight();
+//                    }
+//                    else {
+//                        currentDirection = currentDirection.rotateLeft();
+//                    }
+//                    break;
+//                }
+//                else {
+//                    if (prefersClockwise){
+//                        currentDirection = currentDirection.rotateLeft();
+//                    }
+//                    else {
+//                        currentDirection = currentDirection.rotateRight();
+//                    }
+//                }
+//            }
         }
     }
 
@@ -114,6 +127,9 @@ public class Pathing {
             RobotPlayer.lastMoved = dir;
             RobotPlayer.myCurrentLocation = rc.getLocation();
         }
+        else {
+            myLastLocation = rc.getLocation();
+        }
     }
 
     static Direction best_right_turn(RobotController rc, Direction desired_dir) throws GameActionException {
@@ -127,6 +143,39 @@ public class Pathing {
 
 
     //_______________Advanced Map Based Pathfinding____________________//
+
+    // find closest movable direction to desired direction
+    public static Direction getSmartClosestValidMoveDirection(RobotController rc, Direction desired_dir,
+                                                              boolean preferClockwise) throws GameActionException {
+        if(rc.canMove(desired_dir)) return desired_dir;
+        for (int rotation_offset = 1; rotation_offset <= 4; rotation_offset++){  // 4 is 1/2 of the 8 possible movement
+            // directions
+            Direction left_dir = directions[(desired_dir.ordinal() + 8 + rotation_offset) % 8];
+            Direction right_dir = directions[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
+            if (preferClockwise) {
+                if (rc.canMove(right_dir)) {
+                    if (!rc.getLocation().equals(getResultOfMove(rc, rc.getLocation(), right_dir))){
+                        return right_dir;
+                    }
+                }
+            }
+            if (rc.canMove(left_dir)) {
+                if (!rc.getLocation().equals(getResultOfMove(rc, rc.getLocation(), left_dir))){
+                    return left_dir;
+                }
+            }
+            if (rc.canMove(right_dir)) {
+                if (!rc.getLocation().equals(getResultOfMove(rc, rc.getLocation(), right_dir))){
+                    return right_dir;
+                }
+            }
+        }
+        return Direction.CENTER;
+    }
+
+    public static Direction getSmartClosestValidMoveDirection(RobotController rc, Direction desired_dir) throws GameActionException {
+        return getSmartClosestValidMoveDirection(rc, desired_dir, prefersClockwise);
+    }
 
     static Direction getCurrentTileDir(map_tiles currentTile) {
         switch (currentTile) {
