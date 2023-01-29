@@ -1,9 +1,6 @@
 package latest;
 
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.ResourceType;
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -263,6 +260,67 @@ public class Comms {
     }
 
     ///   ***   TASKS   ***
+    /*
+    Membership Assignment order:
+ * Word 1:
+ * [isTaskAssignment] [groupIDNumber] [botTypes] [shouldOverrideExistingMembership]
+ * [existingMembersOutsideRadiusShouldUnassignMembership] [extraSelectionRadius]
+ * [1] [4] [3] [1] [1] [2]
+     * Word 2:
+ * [selectionRadius] [location]
+ * [4] [12]
+
+     */
+    static boolean assignGroupMembershipCommand(RobotController rc, int groupMembershipWordOne,
+                                                int groupMembershipWordTwo){
+        return true; // TODO
+    }
+
+    static int createGroupMembershipCommandWordOne(RobotController rc, int groupIDNumber, RobotType botType,
+                                                   boolean shouldOverrideExistingMembership,
+                                                   boolean existingMembersOutsideRadiusShouldUnassignMembership,
+                                                   int extraSelectionRadius) {
+        return 0; // TODO
+    }
+
+    static int createGroupMembershipCommandWordTwo(RobotController rc, MapLocation location,
+                                                   int extraSelectionRadius) {
+        return 0; // TODO
+    }
+
+
+    /*
+    Task Assignment:
+     Word 1:
+            * [isTaskAssignment] [groupIDNumber] [groupState][extra task info]
+            * [1]                   [4]              [4]           [7]
+            *
+            *
+            * Word 2:
+            * [extra bits] [location]
+            *   [4]             12
+     */
+    static boolean assignTaskCommand(RobotController rc, int taskAssignmentWordOne,
+                                                int taskAssignmentWordTwo){
+        return true; // TODO
+    }
+    static int createTaskAssignmentCommandWordOne(RobotController rc, int groupIDNumber, RobotPlayer.states botState) {
+        return 0; // TODO
+    }
+
+    static int createTaskAssignmentCommandWordTwo(RobotController rc, MapLocation location,
+                                                   int extraSelectionRadius) {
+        return 0; // TODO
+    }
+
+    static void setMyGroupFromOrders(RobotController rc) {
+        return; // TODO set RobotPlayer.my_group
+    }
+
+    static int getMostRecentOrderForMyGroup(RobotController rc, int groupIDNumber) {
+        return 0; // TODO
+    }
+
 
 
     static int get_task_radius( int array_data) {return (array_data & 0b1111000000000000) >>> 12; }
