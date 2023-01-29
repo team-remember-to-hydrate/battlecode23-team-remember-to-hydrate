@@ -374,19 +374,22 @@ public class Comms {
     static void send_command(RobotController rc, MapLocation location, int radius, int group, int bot_type,
                           boolean override, boolean unassign, int task_type, boolean is_task) throws GameActionException {
         int available_index = get_available_command_index(rc);
-        int first_word = (radius & 0b1111) << 12;
-        first_word += (location.x << 6) + location.y;
+        if(available_index < 99){
+            int first_word = (radius & 0b1111) << 12;
+            first_word += (location.x << 6) + location.y;
 
-        int second_word = 0;
-        if(is_task){second_word += 1 << 15;}
-        second_word += (group & 0b1111) << 11;
-        second_word += (bot_type & 0b111) << 8;
-        if(override){second_word += 1 << 7;}
-        if(unassign){second_word += 1 << 6;}
-        second_word += (task_type & 0b1111) << 2;
+            int second_word = 0;
+            if(is_task){second_word += 1 << 15;}
+            second_word += (group & 0b1111) << 11;
+            second_word += (bot_type & 0b111) << 8;
+            if(override){second_word += 1 << 7;}
+            if(unassign){second_word += 1 << 6;}
+            second_word += (task_type & 0b1111) << 2;
 
-        rc.writeSharedArray(available_index,first_word);
-        rc.writeSharedArray(available_index + 1, second_word);
+            rc.writeSharedArray(available_index,first_word);
+            rc.writeSharedArray(available_index + 1, second_word);
+        }
+
 
     }
 

@@ -68,7 +68,13 @@ public class Launcher {
 
         if(my_task > 0){
             target_location = Comms.get_MapLocation(my_task);
-            my_state = RobotPlayer.states.values()[Comms.get_task_type(my_task)];
+            int desired_task = Comms.get_task_type(my_task);
+            if(desired_task < RobotPlayer.states.values().length && desired_task >=0){
+                my_state = RobotPlayer.states.values()[Comms.get_task_type(my_task)];
+            }
+            else{
+                System.out.println("trying to set task to " + desired_task);
+            }
             indicator_string += " tsk " + my_task;
         }
 

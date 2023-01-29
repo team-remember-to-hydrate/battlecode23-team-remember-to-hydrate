@@ -91,17 +91,8 @@ public class Headquarters {
         }
         // Minimum Viable Product for group attack
         if(num_launchers >= 6 & command_decay < 1){
-            int my_task_array_location = Comms.get_available_command_index(rc);
-            MapLocation target = new MapLocation(rc.getMapWidth() / 2,rc.getMapHeight()/2);
-            int mission = RobotPlayer.states.ATTACK.ordinal();
-            int target_array = RobotPlayer.packMapLocationExtra(target,mission);
-            if(my_task_array_location < Comms.index_last_orders) {
-                rc.writeSharedArray(my_task_array_location, target_array);
-                int packed_info = RobotPlayer.packMapLocationExtra(rc.getLocation(), RobotPlayer.hq_states.TASK.ordinal());
-                rc.writeSharedArray(my_task_array_location, packed_info);
-                command_decay = 20;
-                my_recent_tasks.add(my_task_array_location);
-            }
+            MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
+            Comms.send_command(rc,center,RobotType.HEADQUARTERS.visionRadiusSquared,1,1, false,false,1,true);
         }
 
 //        // if we are holding an anchor we saw an island, lets build a carrier.
