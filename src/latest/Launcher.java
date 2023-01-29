@@ -98,7 +98,7 @@ public class Launcher {
 
             case ATTACK:
                 indicator_string += "ATTACK ";
-                dir = me.directionTo(target_location);
+                dir = attack_dir(rc, me.directionTo(target_location));
                 break;
 
             case OCCUPY:
@@ -159,6 +159,16 @@ public class Launcher {
         return attack_location;
     }
 
+
+    static Direction attack_dir(RobotController rc, Direction dir) throws  GameActionException{
+        checkAndReplaceLeader(rc);
+        indicator_string += ("LeaderID: " + myLeaderID);
+        if (myLeaderID < Integer.MAX_VALUE && !(myLeaderID > rc.getID())) { //If I have a leader candidate better than myself.
+            dir = rc.getLocation().directionTo(rc.senseRobot(myLeaderID).getLocation());
+        }
+        return dir;
+    }
+
     static Direction group_dir(RobotController rc, Direction dir) throws GameActionException {
         // Stay near spawning headquarters but move towards center
         MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight()/2);
@@ -213,7 +223,15 @@ public class Launcher {
                 }
             }
         }
-        return me.directionTo(myIsland);
+        dir = me.directionTo(myIsland);
+        // Check for a leader, and follow them if we find one.
+        checkAndReplaceLeader(rc);
+        indicator_string += ("LeaderID: " + myLeaderID);
+        if (myLeaderID < Integer.MAX_VALUE && !(myLeaderID > rc.getID())) { //If I have a leader candidate better than myself.
+            dir = rc.getLocation().directionTo(rc.senseRobot(myLeaderID).getLocation());
+        }
+
+        return dir;
     }
 
     // It is probably better to use rc.canSenseRobotAtLocation(location) for 5 BC cost vs looping through bots.
