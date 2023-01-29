@@ -16,7 +16,7 @@ public class Headquarters {
     static WellInfo[] wells;
     static HashSet<MapLocation> validBuildLocations = new HashSet<>(40);
     static RobotPlayer.hq_states current_state;
-    static MapLocation[] island_locations = new MapLocation[GameConstants.MAX_NUMBER_ISLANDS + 1];
+    static MapLocation[] island_locations = RobotPlayer.island_locations;
     static List<Integer> island_ids = new ArrayList<>();
     static List<MapLocation> well_locations = new ArrayList<>();
     static List<Integer> my_recent_tasks = new ArrayList<>();
@@ -74,8 +74,16 @@ public class Headquarters {
         List<Integer> island_indexes = Comms.get_array_islands(rc);
 
         for(int island : island_indexes){
-            int this_island_id = Comms.get_island_id(island);
-            MapLocation this_island_location = Comms.get_MapLocation(island);
+            int this_island_id;
+            MapLocation this_island_location = null;
+            if (Comms.is_location(island)){
+                this_island_id = Comms.get_island_id(rc.readSharedArray(island + 1));
+                this_island_location = Comms.get_MapLocation(rc.readSharedArray(island));
+            }
+            else {
+                this_island_id = Comms.get_island_id(rc.readSharedArray(island));
+            }
+
             // remove them from array if we already know about them
             //System.out.println("array location " + island + " id " + this_island_id + " location " + this_island_location + " raw data " + rc.readSharedArray(island) + " " + rc.readSharedArray(island + 1));
             if(island_ids.contains(this_island_id)){
