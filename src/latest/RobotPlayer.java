@@ -136,6 +136,7 @@ public strictfp class RobotPlayer {
     public static void run(RobotController rc) throws GameActionException {
 //        System.out.println("Start of RobotPlayer bc remaining:" + Clock.getBytecodesLeft());
 
+
         // Hello world! Standard output is very useful for debugging.
         // Everything you say here will be directly viewable in your terminal when you run a match!
         // System.out.println("I'm a " + rc.getType() + " and I just got created! I have health " + rc.getHealth());

@@ -104,6 +104,7 @@ public class Launcher {
                 // if we have reached our task destination we should switch to occupy island
 
                 indicator_string += "ANCHOR ";
+                dir = me.directionTo(target_location);
                 break;
         }
 
