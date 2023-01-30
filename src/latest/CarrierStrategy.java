@@ -11,6 +11,7 @@ public class CarrierStrategy {
     static boolean anchorMode = false;
     static int amountResourcesHeld = 0;
     static MapLocation currentTargetIslandLocation = null;
+    static String indicatorString;
 
     public static void run(RobotController rc) throws GameActionException {
         if(hqLoc == null) {
@@ -20,18 +21,21 @@ public class CarrierStrategy {
         }
 
         // Every turn do this:
+        indicatorString = "";
+
         // Read Comms:
         RobotPlayer.process_array_islands(rc);
         RobotPlayer.process_array_wells(rc);
 
 
-        if (Sensing.scanRelativeCombatStrength(rc) < 0 && amountResourcesHeld > 3){
-            // Enemy combatants outnumber visible friendlies
-            fightIfConvenient(rc);
-        }
-        else if (rc.getHealth() < RobotPlayer.myHealthLastTurn){
+
+        if (rc.getHealth() < RobotPlayer.myHealthLastTurn){
             // We have been hit!
             fightBackAndRun(rc);
+        }
+        else if (Sensing.scanRelativeCombatStrength(rc) < 0 && amountResourcesHeld > 3){
+            // Enemy combatants outnumber visible friendlies
+            fightIfConvenient(rc);
         }
         else if(rc.canTakeAnchor(hqLoc, Anchor.ACCELERATING) || rc.canTakeAnchor(hqLoc, Anchor.STANDARD)) {
             tryPickUpAnchor(rc, hqLoc);
@@ -66,9 +70,11 @@ public class CarrierStrategy {
 
         // End of turn actions
         RobotPlayer.myHealthLastTurn = rc.getHealth();
+        rc.setIndicatorString(indicatorString);
     }
 
     private static void fightIfConvenient(RobotController rc) throws GameActionException {
+        indicatorString += "FightIfConvenient - ";
         // If I have resources, consider fighting.
         if (amountResourcesHeld > 3){
             // Find weakest hostile enemy in range, or nearest econ enemy in range
@@ -83,13 +89,29 @@ public class CarrierStrategy {
             RobotInfo targetBot = Sensing.scanWeakestBotInGroup(rc, nearbyEnemies);
             // Hit them
             if (rc.canAttack(targetBot.getLocation())){
-                rc.attack(rc.getLocation());
+                rc.attack(targetBot.getLocation());
                 amountResourcesHeld = getTotalCarrying(rc);
+                indicatorString += "Attacked: " + targetBot.getLocation();
+            }
+
+            // Now gather or return to HQ.
+            if(amountResourcesHeld < GameConstants.CARRIER_CAPACITY){
+                if(rc.getLocation().distanceSquaredTo(wellLoc) <= 2){
+                    tryCollectResources(rc, wellLoc);
+                }
+                else {
+                    Pathing.moveWithBugNav(rc, wellLoc);
+                }
+            }
+            else if(amountResourcesHeld == GameConstants.CARRIER_CAPACITY){
+                Pathing.moveWithBugNav(rc, hqLoc);
+                tryDropAllResources(rc, hqLoc);
             }
         }
     }
 
     private static void fightBackAndRun(RobotController rc) throws GameActionException {
+        indicatorString += "FightBackAndRun - ";
         // If I have an anchor, prioritize delivery if target in sight.
         if (rc.getAnchor() != null
                 && currentTargetIslandLocation != null
@@ -108,21 +130,32 @@ public class CarrierStrategy {
 
         // Pick weakest target
         RobotInfo targetBot = Sensing.scanWeakestBotInGroup(rc, nearbyEnemies);
+        indicatorString += "Target: " + targetBot;
+
         // Hit them
-        if (targetBot != null && amountResourcesHeld > 3 && rc.canAttack(targetBot.getLocation())){
-            rc.attack(rc.getLocation());
+        if (targetBot != null && amountResourcesHeld > 3 && !rc.canAttack(targetBot.getLocation())){
+            // They are out of reach, step towards them and fire away!
+            Pathing.trackedMove(rc, rc.getLocation().directionTo(targetBot.getLocation()));
+            rc.attack(targetBot.getLocation());
+            amountResourcesHeld = getTotalCarrying(rc);
+        }
+        else if (targetBot != null && amountResourcesHeld > 3 && rc.canAttack(targetBot.getLocation())) {
+            // They are within reach, hit them!
+            rc.attack(targetBot.getLocation());
             amountResourcesHeld = getTotalCarrying(rc);
         }
 
-        Direction retreatDirection = rc.getLocation().directionTo(hqLoc);
+        Direction retreatDirection = Pathing.getClosestValidMoveDirection(rc, rc.getLocation().directionTo(hqLoc));
+
+        /*if (targetBot != null){
+            retreatDirection = Pathing.getClosestValidMoveDirection(rc, rc.getLocation().directionTo(targetBot.getLocation()).opposite());
+        }*/
+
+        // Run away to safety
         // TODO: Make this either 5 spaces away from center from HQ, or if HQ in sight then 5 spaces away from enemy behind HQ.
-
-        if (targetBot != null){
-            Pathing.getClosestValidMoveDirection(rc, rc.getLocation().directionTo(targetBot.getLocation()).opposite());
-        }
-
         int movesTaken = 0;
         while (movesTaken < 3){
+            retreatDirection = Pathing.getClosestValidMoveDirection(rc, rc.getLocation().directionTo(hqLoc));
             Pathing.trackedMove(rc, retreatDirection);
             movesTaken++;
         }
