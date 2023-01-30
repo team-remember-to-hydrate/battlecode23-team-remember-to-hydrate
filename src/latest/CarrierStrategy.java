@@ -25,9 +25,9 @@ public class CarrierStrategy {
         RobotPlayer.process_array_wells(rc);
 
 
-        if (Sensing.scanRelativeCombatStrength(rc) < 0){
+        if (Sensing.scanRelativeCombatStrength(rc) < 0 && amountResourcesHeld > 3){
             // Enemy combatants outnumber visible friendlies
-            //fightIfConvenient(rc);
+            fightIfConvenient(rc);
         }
         else if (rc.getHealth() < RobotPlayer.myHealthLastTurn){
             // We have been hit!
@@ -63,6 +63,9 @@ public class CarrierStrategy {
         else {
             throw new GameActionException(GameActionExceptionType.INTERNAL_ERROR, "Carrier internal error");
         }
+
+        // End of turn actions
+        RobotPlayer.myHealthLastTurn = rc.getHealth();
     }
 
     private static void fightIfConvenient(RobotController rc) throws GameActionException {
@@ -87,6 +90,13 @@ public class CarrierStrategy {
     }
 
     private static void fightBackAndRun(RobotController rc) throws GameActionException {
+        // If I have an anchor, prioritize delivery if target in sight.
+        if (rc.getAnchor() != null
+                && currentTargetIslandLocation != null
+                && rc.canSenseLocation(currentTargetIslandLocation)) {
+            deliverAnchor(rc);
+        }
+
         // If I have resources, consider fighting.
         // Find weakest hostile enemy in range, or nearest econ enemy in range
         ArrayList<RobotInfo> nearbyEnemies = Sensing.scanCombatUnitsOfTeamInRange(rc, rc.getTeam().opponent(), 9);
@@ -99,12 +109,13 @@ public class CarrierStrategy {
         // Pick weakest target
         RobotInfo targetBot = Sensing.scanWeakestBotInGroup(rc, nearbyEnemies);
         // Hit them
-        if (targetBot != null && rc.canAttack(targetBot.getLocation())){
+        if (targetBot != null && amountResourcesHeld > 3 && rc.canAttack(targetBot.getLocation())){
             rc.attack(rc.getLocation());
             amountResourcesHeld = getTotalCarrying(rc);
         }
 
         Direction retreatDirection = rc.getLocation().directionTo(hqLoc);
+        // TODO: Make this either 5 spaces away from center from HQ, or if HQ in sight then 5 spaces away from enemy behind HQ.
 
         if (targetBot != null){
             Pathing.getClosestValidMoveDirection(rc, rc.getLocation().directionTo(targetBot.getLocation()).opposite());
@@ -157,6 +168,7 @@ public class CarrierStrategy {
             rc.takeAnchor(loc, Anchor.STANDARD);
             anchorMode = true;
         }
+        currentTargetIslandLocation = null;
     }
     static void deliverAnchor(RobotController rc) throws GameActionException {
         rc.setIndicatorString("deliverAnchor");
@@ -167,23 +179,22 @@ public class CarrierStrategy {
             int tempID = RobotPlayer.island_ids.get(i);
             if (tempID != 0){
                 MapLocation tempLocation = RobotPlayer.island_locations[tempID];
-                if (!tempLocation.equals(null)){
+                if (!tempLocation.equals(null) && !rc.canSenseLocation(tempLocation)){
                     currentTargetIslandLocation = tempLocation;
                     break;
                 }
             }
         }
 
+        // Check nearby islands and prioritize those if they need our anchor.
         if (currentTargetIslandLocation == null || !rc.canSenseLocation(currentTargetIslandLocation)) {
-            currentTargetIslandLocation = null;
             int[] islands = rc.senseNearbyIslands();
 
         // End last minute anchor island edits
 
-
             for (int id : islands) {
                 // If we own it, skip it unless we can upgrade it.
-                if (rc.senseTeamOccupyingIsland(id).equals(rc.getTeam())
+                if (rc.senseTeamOccupyingIsland(id).equals(rc.getTeam()) // if we own it
                     && !(rc.getAnchor().equals(Anchor.ACCELERATING) && rc.senseAnchor(id).equals(Anchor.STANDARD))) {
                     // It is an upgrade if we are holding an Accelerating and island has a Standard anchor.
                     continue;
@@ -210,10 +221,15 @@ public class CarrierStrategy {
                 movesTaken++;
             }
             if (rc.canPlaceAnchor()
-                    && !rc.senseTeamOccupyingIsland(rc.senseIsland(currentTargetIslandLocation)).equals(rc.getTeam())) { //prevents accel anchors though TODO
+                    // If we own it, skip it unless we can upgrade it.
+                    && !(rc.senseTeamOccupyingIsland(rc.senseIsland(rc.getLocation())).equals(rc.getTeam())
+                    // It is an upgrade if we are holding an Accelerating and island has a Standard anchor.
+                    && !(rc.getAnchor().equals(Anchor.ACCELERATING)
+                    && rc.senseAnchor(rc.senseIsland(rc.getLocation())).equals(Anchor.STANDARD)))) {
                 rc.setIndicatorString("Huzzah, placed anchor!");
                 rc.placeAnchor();
                 anchorMode = false;
+                currentTargetIslandLocation = null;
             }
             else if (rc.getLocation().equals(currentTargetIslandLocation)) {
                 currentTargetIslandLocation = null;
