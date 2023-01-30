@@ -8,22 +8,53 @@ public class Headquarters {
     static int my_array_address;
     static WellInfo[] wells;
     static RobotPlayer.hq_states current_state;
+    static int roundNum = 0;
+    static Team ourTeam = null;
+    static int[] initiallySensedIslandIndexes = null;
     /**
      * Run a single turn for a Headquarters.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
      */
     static void runHeadquarters(RobotController rc) throws GameActionException {
-        if(rc.getRoundNum() == 1) {
+        roundNum = rc.getRoundNum();
+        if(roundNum == 1) {
+            ourTeam = rc.getTeam();
+            initiallySensedIslandIndexes = rc.senseNearbyIslands();
             communicateLocation(rc);
             communicateVisibleWells(rc);
-            buildAnchorIfThereIsNearbyIsland(rc);
+            runStartingProduction(rc);
         }
-        if(rc.getRoundNum() == 10){
+        else if(roundNum == 10){
             printCommunicationForDebugging(rc);
         }
+        runContinuousProduction(rc);
+    }
+    static void runStartingProduction(RobotController rc) throws GameActionException {
+        // NOTE: We know we have a certain amount of resources when this method runs.
+        if(roundNum != 1){
+            throw new GameActionException(GameActionExceptionType.INTERNAL_ERROR, "Dont call this method unless it is the first round");
+        }
+
+        // build 1 anchor
+        rc.buildAnchor(Anchor.STANDARD);
+
+        // build 2 carriers
+        Direction dir = getBuildDirection(rc, wells);
+        MapLocation newLoc = closestPossibleBuildDirection(rc, RobotType.CARRIER, dir);
+        rc.buildRobot(RobotType.CARRIER, newLoc);
+        newLoc = closestPossibleBuildDirection(rc, RobotType.CARRIER, dir);
+        rc.buildRobot(RobotType.CARRIER, newLoc);
+
+        // build 2 launchers
+        newLoc = closestPossibleBuildDirection(rc, RobotType.LAUNCHER, dir);
+        rc.buildRobot(RobotType.LAUNCHER, newLoc);
+        newLoc = closestPossibleBuildDirection(rc, RobotType.LAUNCHER, dir);
+        rc.buildRobot(RobotType.LAUNCHER, newLoc);
+    }
+    static void runContinuousProduction(RobotController rc) throws GameActionException {
+        runBuildAnchorsIfThereIsClaimableIsland(rc);
         runLauncherRaid(rc);
     }
-
     static void communicateLocation(RobotController rc) throws GameActionException {
         // first round save our location to the array in the first available spot. 0-3
         // also track visible wells since HQ don't move
@@ -64,24 +95,22 @@ public class Headquarters {
             }
         }
     }
-    static void buildAnchorIfThereIsNearbyIsland(RobotController rc) throws GameActionException {
-        // still in the code for the first round only
-        // look for islands build anchor is there is at least one
-        int[] island_indexes = rc.senseNearbyIslands();
-        for(int island_index : island_indexes){
-            MapLocation[] island_locations = rc.senseNearbyIslandLocations(island_index);
-            if(rc.canBuildAnchor(Anchor.STANDARD)){
+    static void runBuildAnchorsIfThereIsClaimableIsland(RobotController rc) throws GameActionException {
+        for(int island_index : initiallySensedIslandIndexes){
+            if(isIslandClaimable(rc, island_index) && rc.canBuildAnchor(Anchor.STANDARD)){
                 rc.buildAnchor(Anchor.STANDARD);
             }
         }
     }
+    static boolean isIslandClaimable(RobotController rc, int islandIndex) throws GameActionException {
+        return rc.senseTeamOccupyingIsland(islandIndex) == Team.NEUTRAL;
+    }
     static void runLauncherRaid(RobotController rc) throws GameActionException {
         // if there are 6 launchers send them on a raid to spot.
         RobotInfo[] nearby_bots = rc.senseNearbyRobots();
-        Team us = rc.getTeam();
         int num_launchers = 0;
         for(RobotInfo bot : nearby_bots){
-            if(bot.getTeam().equals(us) & bot.getType().equals(RobotType.LAUNCHER)){
+            if(bot.getTeam().equals(ourTeam) & bot.getType().equals(RobotType.LAUNCHER)){
                 num_launchers++;
             }
         }
@@ -151,19 +180,18 @@ public class Headquarters {
         if (wells.length == 0){
             return rc.getLocation().directionTo(RobotPlayer.mapCenter).opposite();
         }
-
         // If we see wells, let's spawn towards one at random
         int wellIndex = rng.nextInt(wells.length);
         return rc.getLocation().directionTo(wells[wellIndex].getMapLocation());
     }
-
     static MapLocation closestPossibleBuildDirection(RobotController rc, RobotType RobotType, Direction desired_dir){
-        if(rc.canBuildRobot(RobotType, rc.getLocation().add(desired_dir))) return rc.getLocation().add(desired_dir);
-        for (int rotation_offset = 1; rotation_offset <= 4; rotation_offset++){  // 4 is 1/2 of the 8 possible directions
-            Direction left_dir = Direction.values()[(desired_dir.ordinal() +  rotation_offset) % 8];
+        MapLocation loc = rc.getLocation().add(desired_dir);
+        if(rc.canBuildRobot(RobotType, loc)) return loc;
+        for (int rotation_offset = 1; rotation_offset <= 4; rotation_offset++) { // 4 is 1/2 of the 8 possible directions
+            Direction left_dir = Direction.values()[(desired_dir.ordinal() + rotation_offset) % 8];
             Direction right_dir = Direction.values()[(desired_dir.ordinal() + 8 - rotation_offset) % 8];
-            if (rc.canBuildRobot(RobotType, rc.getLocation().add(left_dir))) return rc.getLocation().add(desired_dir);
-            if (rc.canBuildRobot(RobotType, rc.getLocation().add(right_dir))) return rc.getLocation().add(desired_dir);
+            if (rc.canBuildRobot(RobotType, rc.getLocation().add(left_dir))) return rc.getLocation().add(left_dir);
+            if (rc.canBuildRobot(RobotType, rc.getLocation().add(right_dir))) return rc.getLocation().add(right_dir);
         }
         return rc.getLocation();
     }
