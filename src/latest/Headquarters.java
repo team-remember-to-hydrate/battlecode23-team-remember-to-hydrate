@@ -19,6 +19,8 @@ public class Headquarters {
     static List<MapLocation> well_locations = new ArrayList<>();
     static List<Integer> my_recent_tasks = new ArrayList<>();
     static int command_decay = 0;
+    static int anchor_decay = 250;
+
     /**
      * Run a single turn for a Headquarters.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
@@ -81,7 +83,15 @@ public class Headquarters {
 
         ///   ***   Beginning HQ decision-making   ***
 
-
+        // Make anchor if we haven't built one in a while
+        anchor_decay--;
+        if (anchor_decay < 1 && rc.canBuildAnchor(Anchor.ACCELERATING)){
+            rc.buildAnchor(Anchor.ACCELERATING);
+        }
+        else if (anchor_decay < 1 && rc.canBuildAnchor(Anchor.STANDARD)){
+            rc.buildAnchor(Anchor.STANDARD);
+            anchor_decay = 50;
+        }
 
         // if there are 6 launchers send them on a raid to spot.
         for(RobotInfo bot : nearby_bots){
@@ -94,9 +104,9 @@ public class Headquarters {
             MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
             Comms.send_command(rc,center,RobotType.HEADQUARTERS.visionRadiusSquared,1,1, false,false,1,true);
         }
-        if(rc.getNumAnchors(Anchor.STANDARD) < 1 && rc.canBuildAnchor(Anchor.STANDARD)) {
-            rc.buildAnchor(Anchor.STANDARD);
-        }
+//        if(rc.getNumAnchors(Anchor.STANDARD) < 1 && rc.canBuildAnchor(Anchor.STANDARD)) {
+//            rc.buildAnchor(Anchor.STANDARD);
+//        }
 
 //        // if we are holding an anchor we saw an island, lets build a carrier.
 //        // Pick a direction to build in.

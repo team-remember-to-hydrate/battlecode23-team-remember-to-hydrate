@@ -27,7 +27,7 @@ public class CarrierStrategy {
 
         if (Sensing.scanRelativeCombatStrength(rc) < 0){
             // Enemy combatants outnumber visible friendlies
-            fightIfConvenient(rc);
+            //fightIfConvenient(rc);
         }
         else if (rc.getHealth() < RobotPlayer.myHealthLastTurn){
             // We have been hit!
