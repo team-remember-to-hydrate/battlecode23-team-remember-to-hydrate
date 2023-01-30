@@ -33,10 +33,10 @@ public class CarrierStrategy {
             // We have been hit!
             fightBackAndRun(rc);
         }
-        else if (Sensing.scanRelativeCombatStrength(rc) < 0 && amountResourcesHeld > 3){
+/*        else if (Sensing.scanRelativeCombatStrength(rc) < 0 && amountResourcesHeld > 3){
             // Enemy combatants outnumber visible friendlies
             fightIfConvenient(rc);
-        }
+        }*/
         else if(rc.canTakeAnchor(hqLoc, Anchor.ACCELERATING) || rc.canTakeAnchor(hqLoc, Anchor.STANDARD)) {
             tryPickUpAnchor(rc, hqLoc);
         }
