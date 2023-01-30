@@ -169,6 +169,18 @@ public class CarrierStrategy {
                 hqLoc = bot.getLocation();
             }
         }
+        if (hqLoc == null){
+            // our carrier can't see a HQ (possible if clouds/currents)
+            int my_HQ = RobotPlayer.get_HQ_array_index(rc);
+            if(0 <= my_HQ & my_HQ < 5){
+
+                hqLoc =  RobotPlayer.unpackMapLocation(rc.readSharedArray(my_HQ));
+            } else {
+                hqLoc = RobotPlayer.birth_location;
+                System.out.println("My HQ is not 0-4 it is " + my_HQ );
+            }
+            RobotPlayer.my_state = RobotPlayer.states.INITIAL;
+        }
     }
     static void searchForWell(RobotController rc) {
         if(wellLoc == null) {
