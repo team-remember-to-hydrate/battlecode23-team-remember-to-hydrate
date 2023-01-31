@@ -20,6 +20,8 @@ public class Headquarters {
     static List<Integer> my_recent_tasks = new ArrayList<>();
     static int command_decay = 0;
     static int anchor_decay = 250;
+    static String indicatorString = "";
+
 
     /**
      * Run a single turn for a Headquarters.
@@ -140,6 +142,23 @@ public class Headquarters {
         if ((enemyLauncherCount == 0) && (carrierCount < 6)){
             Direction dir = getBuildDirection(rc, wells);
             MapLocation newLoc = rc.getLocation().add(dir);
+
+            // This patches issues on maps where nearest well direction is a wall (Orbit).
+            // TODO: Make some methods, one for randValidBuildSpace and another furthestValidBuildInDirection
+            if (!rc.canBuildRobot(RobotType.CARRIER, newLoc)
+                    && rc.getResourceAmount(ResourceType.ADAMANTIUM) > RobotType.CARRIER.buildCostAdamantium){
+                indicatorString += "Picking Carrier Build Location";
+                Iterator i = validBuildLocations.iterator();
+                while (i.hasNext()) {
+                    MapLocation candidate = (MapLocation) i.next();
+                    if (rc.canBuildRobot(RobotType.CARRIER, candidate)) {
+                        indicatorString += " at " + candidate;
+                        newLoc = candidate;
+                        break;
+                    }
+                }
+            }
+
             //rc.setIndicatorString("Trying to build a carrier");
             if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
                 rc.buildRobot(RobotType.CARRIER, newLoc);
